@@ -1,5 +1,8 @@
 CC=ocamlc
 
+validate: index.html
+	tidy -quiet -errors --doctype=html5 $^
+
 index.html: main
 	@./$^ | tee $@
 
@@ -9,4 +12,4 @@ main: Main.ml
 clean:
 	rm -rf main *.cmi *.cmo index.html
 
-.PHONY: clean
+.PHONY: validate clean
