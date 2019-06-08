@@ -1,5 +1,8 @@
 CC=ocamlc
 
+upload: validate
+	scp index.html www.rootmos.io:o/
+
 validate: index.html
 	tidy -quiet -errors --doctype=html5 $^
 
@@ -12,4 +15,4 @@ main: Main.ml
 clean:
 	rm -rf main *.cmi *.cmo index.html
 
-.PHONY: validate clean
+.PHONY: upload validate clean

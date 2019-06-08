@@ -14,7 +14,7 @@ let title t: unit cont = tag "title" (text t)
 
 let index = html @@ seq [
   head @@ title "rootmos' what-nots";
-  body @@ seq [text "foo"; text "bar"];
+  body @@ seq [text "fu"; text "bar"];
 ]
 
 let () = print_endline (index ())
