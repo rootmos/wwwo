@@ -60,17 +60,24 @@ let drop_while p xs =
 
 type post = { url: string; lines: string list; title: string; html: string }
 let posts_path = "../hugo/content/post"
+let static_path = "../hugo/static"
 
 let mk_post fn =
   let content = posts_path ^ "/" ^ fn |> load_file in
   let lines = String.split_on_char '\n' content in
-  let hs = mks ~delim:"\n" @@ take_while ((<>) "---") @@ List.tl @@ drop_while ((<>) "---") lines in
-  let bs = mks ~delim:"\n" @@ List.tl @@ drop_while ((<>) "---") @@ List.tl @@ drop_while ((<>) "---") lines in
+  let hs = mks ~delim:"\n" @@ take_while ((<>) "---") @@ List.tl @@ drop_while ((<>) "---") lines
+  and bs = mks ~delim:"\n" @@ List.tl @@ drop_while ((<>) "---") @@ List.tl @@ drop_while ((<>) "---") lines in
   let props = match Yaml.of_string_exn hs with `O pp -> pp | _ -> failwith "expected object" in
   let prop p = match List.find (fun (k, _) -> k = p) props with
   (_, `String s) -> s | _ -> failwith (p ^ " wrong type") in
   let title = prop "title" in
-  let html = Omd.to_html @@ Omd.of_string bs in
+  let md = Omd.of_string bs in
+  let md = md |> Omd_representation.visit @@ function
+    | Omd_representation.Img (alt, src, title) ->
+        let src = static_path ^ src in
+        Omd_representation.Raw (img src title ()) :: [] |> Option.some
+    | _ -> None in
+  let html = Omd.to_html md in
   let url = (Filename.chop_suffix fn ".markdown") ^ ".html" in
   { url; lines; title; html }
 
