@@ -1,6 +1,9 @@
 open Printf
 
-let ( >>| ) xs f = List.map f xs
+let (>>|) xs f = List.map f xs
+let mks ?(delim = "") = function
+  | [] -> ""
+  | x :: xs -> List.fold_left (fun x y -> x ^ delim ^ y) x xs
 
 type 'a cont = 'a -> string
 
@@ -40,11 +43,12 @@ let img fn alt: 'a cont = fun _ ->
 let js_src url = fun _ ->
   sprintf "<script type=\"text/javascript\" src=\"%s\"></script>" url
 
+let css ls = tag "style" @@ text
+  ((mks ~delim:";" ls) |> String.to_seq |> Seq.filter ((<>) ' ') |> String.of_seq)
+
 let live_reload = js_src "http://livejs.com/live.js"
 
 let local = Sys.getenv_opt "LOCAL" |> Option.is_some
-
-let mks ?(delim = "") xs = List.fold_left (fun x y -> x ^ delim ^ y) "" xs
 
 let take_while p xs =
   let rec go xs k = match xs with
@@ -84,10 +88,15 @@ let mk_post fn =
 
 let posts = Sys.readdir posts_path |> Array.to_list >>| mk_post
 
+let style = css [
+  "a, a:visited { color: blue; text-decoration: none; }";
+]
+
 let page subtitle b = () |> html @@ seq [
   head @@ seq [
     title @@ "rootmos' what-nots" ^ Option.fold ~some:((^) " | ") ~none:"" subtitle;
     if local then live_reload else noop;
+    style;
   ];
   body @@ seq [
     h1 @@ text @@ Option.fold ~some:Fun.id ~none:"rootmos' what-nots" subtitle;
