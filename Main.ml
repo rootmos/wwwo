@@ -110,14 +110,26 @@ let page subtitle b = () |> html @@ seq [
   ]
 ]
 
+type sound = { title: string }
+
+let sounds =
+  let fn = "sounds.json" in
+  let open Yojson.Basic.Util in
+  let js = Yojson.Basic.from_string ~fname:fn (load_file fn) |> to_list in
+  let f j = { title = j |> member "title" |> to_string } in
+  let ss = List.map f js in
+  page (Some "Sounds") @@ ul @@ List.map (fun {title} -> text title) ss
+
 let index = page None @@ seq [
   img "rootmos.jpg" "rootmos";
   posts
     >>| (fun { title; url; date } -> a url @@ text @@ sprintf "%s (%s)" title date)
     |> ul;
+  ul @@ [ a "sounds.html" (text "Sounds") ];
 ]
 
 let () =
   write_file "index.html" index;
+  write_file "sounds.html" sounds;
   posts |> List.iter @@ fun { url; html; title } ->
     write_file url @@ page (Some title) (text html)
