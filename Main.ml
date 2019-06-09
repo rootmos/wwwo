@@ -62,31 +62,37 @@ let drop_while p xs =
   | x :: xs' -> if p x then go xs' else xs in
   go xs
 
-type post = { url: string; lines: string list; title: string; html: string }
+type post = { url: string; lines: string list; title: string; html: string; date: string }
 let posts_path = "../hugo/content/post"
 let static_path = "../hugo/static"
 
 let mk_post fn =
-  let content = posts_path ^ "/" ^ fn |> load_file in
-  let lines = String.split_on_char '\n' content in
-  let hs = mks ~delim:"\n" @@ take_while ((<>) "---") @@ List.tl @@ drop_while ((<>) "---") lines
-  and bs = mks ~delim:"\n" @@ List.tl @@ drop_while ((<>) "---") @@ List.tl @@ drop_while ((<>) "---") lines in
+  let lines = posts_path ^ "/" ^ fn |> load_file |> String.split_on_char '\n' in
+  let hs = mks ~delim:"\n" @@ take_while ((<>) "---")
+    @@ List.tl @@ drop_while ((<>) "---") lines in
+  let bs = mks ~delim:"\n" @@ List.tl @@ drop_while ((<>) "---")
+    @@ List.tl @@ drop_while ((<>) "---") lines in
+
   let props = match Yaml.of_string_exn hs with `O pp -> pp | _ -> failwith "expected object" in
   let prop p = match List.find (fun (k, _) -> k = p) props with
   (_, `String s) -> s | _ -> failwith (p ^ " wrong type") in
-  let title = prop "title" in
+
   let md = Omd.of_string bs in
   let md = md |> Omd_representation.visit @@ function
     | Omd_representation.Img (alt, src, title) ->
         let src = static_path ^ src in
         Omd_representation.Raw (img src title ()) :: [] |> Option.some
     | Omd_representation.Text "{{< toc >}}" -> Omd.toc md |> Option.some
-    | _ -> None in
-  let html = Omd.to_html md in
-  let url = (Filename.chop_suffix fn ".markdown") ^ ".html" in
-  { url; lines; title; html }
+    | _ -> None
 
-let posts = Sys.readdir posts_path |> Array.to_list >>| mk_post
+  in {
+    url = (Filename.chop_suffix fn ".markdown") ^ ".html";
+    lines; html = Omd.to_html md;
+    title = prop "title"; date = prop "date";
+  }
+
+let posts = Sys.readdir posts_path |> Array.to_list >>| mk_post |>
+  List.sort (fun { date = d } { date = d' } -> String.compare d d')
 
 let style = css [
   "a, a:visited { color: blue; text-decoration: none; }";
@@ -106,7 +112,9 @@ let page subtitle b = () |> html @@ seq [
 
 let index = page None @@ seq [
   img "rootmos.jpg" "rootmos";
-  posts >>| (fun { title; url } -> a url @@ text title) |> ul;
+  posts
+    >>| (fun { title; url; date } -> a url @@ text @@ sprintf "%s (%s)" title date)
+    |> ul;
 ]
 
 let () =
