@@ -1,5 +1,5 @@
 CC = ocamlc
-DEPS = magic-mime base64
+DEPS = magic-mime base64 yaml omd
 
 export LOCAL
 
@@ -22,5 +22,8 @@ clean:
 
 deps:
 	opam install ocamlfind $(DEPS)
+
+dev-env:
+	opam install utop merlin odig
 
 .PHONY: upload validate clean deps
