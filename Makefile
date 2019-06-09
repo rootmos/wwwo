@@ -18,7 +18,7 @@ main: Main.ml
 		-o $@ $^
 
 clean:
-	rm -rf *.cmi *.cmo index.html
+	rm -rf *.cmi *.cmo *.html
 
 deps:
 	opam install ocamlfind $(DEPS)

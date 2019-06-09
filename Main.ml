@@ -19,6 +19,8 @@ let title t: unit cont = tag "title" (text t)
 let ul is x = tag "ul" (seq @@ List.map (tag "li") is) @@ x
 let ol is x = tag "ol" (seq @@ List.map (tag "li") is) @@ x
 
+let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>" href (k x)
+
 let load_file f =
   let ic = open_in f in
   let s = really_input_string ic (in_channel_length ic) in
@@ -56,7 +58,7 @@ let drop_while p xs =
   | x :: xs' -> if p x then go xs' else xs in
   go xs
 
-type post = { fn : string; lines : string list; title: string; html: string }
+type post = { url: string; lines: string list; title: string; html: string }
 let posts_path = "../hugo/content/post"
 
 let mk_post fn =
@@ -69,20 +71,28 @@ let mk_post fn =
   (_, `String s) -> s | _ -> failwith (p ^ " wrong type") in
   let title = prop "title" in
   let html = Omd.to_html @@ Omd.of_string bs in
-  { fn; lines; title; html }
+  let url = (Filename.chop_suffix fn ".markdown") ^ ".html" in
+  { url; lines; title; html }
 
-let posts = Sys.readdir posts_path |> Array.to_list >>| mk_post >>| fun { html } -> html
+let posts = Sys.readdir posts_path |> Array.to_list >>| mk_post
 
-let index = html @@ seq [
+let page subtitle b = () |> html @@ seq [
   head @@ seq [
-    title "rootmos' what-nots";
+    title @@ "rootmos' what-nots" ^ Option.fold ~some:((^) " | ") ~none:"" subtitle;
     if local then live_reload else noop;
   ];
   body @@ seq [
-    img "rootmos.jpg" "rootmos";
-    h1 @@ text "rootmos' what-nots";
-    posts >>| text |> ul;
+    h1 @@ text @@ Option.fold ~some:Fun.id ~none:"rootmos' what-nots" subtitle;
+    b
   ]
 ]
 
-let () = write_file "index.html" (index ())
+let index = page None @@ seq [
+  img "rootmos.jpg" "rootmos";
+  posts >>| (fun { title; url } -> a url @@ text title) |> ul;
+]
+
+let () =
+  write_file "index.html" index;
+  posts |> List.iter @@ fun { url; html; title } ->
+    write_file url @@ page (Some title) (text html)
