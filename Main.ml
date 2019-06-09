@@ -76,6 +76,7 @@ let mk_post fn =
     | Omd_representation.Img (alt, src, title) ->
         let src = static_path ^ src in
         Omd_representation.Raw (img src title ()) :: [] |> Option.some
+    | Omd_representation.Text "{{< toc >}}" -> Omd.toc md |> Option.some
     | _ -> None in
   let html = Omd.to_html md in
   let url = (Filename.chop_suffix fn ".markdown") ^ ".html" in
