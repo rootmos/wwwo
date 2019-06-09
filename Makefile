@@ -1,4 +1,6 @@
-CC=ocamlc
+CC = ocamlc
+DEPS = magic-mime base64
+
 export LOCAL
 
 upload: clean validate
@@ -12,10 +14,13 @@ index.html: main
 
 main: Main.ml
 	ocamlfind $(CC) -linkpkg \
-		-package magic-mime,base64 \
+		-package $(shell tr ' ' ',' <<< "$(DEPS)") \
 		-o $@ $^
 
 clean:
 	rm -rf *.cmi *.cmo index.html
 
-.PHONY: upload validate clean
+deps:
+	opam install ocamlfind $(DEPS)
+
+.PHONY: upload validate clean deps

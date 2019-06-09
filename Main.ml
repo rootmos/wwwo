@@ -14,6 +14,7 @@ let head x = tag "head" x
 let p x = tag "p" x
 let h1 x = tag "h1" x
 let title t: unit cont = tag "title" (text t)
+let ul is x = tag "ul" (seq @@ List.map (tag "li") is) @@ x
 
 let load_file f =
   let ic = open_in f in
@@ -43,6 +44,8 @@ let local = match Sys.getenv_opt "LOCAL" with
   | Some _ -> true
   | None -> false
 
+let posts = List.map text @@ Array.to_list @@ Sys.readdir "../hugo/content/post"
+
 let index = html @@ seq [
   head @@ seq [
     title "rootmos' what-nots";
@@ -51,6 +54,7 @@ let index = html @@ seq [
   body @@ seq [
     img "rootmos.jpg" "rootmos";
     h1 @@ text "rootmos' what-nots";
+    ul posts;
   ]
 ]
 
