@@ -19,9 +19,10 @@ let head x = tag "head" x
 let p x = tag "p" x
 let h1 x = tag "h1" x
 let title t: unit cont = tag "title" (text t)
-let ul is x = tag "ul" (seq @@ List.map (tag "li") is) @@ x
-let ol is x = tag "ol" (seq @@ List.map (tag "li") is) @@ x
-let audio src = text @@ sprintf "<audio controls preload=\"none\"><source src=\"%s\"/></audio>" src
+let ul is x = tag "ul" (is >>| tag "li" |> seq) x
+let ol is x = tag "ol" (is >>| tag "li" |> seq) x
+let audio src = text @@ sprintf "<audio controls preload=\"none\" class=\"sound\"><source src=\"%s\"/></audio>" src
+let script s = text s |> tag "script"
 
 let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>" href (k x)
 
@@ -131,7 +132,14 @@ let sounds =
     text @@ sprintf "%s (%s)" title (CalendarLib.Printer.Date.sprint "%a, %d %b %Y" date);
     audio url
   ] in
-  js >>| f >>| r |> ul |> page (Some "Sounds")
+  seq [
+    js >>| f >>| r |> ul;
+    String.concat "" [
+      "{const ss=document.getElementsByClassName(\"sound\");";
+      "for(var s of ss){s.onplay=function(e){";
+      "for(var t of ss){if(t!=e.target&&!t.paused){t.pause()}}}}}";
+    ] |> script
+  ] |> page (Some "Sounds")
 
 let resolve h = Unix.getaddrinfo h ""
   [Unix.AI_FAMILY Unix.PF_INET; Unix.AI_SOCKTYPE Unix.SOCK_STREAM]
