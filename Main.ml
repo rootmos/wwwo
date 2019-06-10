@@ -23,6 +23,8 @@ let ul is x = tag "ul" (is >>| tag "li" |> seq) x
 let ol is x = tag "ol" (is >>| tag "li" |> seq) x
 let audio src = text @@ sprintf "<audio controls preload=\"none\" class=\"sound\"><source src=\"%s\"/></audio>" src
 let script s = text s |> tag "script"
+let table cs x = let tr cs = tag "tr" (cs >>| tag "td" |> seq) in
+  tag "table" (cs >>| tr |> seq) x
 
 let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>" href (k x)
 
@@ -128,12 +130,13 @@ let sounds =
     url = j |> member "url" |> to_string;
     date = j |> member "date" |> to_string |> parse_date;
   } in
-  let r = fun { title; url; date } -> seq [
-    text @@ sprintf "%s (%s)" title (CalendarLib.Printer.Date.sprint "%a, %d %b %Y" date);
+  let r = fun { title; url; date } -> [
+    text title;
+    text @@ CalendarLib.Printer.Date.sprint "%a, %d %b %Y" date;
     audio url
   ] in
   seq [
-    js >>| f >>| r |> ul;
+    (js >>| f >>| r) |> table;
     String.concat "" [
       "{const ss=document.getElementsByClassName(\"sound\");";
       "for(var s of ss){s.onplay=function(e){";
