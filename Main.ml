@@ -21,6 +21,7 @@ let h1 x = tag "h1" x
 let title t: unit cont = tag "title" (text t)
 let ul is x = tag "ul" (seq @@ List.map (tag "li") is) @@ x
 let ol is x = tag "ol" (seq @@ List.map (tag "li") is) @@ x
+let audio src = text @@ sprintf "<audio controls preload=\"none\"><source src=\"%s\"/></audio>" src
 
 let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>" href (k x)
 
@@ -110,15 +111,27 @@ let page subtitle b = () |> html @@ seq [
   ]
 ]
 
-type sound = { title: string }
+type sound = { title: string; url: string; date: CalendarLib.Date.t }
+
+let parse_date s =
+  try CalendarLib.Printer.Date.from_fstring "%F" s
+  with Invalid_argument _ ->
+  CalendarLib.Printer.Date.from_fstring "%FT%T%:z" s
 
 let sounds =
   let fn = "sounds.json" in
   let open Yojson.Basic.Util in
   let js = Yojson.Basic.from_string ~fname:fn (load_file fn) |> to_list in
-  let f j = { title = j |> member "title" |> to_string } in
-  let ss = List.map f js in
-  page (Some "Sounds") @@ ul @@ List.map (fun {title} -> text title) ss
+  let f j = {
+    title = j |> member "title" |> to_string;
+    url = j |> member "url" |> to_string;
+    date = j |> member "date" |> to_string |> parse_date;
+  } in
+  let r = fun { title; url; date } -> seq [
+    text @@ sprintf "%s (%s)" title (CalendarLib.Printer.Date.sprint "%a, %d %b %Y" date);
+    audio url
+  ] in
+  js >>| f >>| r |> ul |> page (Some "Sounds")
 
 let resolve h = Unix.getaddrinfo h ""
   [Unix.AI_FAMILY Unix.PF_INET; Unix.AI_SOCKTYPE Unix.SOCK_STREAM]

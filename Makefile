@@ -1,5 +1,5 @@
 CC = ocamlc
-DEPS = magic-mime base64 yaml omd yojson
+DEPS = magic-mime base64 yaml omd yojson calendar
 
 export LOCAL
 
