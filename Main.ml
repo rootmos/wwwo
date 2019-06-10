@@ -135,8 +135,9 @@ let sounds =
     text @@ CalendarLib.Printer.Date.sprint "%a, %d %b %Y" date;
     audio url
   ] in
+  let s { date = d0 } { date = d1 } = CalendarLib.Date.compare d1 d0 in
   seq [
-    (js >>| f >>| r) |> table;
+    (js >>| f |> List.sort s >>| r) |> table;
     String.concat "" [
       "{const ss=document.getElementsByClassName(\"sound\");";
       "for(var s of ss){s.onplay=function(e){";
