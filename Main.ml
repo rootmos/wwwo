@@ -120,12 +120,25 @@ let sounds =
   let ss = List.map f js in
   page (Some "Sounds") @@ ul @@ List.map (fun {title} -> text title) ss
 
+let resolve h = Unix.getaddrinfo h ""
+  [Unix.AI_FAMILY Unix.PF_INET; Unix.AI_SOCKTYPE Unix.SOCK_STREAM]
+  |> function
+  | { ai_addr = Unix.ADDR_INET (a, _) } :: _ -> Unix.string_of_inet_addr a |> Option.some
+  | _ -> Option.none
+
+let services = ul @@ [
+  text @@ sprintf "dns.rootmos.io (%s) 53 UDP/TCP, 853 DNS over TLS"
+    (Option.get @@ resolve "dns.rootmos.io");
+  a "https://ip.rootmos.io" (text "ip.rootmos.io");
+]
+
 let index = page None @@ seq [
   img "rootmos.jpg" "rootmos";
   posts
     >>| (fun { title; url; date } -> a url @@ text @@ sprintf "%s (%s)" title date)
     |> ul;
   ul @@ [ a "sounds.html" (text "Sounds") ];
+  services;
 ]
 
 let () =
