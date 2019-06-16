@@ -64,6 +64,14 @@ let css ls = let body = ls |> mks |> String.to_seq |> Seq.filter ((<>) ' ')
   text @@ sprintf "<style type=\"text/css\">%s</style>" body
 
 let live_reload = js_src "http://livejs.com/live.js"
+let tracking = seq [
+  js_src "https://www.googletagmanager.com/gtag/js?id=UA-124878438-2";
+  String.concat "" [
+    "window.dataLayer = window.dataLayer || [];";
+    "function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
+    "gtag('config', 'UA-124878438-2')";
+  ] |> script
+]
 
 let local = match Sys.getenv "ENV" with
 | "dev" -> true
@@ -134,7 +142,7 @@ let posts_snippet = seq [
 let page ?(only_subtitle=false) subtitle b = () |> html @@ seq [
   head @@ seq [
     title @@ "rootmos' what-nots" ^ Option.fold ~some:((^) " | ") ~none:"" subtitle;
-    if local then live_reload else noop;
+    if local then live_reload else tracking;
     style;
   ];
   body @@ seq [
@@ -142,7 +150,7 @@ let page ?(only_subtitle=false) subtitle b = () |> html @@ seq [
       text @@ if only_subtitle then Option.get subtitle else
         "rootmos' what-nots" ^ Option.fold ~some:((^) " | ") ~none:"" subtitle;
       if Option.is_some subtitle then
-        div ~cls:"subtitle" @@ a "index.html" @@ text "back" else noop
+        span ~cls:"subtitle" @@ a "index.html" @@ text "back" else noop
     ];
     b
   ]
@@ -177,7 +185,7 @@ and sounds_snippet = let open Sounds_t in
   ] in seq [
     h2 @@ seq [
       text "Sounds";
-      div ~cls:"subtitle" @@ a "sounds.html" @@ text "all"
+      span ~cls:"subtitle" @@ a "sounds.html" @@ text "all"
     ];
     sounds |> take 5 >>| r |> table;
     audio_player_script;
@@ -203,7 +211,7 @@ and activity_snippet = let open Github_t in
   ] in seq [
     h2 @@ seq [
       text "Activity";
-      div ~cls:"subtitle" @@ a "activity.html" @@ text "more"
+      span ~cls:"subtitle" @@ a "activity.html" @@ text "more"
     ];
     activity |> take 5 >>| r |> table;
   ]
@@ -215,7 +223,7 @@ let resolve h = Unix.getaddrinfo h ""
   | _ -> Option.none
 
 let services_snippet = seq [
-  h2 @@ seq [ text "Services"; div ~cls:"subtitle" @@ text "what I host" ];
+  h2 @@ seq [ text "Services"; span ~cls:"subtitle" @@ text "what I host" ];
   ul @@ [
     seq [
       text "dns.rootmos.io (";
