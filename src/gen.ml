@@ -5,6 +5,15 @@ let mks ?(delim = "") = function
   | [] -> ""
   | x :: xs -> List.fold_left (fun x y -> x ^ delim ^ y) x xs
 
+let split n xs =
+  let rec go n ys = function
+  | [] -> List.rev ys, []
+  | x :: xs -> if n = 0 then List.rev ys, xs
+  else go (n-1) (x :: ys) xs
+  in go n [] xs
+
+let take xs n = match split xs n with (ys, _) -> ys
+
 type 'a cont = 'a -> string
 
 let tag t: 'a cont -> 'a cont = fun k x -> sprintf "<%s>%s</%s>" t (k x) t
@@ -18,6 +27,7 @@ let body x =  tag "body" x
 let head x = tag "head" x
 let p x = tag "p" x
 let h1 x = tag "h1" x
+let h2 x = tag "h2" x
 let title t: unit cont = tag "title" (text t)
 let ul is x = tag "ul" (is >>| tag "li" |> seq) x
 let ol is x = tag "ol" (is >>| tag "li" |> seq) x
@@ -107,6 +117,14 @@ let style = css [
   ".slogan { font-style: italic }";
   "img.avatar { height: 10em }";
   ".intro { text-align: center }";
+  ".subtitle { display: inline; margin-left: 1em; font-size: 0.75em }";
+]
+
+let posts_snippet = seq [
+  h2 @@ text "Posts";
+  posts >>| (fun { title; url; date } ->
+    a url @@ text @@ sprintf "%s (%s)" title date
+  ) |> ul
 ]
 
 let page subtitle b = () |> html @@ seq [
@@ -116,7 +134,11 @@ let page subtitle b = () |> html @@ seq [
     style;
   ];
   body @@ seq [
-    h1 @@ text @@ Option.fold ~some:Fun.id ~none:"rootmos' what-nots" subtitle;
+    h1 @@ seq [
+      text @@ Option.fold ~some:Fun.id ~none:"rootmos' what-nots" subtitle;
+      if Option.is_some subtitle then
+        div ~cls:"subtitle" @@ a "index.html" @@ text "back" else noop
+    ];
     b
   ]
 ]
@@ -125,31 +147,61 @@ let sounds =
   let open Sounds_t in
   let js = Sounds_j.sounds_of_string (Utils.load_file "sounds.json") in
   let s s0 s1 = Lenient_iso8601.compare s1.date s0.date in
+  js |> List.sort s
+and audio_player_script = String.concat "" [
+  "{const ss=document.getElementsByClassName(\"sound\");";
+  "for(var s of ss){s.onplay=function(e){";
+  "for(var t of ss){if(t!=e.target&&!t.paused){t.pause()}}}}}";
+] |> script
+
+let sounds_page = let open Sounds_t in
   let r s = [
     text s.title;
     text @@ Lenient_iso8601.rfc822 s.date;
     audio s.url
-  ] in
-  seq [
-    js |> List.sort s >>| r |> table;
-    String.concat "" [
-      "{const ss=document.getElementsByClassName(\"sound\");";
-      "for(var s of ss){s.onplay=function(e){";
-      "for(var t of ss){if(t!=e.target&&!t.paused){t.pause()}}}}}";
-    ] |> script
+  ] in seq [
+    sounds >>| r |> table;
+    audio_player_script;
   ] |> page (Some "Sounds")
 
-let activity =
-  let open Github_t in
+and sounds_snippet = let open Sounds_t in
+  let r s = [
+    text s.title;
+    text @@ Lenient_iso8601.rfc822 s.date;
+    audio s.url
+  ] in seq [
+    h2 @@ seq [
+      text "Sounds";
+      div ~cls:"subtitle" @@ a "sounds.html" @@ text "all"
+    ];
+    sounds |> take 5 >>| r |> table;
+    audio_player_script;
+  ]
+
+let activity = let open Github_t in
   let cs = Utils.load_file "github-activity.rootmos.commits.json" |>
     Github_j.commits_of_string in
   let s c0 c1 = Lenient_iso8601.compare c1.date c0.date in
+  cs |> List.sort s
+
+let activity_page = let open Github_t in
   let r c = [
     text @@ Lenient_iso8601.rfc822 c.date;
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
-  ] in
-  cs |> List.sort s >>| r |> table |> page (Some "Activity")
+  ] in activity >>| r |> table |> page (Some "Activity")
+and activity_snippet = let open Github_t in
+  let r c = [
+    text @@ Lenient_iso8601.rfc822 c.date;
+    a c.repo_url @@ text c.repo;
+    a c.url @@ text c.message;
+  ] in seq [
+    h2 @@ seq [
+      text "Activity";
+      div ~cls:"subtitle" @@ a "activity.html" @@ text "more"
+    ];
+    activity |> take 5 >>| r |> table;
+  ]
 
 let resolve h = Unix.getaddrinfo h ""
   [Unix.AI_FAMILY Unix.PF_INET; Unix.AI_SOCKTYPE Unix.SOCK_STREAM]
@@ -157,15 +209,18 @@ let resolve h = Unix.getaddrinfo h ""
   | { ai_addr = Unix.ADDR_INET (a, _) } :: _ -> Unix.string_of_inet_addr a |> Option.some
   | _ -> Option.none
 
-let services = ul @@ [
-  seq [
-    text "dns.rootmos.io (";
-    a "https://www.digwebinterface.com/?hostnames=google.com&type=A&ns=self&nameservers=dns.rootmos.io"
-      @@ text "dig";
-    text @@ sprintf ") (%s) 53 UDP/TCP, 853 DNS over TLS"
-      (Option.get @@ resolve "dns.rootmos.io");
-  ];
-  a "https://ip.rootmos.io" (text "ip.rootmos.io");
+let services = seq [
+  h2 @@ text "Services";
+  ul @@ [
+    seq [
+      text "dns.rootmos.io (";
+      a "https://www.digwebinterface.com/?hostnames=google.com&type=A&ns=self&nameservers=dns.rootmos.io"
+        @@ text "dig";
+      text @@ sprintf ") (%s) 53 UDP/TCP, 853 DNS over TLS"
+        (Option.get @@ resolve "dns.rootmos.io");
+    ];
+    a "https://ip.rootmos.io" (text "ip.rootmos.io");
+  ]
 ]
 
 let social = seq [
@@ -183,20 +238,16 @@ let index = page None @@ seq [
     div ~cls:"slogan" @@ text "Some math, mostly programming and everything in between";
     social;
   ];
-  posts
-    >>| (fun { title; url; date } -> a url @@ text @@ sprintf "%s (%s)" title date)
-    |> ul;
-  ul @@ [
-    a "sounds.html" (text "Sounds");
-    a "activity.html" (text "Activity");
-  ];
+  posts_snippet;
+  sounds_snippet;
+  activity_snippet;
   services;
 ]
 
 let () =
   let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
   Utils.write_file (webroot ^ "/index.html") index;
-  Utils.write_file (webroot ^ "/sounds.html") sounds;
-  Utils.write_file (webroot ^ "/activity.html") activity;
+  Utils.write_file (webroot ^ "/sounds.html") sounds_page;
+  Utils.write_file (webroot ^ "/activity.html") activity_page;
   posts |> List.iter @@ fun { url; html; title } ->
     Utils.write_file (webroot ^ "/" ^ url) @@ page (Some title) (text html)
