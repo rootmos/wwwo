@@ -128,7 +128,7 @@ let posts_snippet = seq [
   ) |> ul
 ]
 
-let page subtitle b = () |> html @@ seq [
+let page ?(only_subtitle=false) subtitle b = () |> html @@ seq [
   head @@ seq [
     title @@ "rootmos' what-nots" ^ Option.fold ~some:((^) " | ") ~none:"" subtitle;
     if local then live_reload else noop;
@@ -136,7 +136,8 @@ let page subtitle b = () |> html @@ seq [
   ];
   body @@ seq [
     h1 @@ seq [
-      text @@ Option.fold ~some:Fun.id ~none:"rootmos' what-nots" subtitle;
+      text @@ if only_subtitle then Option.get subtitle else
+        "rootmos' what-nots" ^ Option.fold ~some:((^) " | ") ~none:"" subtitle;
       if Option.is_some subtitle then
         div ~cls:"subtitle" @@ a "index.html" @@ text "back" else noop
     ];
@@ -251,4 +252,5 @@ let () =
   Utils.write_file (webroot ^ "/sounds.html") sounds_page;
   Utils.write_file (webroot ^ "/activity.html") activity_page;
   posts |> List.iter @@ fun { url; html; title } ->
-    Utils.write_file (webroot ^ "/" ^ url) @@ page (Some title) (text html)
+    Utils.write_file (webroot ^ "/" ^ url) @@
+      page ~only_subtitle:true (Some title) (text html)
