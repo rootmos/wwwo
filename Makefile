@@ -11,6 +11,9 @@ export PIP = $(VENV)/bin/pip
 generate: build fa sounds.json github-activity.rootmos.commits.json
 	@mkdir -p $(WEBROOT)/$(ENV)
 	./src/gen
+
+.PHONY: validate
+validate:
 	find $(WEBROOT)/$(ENV) -name "*.html" -exec \
 		tidy -quiet -errors --doctype=html5 {} \;
 

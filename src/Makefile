@@ -10,7 +10,7 @@ endef
 
 gen: utils.ml lenient_iso8601.ml $(call atd, sounds) $(call atd, github) gen.ml
 	ocamlfind $(CC) -linkpkg \
-		-package $(shell tr ' ' ',' <<< "$(GEN_DEPS)") \
+		-package $(shell echo "$(GEN_DEPS)" | tr ' ' ',') \
 		-o $@ $^
 
 %_t.mli %_t.ml %_j.mli %_j.ml: %.atd
