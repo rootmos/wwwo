@@ -3,6 +3,8 @@ type t = CalendarLib.Date.t
 let wrap s =
   try CalendarLib.Printer.Date.from_fstring "%F" s
   with Invalid_argument _ ->
+  try CalendarLib.Printer.Date.from_fstring "%FT%TZ" s
+  with Invalid_argument _ ->
   CalendarLib.Printer.Date.from_fstring "%FT%T%:z" s
 
 let unwrap t = CalendarLib.Printer.Date.sprint "%a, %d %b %Y" t

@@ -110,12 +110,12 @@ let page subtitle b = () |> html @@ seq [
 let sounds =
   let open Sounds_t in
   let js = Sounds_j.sounds_of_string (Utils.load_file "sounds.json") in
+  let s s0 s1 = Lenient_iso8601.compare s1.date s0.date in
   let r s = [
     text s.title;
     text @@ Lenient_iso8601.rfc822 s.date;
     audio s.url
   ] in
-  let s s0 s1 = Lenient_iso8601.compare s1.date s0.date in
   seq [
     js |> List.sort s >>| r |> table;
     String.concat "" [
@@ -124,6 +124,18 @@ let sounds =
       "for(var t of ss){if(t!=e.target&&!t.paused){t.pause()}}}}}";
     ] |> script
   ] |> page (Some "Sounds")
+
+let activity =
+  let open Github_t in
+  let cs = Utils.load_file "github-activity.rootmos.commits.json" |>
+    Github_j.commits_of_string in
+  let s c0 c1 = Lenient_iso8601.compare c1.date c0.date in
+  let r c = [
+    text @@ Lenient_iso8601.rfc822 c.date;
+    a c.repo_url @@ text c.repo;
+    a c.url @@ text c.message;
+  ] in
+  cs |> List.sort s >>| r |> table |> page (Some "Activity")
 
 let resolve h = Unix.getaddrinfo h ""
   [Unix.AI_FAMILY Unix.PF_INET; Unix.AI_SOCKTYPE Unix.SOCK_STREAM]
@@ -142,7 +154,10 @@ let index = page None @@ seq [
   posts
     >>| (fun { title; url; date } -> a url @@ text @@ sprintf "%s (%s)" title date)
     |> ul;
-  ul @@ [ a "sounds.html" (text "Sounds") ];
+  ul @@ [
+    a "sounds.html" (text "Sounds");
+    a "activity.html" (text "Activity");
+  ];
   services;
 ]
 
@@ -150,5 +165,6 @@ let () =
   let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
   Utils.write_file (webroot ^ "/index.html") index;
   Utils.write_file (webroot ^ "/sounds.html") sounds;
+  Utils.write_file (webroot ^ "/activity.html") activity;
   posts |> List.iter @@ fun { url; html; title } ->
     Utils.write_file (webroot ^ "/" ^ url) @@ page (Some title) (text html)

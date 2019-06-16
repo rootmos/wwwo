@@ -17,7 +17,7 @@ def commits(u, N):
 
         d = {
             "event_id": e.id,
-            "date": e.created_at.isoformat(),
+            "date": e.created_at.isoformat() + "Z",
             "repo":  e.repo.name,
             "repo_url":  e.repo.html_url,
         }

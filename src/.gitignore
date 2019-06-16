@@ -1,3 +1,6 @@
 *.cmi
 *.cmo
-sounds_*.ml*
+*_j.ml
+*_j.mli
+*_t.ml
+*_t.mli
