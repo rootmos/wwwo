@@ -118,6 +118,7 @@ let style = css [
   "img.avatar { height: 10em }";
   ".intro { text-align: center }";
   ".subtitle { display: inline; margin-left: 1em; font-size: 0.75em }";
+  ".date { white-space: nowrap }";
 ]
 
 let posts_snippet = seq [
@@ -157,7 +158,7 @@ and audio_player_script = String.concat "" [
 let sounds_page = let open Sounds_t in
   let r s = [
     text s.title;
-    text @@ Lenient_iso8601.rfc822 s.date;
+    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
     audio s.url
   ] in seq [
     sounds >>| r |> table;
@@ -167,7 +168,7 @@ let sounds_page = let open Sounds_t in
 and sounds_snippet = let open Sounds_t in
   let r s = [
     text s.title;
-    text @@ Lenient_iso8601.rfc822 s.date;
+    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
     audio s.url
   ] in seq [
     h2 @@ seq [
@@ -186,13 +187,13 @@ let activity = let open Github_t in
 
 let activity_page = let open Github_t in
   let r c = [
-    text @@ Lenient_iso8601.rfc822 c.date;
+    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 c.date;
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
   ] in activity >>| r |> table |> page (Some "Activity")
 and activity_snippet = let open Github_t in
   let r c = [
-    text @@ Lenient_iso8601.rfc822 c.date;
+    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 c.date;
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
   ] in seq [
