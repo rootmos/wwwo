@@ -42,7 +42,9 @@ let css ls = tag "style" @@ text
 
 let live_reload = js_src "http://livejs.com/live.js"
 
-let local = Sys.getenv_opt "LOCAL" |> Option.is_some
+let local = match Sys.getenv "ENV" with
+| "dev" -> true
+| _ -> false
 
 let take_while p xs =
   let rec go xs k = match xs with
@@ -158,7 +160,8 @@ let index = page None @@ seq [
 ]
 
 let () =
-  Utils.write_file "index.html" index;
-  Utils.write_file "sounds.html" sounds;
+  let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
+  Utils.write_file (webroot ^ "/index.html") index;
+  Utils.write_file (webroot ^ "/sounds.html") sounds;
   posts |> List.iter @@ fun { url; html; title } ->
-    Utils.write_file url @@ page (Some title) (text html)
+    Utils.write_file (webroot ^ "/" ^ url) @@ page (Some title) (text html)
