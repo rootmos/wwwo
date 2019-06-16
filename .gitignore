@@ -1,5 +1,3 @@
-*.cmi
-*.cmo
 .merlin
 venv
 

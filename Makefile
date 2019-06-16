@@ -1,6 +1,3 @@
-CC = ocamlc
-GEN_DEPS = magic-mime base64 yaml omd yojson calendar
-
 export ENV ?= dev
 export WEBROOT ?= $(shell pwd)/webroot
 PORT ?= 8080
@@ -11,23 +8,24 @@ export PYTHON = $(VENV)/bin/python3
 export PIP = $(VENV)/bin/pip
 
 .PHONY: generate
-generate: gen sounds.json github-activity.rootmos.commits.json
+generate: build sounds.json github-activity.rootmos.commits.json
 	@mkdir -p $(WEBROOT)/$(ENV)
-	./$<
-	tidy -quiet -errors --doctype=html5 $(wildcard $(WEBROOT)/$(ENV)/*.html)
+	./src/gen
+	find $(WEBROOT)/$(ENV) -name "*.html" -exec \
+		tidy -quiet -errors --doctype=html5 {} \;
 
 .PHONY: serve
 serve:
 	$(PYTHON) -m http.server --directory=$(WEBROOT)/$(ENV) $(PORT)
 
-gen: utils.ml gen.ml
-	ocamlfind $(CC) -linkpkg \
-		-package $(shell tr ' ' ',' <<< "$(GEN_DEPS)") \
-		-o $@ $^
+.PHONY: build
+build:
+	$(MAKE) -C src install
 
 .PHONY: clean
 clean:
-	rm -rf gen github-activity *.cmi *.cmo *.html $(WEBROOT)
+	$(MAKE) -C src $@
+	rm -rf $(WEBROOT)
 
 .PHONY: fresh
 fresh:
@@ -41,7 +39,7 @@ github-activity.%.commits.json: $(VENV)
 
 .PHONY: deps
 deps: $(VENV)
-	opam install ocamlfind $(GEN_DEPS)
+	$(MAKE) -C src $@
 	$(PIP) install -r requirements.txt
 
 $(VENV):

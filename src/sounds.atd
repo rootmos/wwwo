@@ -1,0 +1,15 @@
+type date = string wrap <ocaml module="Lenient_iso8601">
+
+type sound = {
+    title: string;
+    sha1: string;
+    url: string;
+    filename: string;
+    artist: string;
+    composer: string;
+    date: date;
+    year: int;
+    length: float;
+}
+
+type sounds = sound list

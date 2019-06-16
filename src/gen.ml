@@ -107,30 +107,17 @@ let page subtitle b = () |> html @@ seq [
   ]
 ]
 
-type sound = { title: string; url: string; date: CalendarLib.Date.t }
-
-let parse_date s =
-  try CalendarLib.Printer.Date.from_fstring "%F" s
-  with Invalid_argument _ ->
-  CalendarLib.Printer.Date.from_fstring "%FT%T%:z" s
-
 let sounds =
-  let fn = "sounds.json" in
-  let open Yojson.Basic.Util in
-  let js = Yojson.Basic.from_string ~fname:fn (Utils.load_file fn) |> to_list in
-  let f j = {
-    title = j |> member "title" |> to_string;
-    url = j |> member "url" |> to_string;
-    date = j |> member "date" |> to_string |> parse_date;
-  } in
-  let r = fun { title; url; date } -> [
-    text title;
-    text @@ CalendarLib.Printer.Date.sprint "%a, %d %b %Y" date;
-    audio url
+  let open Sounds_t in
+  let js = Sounds_j.sounds_of_string (Utils.load_file "sounds.json") in
+  let r s = [
+    text s.title;
+    text @@ Lenient_iso8601.rfc822 s.date;
+    audio s.url
   ] in
-  let s { date = d0 } { date = d1 } = CalendarLib.Date.compare d1 d0 in
+  let s s0 s1 = Lenient_iso8601.compare s1.date s0.date in
   seq [
-    (js >>| f |> List.sort s >>| r) |> table;
+    js |> List.sort s >>| r |> table;
     String.concat "" [
       "{const ss=document.getElementsByClassName(\"sound\");";
       "for(var s of ss){s.onplay=function(e){";
