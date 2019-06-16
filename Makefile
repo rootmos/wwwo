@@ -8,7 +8,7 @@ export PYTHON = $(VENV)/bin/python3
 export PIP = $(VENV)/bin/pip
 
 .PHONY: generate
-generate: build sounds.json github-activity.rootmos.commits.json
+generate: build fa sounds.json github-activity.rootmos.commits.json
 	@mkdir -p $(WEBROOT)/$(ENV)
 	./src/gen
 	find $(WEBROOT)/$(ENV) -name "*.html" -exec \
@@ -48,3 +48,12 @@ $(VENV):
 .PHONY: dev-env
 dev-env:
 	opam install utop merlin odig
+
+FA_URL = https://use.fontawesome.com/releases/v5.9.0/fontawesome-free-5.9.0-web.zip
+fa.zip:
+	wget -qO$@ "$(FA_URL)"
+
+fa: fa.zip
+	unzip $<
+	rm -rf fa
+	mv fontawesome-free-*-web $@

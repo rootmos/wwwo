@@ -25,20 +25,30 @@ let audio src = text @@ sprintf "<audio controls preload=\"none\" class=\"sound\
 let script s = text s |> tag "script"
 let table cs x = let tr cs = tag "tr" (cs >>| tag "td" |> seq) in
   tag "table" (cs >>| tr |> seq) x
+let div ?(cls = "") = fun k x ->
+  if cls <> "" then sprintf "<div class=\"%s\">%s</div>" cls (k x)
+  else sprintf "<div>%s</div>" (k x)
 
 let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>" href (k x)
 
-let img fn alt: 'a cont = fun _ ->
-  sprintf "<img src=\"data:%s;base64,%s\" alt=\"%s\"/>"
-    (Magic_mime.lookup fn)
-    (Base64.encode_exn @@ Utils.load_file fn)
-    alt
+let img ?(cls = "") fn alt: 'a cont = fun _ ->
+  if cls <> "" then
+    sprintf "<img src=\"data:%s;base64,%s\" alt=\"%s\" class=\"%s\"/>"
+      (Magic_mime.lookup fn)
+      (Base64.encode_exn @@ Utils.load_file fn)
+      alt cls
+  else
+    sprintf "<img src=\"data:%s;base64,%s\" alt=\"%s\"/>"
+      (Magic_mime.lookup fn)
+      (Base64.encode_exn @@ Utils.load_file fn)
+      alt
 
 let js_src url = fun _ ->
   sprintf "<script type=\"text/javascript\" src=\"%s\"></script>" url
 
-let css ls = tag "style" @@ text
-  ((mks ~delim:";" ls) |> String.to_seq |> Seq.filter ((<>) ' ') |> String.of_seq)
+let css ls = let body = ls |> mks |> String.to_seq |> Seq.filter ((<>) ' ')
+    |> String.of_seq in
+  text @@ sprintf "<style type=\"text/css\">%s</style>" body
 
 let live_reload = js_src "http://livejs.com/live.js"
 
@@ -92,7 +102,11 @@ let posts = Sys.readdir posts_path |> Array.to_list >>| mk_post |>
   List.sort (fun { date = d } { date = d' } -> String.compare d d')
 
 let style = css [
-  "a, a:visited { color: blue; text-decoration: none; }";
+  "a, a:visited { color: blue; text-decoration: none }";
+  "img.social { height: 4em; padding: 1em }";
+  ".slogan { font-style: italic }";
+  "img.avatar { height: 10em }";
+  ".intro { text-align: center }";
 ]
 
 let page subtitle b = () |> html @@ seq [
@@ -154,8 +168,21 @@ let services = ul @@ [
   a "https://ip.rootmos.io" (text "ip.rootmos.io");
 ]
 
+let social = seq [
+  a "https://github.com/rootmos" @@ img ~cls:"social"
+    "fa/svgs/brands/github.svg" "GitHub";
+  a "https://soundcloud.com/rootmos" @@ img ~cls:"social"
+    "fa/svgs/brands/soundcloud.svg" "SoundCloud";
+  a "https://keybase.io/rootmos" @@ img ~cls:"social"
+    "fa/svgs/brands/keybase.svg" "Keybase";
+]
+
 let index = page None @@ seq [
-  img "rootmos.jpg" "rootmos";
+  div ~cls:"intro" @@ seq [
+    img ~cls:"avatar" "rootmos.jpg" "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness";
+    div ~cls:"slogan" @@ text "Some math, mostly programming and everything in between";
+    social;
+  ];
   posts
     >>| (fun { title; url; date } -> a url @@ text @@ sprintf "%s (%s)" title date)
     |> ul;

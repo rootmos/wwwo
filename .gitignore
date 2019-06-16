@@ -1,9 +1,11 @@
 .merlin
 venv
 
-gen
-.github_access_token
+webroot
 
-*.html
+.github_access_token
 sounds.json
 github-activity.*.json
+
+fa
+fa.zip
