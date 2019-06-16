@@ -113,9 +113,9 @@ let posts = Sys.readdir posts_path |> Array.to_list >>| mk_post |>
 
 let style = css [
   "a, a:visited { color: blue; text-decoration: none }";
-  "img.social { height: 4em; padding: 1em }";
-  ".slogan { font-style: italic }";
-  "img.avatar { height: 10em }";
+  "img.social { height: 3em; padding: 1em }";
+  ".slogan { font-size: 1.15em; font-style: italic; margin: 0.5em }";
+  "img.avatar { height: 14em }";
   ".intro { text-align: center }";
   ".subtitle { display: inline; margin-left: 1em; font-size: 0.75em }";
   ".date { white-space: nowrap }";
