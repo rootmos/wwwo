@@ -33,15 +33,15 @@ let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>" href (k x)
 
 let img ?(cls = "") fn alt: 'a cont = fun _ ->
   if cls <> "" then
-    sprintf "<img src=\"data:%s;base64,%s\" alt=\"%s\" class=\"%s\"/>"
+    sprintf "<img src=\"data:%s;base64,%s\" title=\"%s\" alt=\"%s\" class=\"%s\"/>"
       (Magic_mime.lookup fn)
       (Base64.encode_exn @@ Utils.load_file fn)
-      alt cls
+      alt alt cls
   else
-    sprintf "<img src=\"data:%s;base64,%s\" alt=\"%s\"/>"
+    sprintf "<img src=\"data:%s;base64,%s\" title=\"%s\" alt=\"%s\"/>"
       (Magic_mime.lookup fn)
       (Base64.encode_exn @@ Utils.load_file fn)
-      alt
+      alt alt
 
 let js_src url = fun _ ->
   sprintf "<script type=\"text/javascript\" src=\"%s\"></script>" url
