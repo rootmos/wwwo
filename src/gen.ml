@@ -38,6 +38,9 @@ let table cs x = let tr cs = tag "tr" (cs >>| tag "td" |> seq) in
 let div ?(cls = "") = fun k x ->
   if cls <> "" then sprintf "<div class=\"%s\">%s</div>" cls (k x)
   else sprintf "<div>%s</div>" (k x)
+let span ?(cls = "") = fun k x ->
+  if cls <> "" then sprintf "<span class=\"%s\">%s</span>" cls (k x)
+  else sprintf "<span>%s</span>" (k x)
 
 let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>" href (k x)
 
@@ -117,7 +120,7 @@ let style = css [
   ".slogan { font-size: 1.15em; font-style: italic; margin: 0.5em }";
   "img.avatar { height: 14em }";
   ".intro { text-align: center }";
-  ".subtitle { display: inline; margin-left: 1em; font-size: 0.75em }";
+  ".subtitle { display: inline; margin-left: 0.75em; font-size: 0.75em; font-weight: normal }";
   ".date { white-space: nowrap }";
 ]
 
@@ -211,8 +214,8 @@ let resolve h = Unix.getaddrinfo h ""
   | { ai_addr = Unix.ADDR_INET (a, _) } :: _ -> Unix.string_of_inet_addr a |> Option.some
   | _ -> Option.none
 
-let services = seq [
-  h2 @@ text "Services";
+let services_snippet = seq [
+  h2 @@ seq [ text "Services"; div ~cls:"subtitle" @@ text "what I host" ];
   ul @@ [
     seq [
       text "dns.rootmos.io (";
@@ -225,6 +228,13 @@ let services = seq [
   ]
 ]
 
+let resume_snippet = seq [
+  h2 @@ text "Resume";
+  (let url = "https://rootmos-static.ams3.cdn.digitaloceanspaces.com/resume-gustav-behm.pdf"
+  in a url @@ text "PDF");
+  text " (updated 30 Nov 2018)";
+]
+
 let social = seq [
   a "https://github.com/rootmos" @@ img ~cls:"social"
     "fa/svgs/brands/github.svg" "GitHub";
@@ -233,6 +243,12 @@ let social = seq [
   a "https://keybase.io/rootmos" @@ img ~cls:"social"
     "fa/svgs/brands/keybase.svg" "Keybase";
 ]
+
+let md_snippet fn =
+  let md = Utils.load_file fn |> Omd.of_string |> Omd_representation.visit @@ function
+    | Omd_representation.H1 t -> Some (Omd_representation.H2 t :: [])
+    | _ -> None in
+  text @@ Omd.to_html md
 
 let index = page None @@ seq [
   div ~cls:"intro" @@ seq [
@@ -243,7 +259,10 @@ let index = page None @@ seq [
   posts_snippet;
   sounds_snippet;
   activity_snippet;
-  services;
+  services_snippet;
+  md_snippet "projects.md";
+  md_snippet "academic.md";
+  resume_snippet;
 ]
 
 let () =
