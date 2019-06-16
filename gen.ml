@@ -28,20 +28,10 @@ let table cs x = let tr cs = tag "tr" (cs >>| tag "td" |> seq) in
 
 let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>" href (k x)
 
-let load_file f =
-  let ic = open_in f in
-  let s = really_input_string ic (in_channel_length ic) in
-  close_in ic; s
-
-let write_file filename s =
-  let oc = open_out filename in
-  output_string oc s;
-  close_out oc
-
 let img fn alt: 'a cont = fun _ ->
   sprintf "<img src=\"data:%s;base64,%s\" alt=\"%s\"/>"
     (Magic_mime.lookup fn)
-    (Base64.encode_exn @@ load_file fn)
+    (Base64.encode_exn @@ Utils.load_file fn)
     alt
 
 let js_src url = fun _ ->
@@ -71,7 +61,8 @@ let posts_path = "../hugo/content/post"
 let static_path = "../hugo/static"
 
 let mk_post fn =
-  let lines = posts_path ^ "/" ^ fn |> load_file |> String.split_on_char '\n' in
+  let lines = posts_path ^ "/" ^ fn |> Utils.load_file
+    |> String.split_on_char '\n' in
   let hs = mks ~delim:"\n" @@ take_while ((<>) "---")
     @@ List.tl @@ drop_while ((<>) "---") lines in
   let bs = mks ~delim:"\n" @@ List.tl @@ drop_while ((<>) "---")
@@ -124,7 +115,7 @@ let parse_date s =
 let sounds =
   let fn = "sounds.json" in
   let open Yojson.Basic.Util in
-  let js = Yojson.Basic.from_string ~fname:fn (load_file fn) |> to_list in
+  let js = Yojson.Basic.from_string ~fname:fn (Utils.load_file fn) |> to_list in
   let f j = {
     title = j |> member "title" |> to_string;
     url = j |> member "url" |> to_string;
@@ -167,7 +158,7 @@ let index = page None @@ seq [
 ]
 
 let () =
-  write_file "index.html" index;
-  write_file "sounds.html" sounds;
+  Utils.write_file "index.html" index;
+  Utils.write_file "sounds.html" sounds;
   posts |> List.iter @@ fun { url; html; title } ->
-    write_file url @@ page (Some title) (text html)
+    Utils.write_file url @@ page (Some title) (text html)

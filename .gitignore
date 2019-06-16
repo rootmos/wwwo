@@ -1,4 +1,11 @@
-*.html
 *.cmi
 *.cmo
-main
+.merlin
+venv
+
+gen
+.github_access_token
+
+*.html
+sounds.json
+github-activity.*.json
