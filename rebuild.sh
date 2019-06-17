@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# ensure we've loaded the ocaml environment
+. ~/.profile
+
 SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
 
 MAKE=$(which gmake 2>/dev/null)
