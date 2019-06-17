@@ -144,6 +144,7 @@ let page ?(only_subtitle=false) subtitle b = () |> html @@ seq [
     title @@ "rootmos' what-nots" ^ Option.fold ~some:((^) " | ") ~none:"" subtitle;
     if local then live_reload else tracking;
     style;
+    text "<meta charset=\"UTF-8\">";
   ];
   body @@ seq [
     h1 @@ seq [
@@ -255,6 +256,7 @@ let social = seq [
 let md_snippet fn =
   let md = Utils.load_file fn |> Omd.of_string |> Omd_representation.visit @@ function
     | Omd_representation.H1 t -> Some (Omd_representation.H2 t :: [])
+    | Omd_representation.H2 t -> Some (Omd_representation.H3 t :: [])
     | _ -> None in
   text @@ Omd.to_html md
 
