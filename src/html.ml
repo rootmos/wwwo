@@ -2,11 +2,17 @@ open Printf
 open Common
 open CamomileLibraryDefault
 
-let url_escape_string s =
-  let f c = let cp = Camomile.UChar.uint_code (Camomile.UChar.of_char c) in
-    if cp > 0 && cp < 0x7f then String.make 1 c
-    else (sprintf "%%%X%%%X" ((cp land 0xff00) lor 1) (cp land 0xff))
-  in String.to_seq s |> Seq.map f |> Seq.fold_left (^) ""
+let url_escape_string s: string =
+  let b = Camomile.UTF8.Buf.create 0 in
+  let f c = let cp = CamomileLibrary.UChar.code c in
+    if cp > 0 && cp < 0x7f then Camomile.UTF8.Buf.add_char b c
+    else
+      let b' = Camomile.UTF8.Buf.create 0 in
+      Camomile.UTF8.init 1 (fun _ -> c) |> Camomile.UTF8.Buf.add_string b';
+      Camomile.UTF8.Buf.contents b' |> String.iter (fun c -> c |>
+        Char.code |> sprintf "%%%.2X" |> Camomile.UTF8.Buf.add_string b
+      )
+  in Camomile.UTF8.iter f s; Camomile.UTF8.Buf.contents b
 
 let html_escape_string s =
   let f = function
