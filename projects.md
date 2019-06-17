@@ -1,7 +1,7 @@
 # Projects <span class="subtitle">what I do on the weekends</span>
 * [apl-hack](https://github.com/rootmos/apl-hack) &raquo;
   a place to collect things I learn about APL
-* [coq-hack](https://github.com/rootmos/coq-hack") &raquo;
+* [coq-hack](https://github.com/rootmos/coq-hack) &raquo;
   a place to collect things I learn about Coq
 * [lambdasylum](https://github.com/rootmos/lambdasylum) &raquo;
   a place to study lambda calculi: simply typed lambda calculus, System F, Church encodings

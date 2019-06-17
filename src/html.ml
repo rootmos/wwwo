@@ -1,5 +1,18 @@
 open Printf
 open Common
+open CamomileLibraryDefault
+
+let url_escape_string s =
+  let f c = let cp = Camomile.UChar.uint_code (Camomile.UChar.of_char c) in
+    if cp > 0 && cp < 0x7f then String.make 1 c
+    else (sprintf "%%%X%%%X" ((cp land 0xff00) lor 1) (cp land 0xff))
+  in String.to_seq s |> Seq.map f |> Seq.fold_left (^) ""
+
+let html_escape_string s =
+  let f = function
+    | '&' -> "&amp;"
+    | c -> String.make 1 c
+  in String.to_seq s |> Seq.map f |> Seq.fold_left (^) ""
 
 type 'a t = 'a -> string
 
@@ -18,7 +31,9 @@ let h2 x = tag "h2" x
 let title t = tag "title" (text t)
 let ul is x = tag "ul" (is >>| tag "li" |> seq) x
 let ol is x = tag "ol" (is >>| tag "li" |> seq) x
-let audio src = text @@ sprintf "<audio controls preload=\"none\" class=\"sound\"><source src=\"%s\"/></audio>" src
+let audio src = text @@
+  sprintf "<audio controls preload=\"none\" class=\"sound\"><source src=\"%s\"/></audio>"
+  (url_escape_string src |> html_escape_string)
 let script s = text s |> tag "script"
 let table cs x = let tr cs = tag "tr" (cs >>| tag "td" |> seq) in
   tag "table" (cs >>| tr |> seq) x
@@ -29,7 +44,8 @@ let span ?(cls = "") = fun k x ->
   if cls <> "" then sprintf "<span class=\"%s\">%s</span>" cls (k x)
   else sprintf "<span>%s</span>" (k x)
 
-let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>" href (k x)
+let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>"
+  (url_escape_string href |> html_escape_string) (k x)
 
 let img ?(cls = "") fn alt = fun _ ->
   if cls <> "" then

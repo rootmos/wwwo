@@ -14,8 +14,7 @@ generate: build fa sounds.json github-activity.rootmos.commits.json
 
 .PHONY: validate
 validate:
-	find $(WEBROOT)/$(ENV) -name "*.html" -exec \
-		tidy -quiet -errors --doctype=html5 {} \;
+	find $(WEBROOT)/$(ENV) -name "*.html" -exec ./validate.sh {} \;
 
 .PHONY: serve
 serve:

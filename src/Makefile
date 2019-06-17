@@ -1,5 +1,5 @@
 CC = ocamlc
-GEN_DEPS = magic-mime base64 yaml omd calendar atdgen
+GEN_DEPS = magic-mime base64 yaml omd calendar atdgen camomile
 
 .PHONY: install
 install: gen
