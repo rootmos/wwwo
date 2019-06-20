@@ -49,16 +49,6 @@ let mk_post fn =
 let posts = Sys.readdir posts_path |> Array.to_list >>| mk_post |>
   List.sort (fun { date = d } { date = d' } -> String.compare d d')
 
-let style = css [
-  "a, a:visited { color: blue; text-decoration: none }";
-  "img.social { height: 3em; padding: 1em }";
-  ".slogan { font-size: 1.15em; font-style: italic; margin: 0.5em }";
-  "img.avatar { height: 14em }";
-  ".intro { text-align: center }";
-  ".subtitle { display: inline; margin-left: 0.75em; font-size: 0.75em; font-weight: normal }";
-  ".date { white-space: nowrap }";
-]
-
 let posts_snippet = seq [
   h2 @@ text "Posts";
   posts >>| (fun { title; url; date } ->
@@ -66,21 +56,22 @@ let posts_snippet = seq [
   ) |> ul
 ]
 
-let page ?(only_subtitle=false) subtitle b = () |> html @@ seq [
+let page ?(only_subtitle=false) subtitle b =
+  let t = "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
+  () |> html @@ seq [
   head @@ seq [
-    title @@ "rootmos' what-nots" ^ Option.fold ~some:((^) " | ") ~none:"" subtitle;
+    title @@ t;
     if local then live_reload else tracking;
-    style;
+    css [ Utils.load_file "style.css" ];
     text "<meta charset=\"UTF-8\">";
   ];
   body @@ seq [
     h1 @@ seq [
-      text @@ if only_subtitle then Option.get subtitle else
-        "rootmos' what-nots" ^ Option.fold ~some:((^) " | ") ~none:"" subtitle;
+      text @@ if only_subtitle then Option.get subtitle else t;
       if Option.is_some subtitle then
         span ~cls:"subtitle" @@ a "index.html" @@ text "back" else noop
     ];
-    b
+    div ~cls:"content" @@ b
   ]
 ]
 
@@ -103,7 +94,7 @@ let sounds_page = let open Sounds_t in
   ] in seq [
     sounds >>| r |> table;
     audio_player_script;
-  ] |> page (Some "Sounds")
+  ] |> page (Some "sounds")
 
 and sounds_snippet = let open Sounds_t in
   let r s = [
@@ -130,7 +121,7 @@ let activity_page = let open Github_t in
     div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 c.date;
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
-  ] in activity >>| r |> table |> page (Some "Activity")
+  ] in activity >>| r |> table |> page (Some "activity")
 and activity_snippet = let open Github_t in
   let r c = [
     div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 c.date;
@@ -166,9 +157,11 @@ let services_snippet = seq [
 
 let resume_snippet = seq [
   h2 @@ text "Resume";
-  (let url = "https://rootmos-static.ams3.cdn.digitaloceanspaces.com/resume-gustav-behm.pdf"
-  in a url @@ text "PDF");
-  text " (updated 30 Nov 2018)";
+  p @@ seq [
+    (let url = "https://rootmos-static.ams3.cdn.digitaloceanspaces.com/resume-gustav-behm.pdf"
+    in a url @@ text "PDF");
+    text " (updated 30 Nov 2018)";
+  ]
 ]
 
 let social = seq [
@@ -193,13 +186,13 @@ let index = page None @@ seq [
     div ~cls:"slogan" @@ text "Some math, mostly programming and everything in between";
     social;
   ];
-  posts_snippet;
-  sounds_snippet;
-  activity_snippet;
-  services_snippet;
-  md_snippet "projects.md";
-  md_snippet "academic.md";
-  resume_snippet;
+  div ~cls:"content" @@ posts_snippet;
+  div ~cls:"content" @@ sounds_snippet;
+  div ~cls:"content" @@ activity_snippet;
+  div ~cls:"content" @@ services_snippet;
+  div ~cls:"content" @@ md_snippet "projects.md";
+  div ~cls:"content" @@ md_snippet "academic.md";
+  div ~cls:"content" @@ resume_snippet;
 ]
 
 let () =

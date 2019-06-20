@@ -68,6 +68,13 @@ let img ?(cls = "") fn alt = fun _ ->
 let js_src url = fun _ ->
   sprintf "<script type=\"text/javascript\" src=\"%s\"></script>" url
 
-let css ls = let body = ls |> String.concat "" |>
-  String.to_seq |> Seq.filter ((<>) ' ') |> String.of_seq in
+let minimize_css s =
+  let s = Str.global_replace (Str.regexp "\n") "" s in
+  let s = Str.global_replace (Str.regexp ":[ \t]+") ":" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*{[ \t]*") "{" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*}[ \t]*") "}" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*;[ \t]*") ";" s
+  in s
+
+let css ls = let body = ls |> String.concat "" |> minimize_css in
   text @@ sprintf "<style type=\"text/css\">%s</style>" body

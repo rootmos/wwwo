@@ -1,0 +1,100 @@
+body {
+  font-family: "arial";
+  background-color: #eee;
+  width: 1000px;
+  margin: auto;
+  color: #555;
+}
+
+.content {
+  background-color: #fff;
+}
+
+ul, ol {
+  list-style: none;
+  margin: 0;
+  padding: 15px 45px;
+}
+
+p {
+  margin: 0;
+  padding: 15px 45px;
+}
+
+pre {
+  margin: 0;
+  padding: 15px 45px;
+}
+
+li {
+  padding: 2px 15px;
+}
+
+table {
+  width: 100%;
+  padding: 15px 60px;
+}
+
+h1 {
+  text-align: center;
+  padding: 5px;
+  color: #444;
+}
+
+h2, h3 {
+  margin: 0;
+  padding: 30px 0 0 30px;
+  color: #000;
+}
+
+a, a:visited {
+  color: #208dce;
+  height: 80px;
+  width: 80px;
+}
+
+a:hover {
+  color: #ce2020;
+}
+
+img.social {
+  height: 3em;
+  padding: 1em;
+}
+
+img.social:hover {
+  filter: invert(22%) sepia(88%) saturate(2613%) hue-rotate(352deg)
+    brightness(79%) contrast(94%);
+}
+
+.slogan {
+  font-size: 15px;
+  font-style: italic;
+  margin: 170px 40px 0 0;
+  color: #777;
+  text-align: right;
+  width: 660px;
+}
+
+img.avatar {
+  height: 14em;
+}
+
+.intro {
+  text-align: center;
+  background-color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+}
+
+.subtitle {
+  margin-left: 15px;
+  font-size: 18px;
+  font-weight: normal;
+}
+
+.date {
+  white-space: nowrap;
+}
