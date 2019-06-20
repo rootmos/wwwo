@@ -11,7 +11,7 @@ body {
 }
 
 ul, ol {
-  list-style: none;
+  list-style: inside square;
   margin: 0;
   padding: 15px 45px;
 }
