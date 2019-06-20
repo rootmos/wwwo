@@ -165,12 +165,12 @@ let resume_snippet = seq [
 ]
 
 let social = seq [
-  a "https://github.com/rootmos" @@ img ~cls:"social"
-    "fa/svgs/brands/github.svg" "GitHub";
-  a "https://soundcloud.com/rootmos" @@ img ~cls:"social"
-    "fa/svgs/brands/soundcloud.svg" "SoundCloud";
-  a "https://keybase.io/rootmos" @@ img ~cls:"social"
-    "fa/svgs/brands/keybase.svg" "Keybase";
+  a "https://github.com/rootmos" @@ svg ~cls:"social"
+    "fa/svgs/brands/github.svg";
+  a "https://soundcloud.com/rootmos" @@ svg ~cls:"social"
+    "fa/svgs/brands/soundcloud.svg";
+  a "https://keybase.io/rootmos" @@ svg ~cls:"social"
+    "fa/svgs/brands/keybase.svg";
 ]
 
 let md_snippet fn =

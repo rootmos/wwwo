@@ -65,6 +65,12 @@ let img ?(cls = "") fn alt = fun _ ->
       (Base64.encode_exn @@ Utils.load_file fn)
       alt alt
 
+let svg ?(cls = "") fn =
+  let s = Utils.load_file fn in
+  let s = match cls with "" -> s | _ ->
+    Str.replace_first (Str.regexp "svg") (sprintf "svg class=\"%s\"" cls) s in
+  text s
+
 let js_src url = fun _ ->
   sprintf "<script type=\"text/javascript\" src=\"%s\"></script>" url
 

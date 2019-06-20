@@ -57,14 +57,13 @@ a:hover {
   color: #ce2020;
 }
 
-img.social {
+svg.social {
   height: 3em;
   padding: 1em;
 }
 
-img.social:hover {
-  filter: invert(22%) sepia(88%) saturate(2613%) hue-rotate(352deg)
-    brightness(79%) contrast(94%);
+svg.social:hover {
+  fill: #ce2020;
 }
 
 .slogan {
