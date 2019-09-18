@@ -24,4 +24,4 @@ clean:
 
 .PHONY: deps
 deps:
-	opam install ocamlfind $(GEN_DEPS)
+	opam install --yes ocamlfind $(GEN_DEPS)
