@@ -4,8 +4,9 @@ from github import Github
 import itertools
 import json
 import argparse
+import os
 
-with open('.github_access_token') as f:
+with open(os.path.expanduser("~/.github_access_token"), "r") as f:
     token = f.read().split('\n')[0]
 
 g = Github(token)
