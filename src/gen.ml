@@ -8,6 +8,7 @@ module Path = struct
   let post = Filename.concat @@ Filename.concat root "post"
   let snippet = Filename.concat @@ Filename.concat root "snippet"
   let image = Filename.concat @@ Filename.concat root "image"
+  let style = Filename.concat @@ Filename.concat root "css"
 end
 
 let live_reload = js_src "http://livejs.com/live.js"
@@ -68,7 +69,7 @@ let page ?(only_subtitle=false) subtitle b =
   head @@ seq [
     title @@ t;
     if local then live_reload else tracking;
-    css [ Utils.load_file "style.css" ];
+    css [ Utils.load_file (Path.style "style.css") ];
     text "<meta charset=\"UTF-8\">";
   ];
   body @@ seq [
