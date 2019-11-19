@@ -1,0 +1,10 @@
+digraph G {
+    a1 [label="apply"];
+    a2 [label="apply"];
+    a1 -> a2;
+    a1 -> x;
+    a2 -> plus;
+    let [label="let x"];
+    a2 -> let;
+    let -> 7;
+}

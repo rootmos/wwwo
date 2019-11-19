@@ -21,28 +21,33 @@ serve:
 	$(PYTHON) -m http.server --directory=$(WEBROOT)/$(ENV) $(PORT)
 
 .PHONY: build
-build:
+build: deps
 	$(MAKE) -C src install
 
 .PHONY: clean
 clean:
-	$(MAKE) -C src $@
-	rm -rf $(WEBROOT)
+	$(MAKE) -C src clean
+	rm -rf $(WEBROOT) .flag.* $(VENV)
 
 .PHONY: fresh
 fresh:
 	rm -rf sounds.json github-activity.*.json
 
-sounds.json: $(VENV)
+sounds.json: .flag.deps
 	$(PYTHON) sounds.py > $@
 
-github-activity.%.commits.json: $(VENV)
+github-activity.%.commits.json: .flag.deps
 	$(PYTHON) github-activity.py $*
 
 .PHONY: deps
-deps: $(VENV)
-	$(MAKE) -C src $@
-	$(PIP) install -r requirements.txt
+deps: .flag.deps
+.flag.deps: .flag.requirements.txt
+	$(MAKE) -C src deps
+	@touch $@
+
+.flag.requirements%txt: requirements%txt | $(VENV)
+	$(PIP) install -r $<
+	@touch $@
 
 $(VENV):
 	$(HOST_PYTHON) -m venv $@

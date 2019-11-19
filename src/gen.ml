@@ -2,6 +2,14 @@ open Common
 open Html
 open Printf
 
+module Path = struct
+  let root = "content"
+  let posts () = Sys.readdir (Filename.concat root "post") |> Array.to_list
+  let post = Filename.concat @@ Filename.concat root "post"
+  let snippet = Filename.concat @@ Filename.concat root "snippet"
+  let image = Filename.concat @@ Filename.concat root "image"
+end
+
 let live_reload = js_src "http://livejs.com/live.js"
 let tracking = seq [
   js_src "https://www.googletagmanager.com/gtag/js?id=UA-124878438-2";
@@ -17,11 +25,9 @@ let local = match Sys.getenv "ENV" with
 | _ -> false
 
 type post = { url: string; lines: string list; title: string; html: string; date: string }
-let posts_path = "../hugo/content/post"
-let static_path = "../hugo/static"
 
-let mk_post fn =
-  let lines = posts_path ^ "/" ^ fn |> Utils.load_file
+let mk_post p =
+  let lines = Path.post p |> Utils.load_file
     |> String.split_on_char '\n' in
   let hs = String.concat "\n" @@ take_while ((<>) "---")
     @@ List.tl @@ drop_while ((<>) "---") lines in
@@ -35,18 +41,18 @@ let mk_post fn =
   let md = Omd.of_string bs in
   let md = md |> Omd_representation.visit @@ function
     | Omd_representation.Img (alt, src, title) ->
-        let src = static_path ^ src in
+        let src = Path.image src in
         Omd_representation.Raw (img src title ()) :: [] |> Option.some
     | Omd_representation.Text "{{< toc >}}" -> Omd.toc md |> Option.some
     | _ -> None
 
   in {
-    url = (Filename.chop_suffix fn ".markdown") ^ ".html";
+    url = (Filename.chop_suffix p ".md") ^ ".html";
     lines; html = Omd.to_html md;
     title = prop "title"; date = prop "date";
   }
 
-let posts = Sys.readdir posts_path |> Array.to_list >>| mk_post |>
+let posts = Path.posts () >>| mk_post |>
   List.sort (fun { date = d } { date = d' } -> String.compare d d')
 
 let posts_snippet = seq [
@@ -173,8 +179,9 @@ let social = seq [
     "fa/svgs/brands/keybase.svg";
 ]
 
-let md_snippet fn =
-  let md = Utils.load_file fn |> Omd.of_string |> Omd_representation.visit @@ function
+let md_snippet s =
+  let raw = Utils.load_file @@ Path.snippet s in
+  let md = raw |> Omd.of_string |> Omd_representation.visit @@ function
     | Omd_representation.H1 t -> Some (Omd_representation.H2 t :: [])
     | Omd_representation.H2 t -> Some (Omd_representation.H3 t :: [])
     | _ -> None in
@@ -182,7 +189,7 @@ let md_snippet fn =
 
 let index = page None @@ seq [
   div ~cls:"intro" @@ seq [
-    img ~cls:"avatar" "rootmos.jpg" "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness";
+    img ~cls:"avatar" (Path.image "rootmos.jpg") "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness";
     div ~cls:"slogan" @@ text "Some math, mostly programming and everything in between";
     social;
   ];
@@ -197,9 +204,10 @@ let index = page None @@ seq [
 
 let () =
   let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
-  Utils.write_file (webroot ^ "/index.html") index;
-  Utils.write_file (webroot ^ "/sounds.html") sounds_page;
-  Utils.write_file (webroot ^ "/activity.html") activity_page;
+  let in_root = Filename.concat webroot in
+  Utils.write_file (in_root "index.html") index;
+  Utils.write_file (in_root "sounds.html") sounds_page;
+  Utils.write_file (in_root "activity.html") activity_page;
   posts |> List.iter @@ fun { url; html; title } ->
-    Utils.write_file (webroot ^ "/" ^ url) @@
+    Utils.write_file (in_root url) @@
       page ~only_subtitle:true (Some title) (text html)

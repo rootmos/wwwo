@@ -1,0 +1,28 @@
+digraph G {
+    l1 -> plus [style=dashed];
+    l1 -> l2;
+    l2 -> 7 [style=dashed];
+    l2 -> l0;
+    l0 -> a1 [style=dashed];
+    a1 -> "spine-1";
+    a1 -> s2_1;
+    l0 -> l3;
+    l3 -> s2_2 [style=dashed];
+    l3 -> a2;
+    a2 -> "spine-0";
+    a2 -> "spine-3";
+
+    s2_1 [label="spine-2"];
+    s2_2 [label="spine-2"];
+    l0 [label="let spine-0"];
+    l1 [label="let spine-1"];
+    l2 [label="let spine-2"];
+    l3 [label="let spine-3"];
+    a1 [label="apply"];
+    a2 [label="apply"];
+
+    // (let (spine-1 [primfun plus])
+    //     (let (spine-2 [scalar 7])
+    //       (let (spine-0 [apply spine-1 spine-2])
+    //         (let (spine-3 spine-2) (apply spine-0 spine-3)))))
+}

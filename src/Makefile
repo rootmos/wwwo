@@ -20,8 +20,11 @@ gen: lenient_iso8601.ml $(call atd, sounds) $(call atd, github) \
 
 .PHONY: clean
 clean:
-	rm -rf gen *.cmi *.cmo *_{j,t}.{ml,mli}
+	rm -rf gen *.cmi *.cmo *_{j,t}.{ml,mli} .flag.*
 
 .PHONY: deps
-deps:
+deps: .flag.opam-install
+
+.flag.opam-install:
 	opam install --yes ocamlfind $(GEN_DEPS)
+	@touch $@
