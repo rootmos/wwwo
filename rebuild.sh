@@ -10,5 +10,5 @@ if [ $? -ne 0 ]; then
     MAKE=$(which make)
 fi
 
-(cd $SCRIPT_DIR && git pull 2>&1)
+(cd $SCRIPT_DIR && git fetch && git checkout origin/master 2>&1)
 $MAKE -C $SCRIPT_DIR fresh generate ENV=prod
