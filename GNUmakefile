@@ -24,6 +24,10 @@ serve:
 build: deps
 	$(MAKE) -C src install
 
+.PHONY: upload
+upload:
+	aws s3 cp --recursive $(WEBROOT)/$(ENV) s3://rootmos-www
+
 .PHONY: clean
 clean:
 	$(MAKE) -C src clean

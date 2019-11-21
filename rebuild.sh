@@ -11,4 +11,4 @@ if [ $? -ne 0 ]; then
 fi
 
 (cd $SCRIPT_DIR && git fetch && git checkout origin/master 2>&1)
-$MAKE -C $SCRIPT_DIR fresh generate ENV=prod
+$MAKE -C $SCRIPT_DIR fresh generate upload ENV=prod
