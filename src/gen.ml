@@ -211,8 +211,7 @@ let bor19 = seq [
   ul [
     a "https://www.mixcloud.com/rootmos/best-of-rootmos-2019/" @@ text "Mixcloud";
   ]
-] |> page
-    ~only_subtitle:true (Some "Best of rootmos 2019")
+] |> page ~only_subtitle:true (Some "Best of rootmos 2019")
     ~additional_css:[ Utils.load_file (Path.style "bor19.css") ]
 
 let () =

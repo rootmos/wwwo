@@ -26,7 +26,7 @@ build: deps
 
 .PHONY: upload
 upload:
-	aws s3 cp --recursive $(WEBROOT)/$(ENV) s3://rootmos-www
+	aws s3 cp --acl=public-read --recursive $(WEBROOT)/$(ENV) s3://rootmos-www
 
 .PHONY: clean
 clean:
