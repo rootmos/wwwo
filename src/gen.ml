@@ -76,7 +76,7 @@ let page ?(only_subtitle=false) ?(additional_css=[]) subtitle b =
     h1 @@ seq [
       text @@ if only_subtitle then Option.get subtitle else t;
       if Option.is_some subtitle then
-        span ~cls:"subtitle" @@ a "index.html" @@ text "back" else noop
+        span ~cls:"subtitle" @@ a "/index.html" @@ text "back" else noop
     ];
     div ~cls:"content" @@ b
   ]
