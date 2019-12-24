@@ -210,6 +210,22 @@ let bor19 = seq [
   ]];
   ul [
     a "https://www.mixcloud.com/rootmos/best-of-rootmos-2019/" @@ text "Mixcloud";
+    seq [
+      text "Tracks:";
+      ol [
+        text "Session @ 2019-08-18";
+        text "L3";
+        text "Sunday meditations 1";
+        text "Session @ 2019-12-11";
+        text "M44";
+        text "Sunday Jam 2";
+        text "Syltextrakt (14 augusti 2019)";
+        text "Negative space";
+        text "Plague Ostinato";
+        text "Session @ 2019-08-07";
+        text "Session @ 2019-09-05";
+      ]
+    ]
   ]
 ] |> page ~only_subtitle:true (Some "Best of rootmos 2019")
     ~additional_css:[ Utils.load_file (Path.style "bor19.css") ]
