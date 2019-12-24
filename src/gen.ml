@@ -63,13 +63,13 @@ let posts_snippet = seq [
   ) |> ul
 ]
 
-let page ?(only_subtitle=false) subtitle b =
+let page ?(only_subtitle=false) ?(additional_css=[]) subtitle b =
   let t = "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
   () |> html @@ seq [
   head @@ seq [
     title @@ t;
     if local then live_reload else tracking;
-    css [ Utils.load_file (Path.style "style.css") ];
+    css @@ Utils.load_file (Path.style "style.css") :: additional_css;
     text "<meta charset=\"UTF-8\">";
   ];
   body @@ seq [
@@ -152,11 +152,11 @@ let services_snippet = seq [
   h2 @@ seq [ text "Services"; span ~cls:"subtitle" @@ text "what I host" ];
   ul @@ [
     seq [
-      text "dns.rootmos.io (";
+      text "dns.infra.rootmos.io (";
       a "https://www.digwebinterface.com/?hostnames=google.com&type=A&ns=self&nameservers=dns.rootmos.io"
         @@ text "dig";
       text @@ sprintf ") (%s) 53 UDP/TCP, 853 DNS over TLS"
-        (Option.get @@ resolve "dns.rootmos.io");
+        (Option.get @@ resolve "dns.infra.rootmos.io");
     ];
     a "https://ip.rootmos.io" (text "ip.rootmos.io");
   ]
@@ -203,12 +203,25 @@ let index = page None @@ seq [
   div ~cls:"content" @@ resume_snippet;
 ]
 
+let bor19 = seq [
+  table [[
+    img ~cls:"cover" (Path.image "bor19-cover.jpg") "cover";
+    audio "https://rootmos-sounds.ams3.digitaloceanspaces.com/2019-12-23-best-of-rootmos-2019.mp3";
+  ]];
+  ul [
+    a "https://www.mixcloud.com/rootmos/best-of-rootmos-2019/" @@ text "Mixcloud";
+  ]
+] |> page
+    ~only_subtitle:true (Some "Best of rootmos 2019")
+    ~additional_css:[ Utils.load_file (Path.style "bor19.css") ]
+
 let () =
   let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
   let in_root = Filename.concat webroot in
   Utils.write_file (in_root "index.html") index;
   Utils.write_file (in_root "sounds.html") sounds_page;
   Utils.write_file (in_root "activity.html") activity_page;
+  Utils.write_file (in_root "bor19/index.html") bor19;
   posts |> List.iter @@ fun { url; html; title } ->
     Utils.write_file (in_root url) @@
       page ~only_subtitle:true (Some title) (text html)
