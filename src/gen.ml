@@ -79,7 +79,17 @@ let page ?(only_subtitle=false) ?(additional_css=[]) subtitle b =
       if Option.is_some subtitle then
         span ~cls:"subtitle" @@ a "/index.html" @@ text "back" else noop
     ];
-    div ~cls:"content" @@ b
+    div ~cls:"content" @@ b;
+    div ~cls:"footer" @@ seq [
+      let t = Unix.time () |> Unix.gmtime in
+      let c = Sys.getenv_opt "GIT_REV" |> Option.map (fun r ->
+        a (sprintf "https://github.com/rootmos/wwwo/commit/%s" r) @@
+        span @@ text (String.sub r 0 7)
+      )
+      in span ~cls:"copyleft" @@ seq @@ Option.to_list c @ [
+        text @@ sprintf " %d &copy;" (1900 + t.tm_year)
+      ]
+    ]
   ]
 ]
 

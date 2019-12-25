@@ -11,7 +11,7 @@ export PIP = $(VENV)/bin/pip
 
 generate: build fa meta
 	@mkdir -p $(WEBROOT)/$(ENV)
-	./src/gen
+	GIT_REV=$(shell git rev-parse HEAD) ./src/gen
 
 .PHONY: meta
 meta: $(META)/sounds.json \

@@ -101,3 +101,12 @@ img.avatar {
 .c {
   text-align: center;
 }
+
+.footer {
+  text-align: center;
+}
+
+.copyleft {
+  display:inline-block;
+  transform: rotate(180deg);
+}
