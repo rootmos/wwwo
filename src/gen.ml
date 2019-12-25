@@ -101,6 +101,7 @@ let sounds_page = let open Sounds_t in
     div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
     audio ~id:(String.sub s.sha1 0 7) s.url
   ] in seq [
+    p ~cls:(Some "c") @@ a "/bor19" @@ text "Best of rootmos 2019 mix";
     sounds >>| r |> table;
     audio_player_script;
   ] |> page (Some "sounds")

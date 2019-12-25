@@ -22,7 +22,11 @@ let html_escape_string s =
 
 type 'a t = 'a -> string
 
-let tag t: 'a t -> 'a t = fun k x -> sprintf "<%s>%s</%s>" t (k x) t
+let tag ?(id=None) ?(cls=None) t: 'a t -> 'a t = fun k x -> match id, cls with
+| None, None -> sprintf "<%s>%s</%s>" t (k x) t
+| Some i, None -> sprintf "<%s id=\"%s\">%s</%s>" t i (k x) t
+| None, Some c -> sprintf "<%s class=\"%s\">%s</%s>" t c (k x) t
+| Some i, Some c -> sprintf "<%s id=\"%s\" class=\"%s\">%s</%s>" t i c (k x) t
 let seq xs: 'a t = fun a ->
   String.concat "" @@ List.rev @@ List.fold_left (fun ys k' -> k' a :: ys) [] xs
 let text t: 'a t = fun _ -> t
@@ -31,7 +35,7 @@ let noop: 'a t = fun x -> text "" x
 let html x = seq [text "<!DOCTYPE html>"; tag "html" x]
 let body x =  tag "body" x
 let head x = tag "head" x
-let p x = tag "p" x
+let p ?(cls=None) ?(id=None) x = tag ~cls ~id "p" x
 let h1 x = tag "h1" x
 let h2 x = tag "h2" x
 let title t = tag "title" (text t)
