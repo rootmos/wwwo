@@ -225,18 +225,18 @@ let bor19 = seq [
     a "https://www.mixcloud.com/rootmos/best-of-rootmos-2019/" @@ text "Mixcloud";
     seq [
       text "Tracks:";
-      ol [
-        text "Session @ 2019-08-18";
-        a "/sounds.html#17a699b" @@ text "L3";
-        a "/sounds.html#01e765f" @@ text "Sunday meditations 1";
-        text "Session @ 2019-12-11";
-        a "/sounds.html#5920850" @@ text "M44";
-        a "/sounds.html#ec936b3" @@ text "Sunday Jam 2";
-        a "/sounds.html#a46694f" @@ text "Syltextrakt (14 augusti 2019)";
-        a "/sounds.html#f310aa7" @@ text "Negative space";
-        a "/sounds.html#cbf4c4a" @@ text "Plague Ostinato";
-        text "Session @ 2019-08-07";
-        text "Session @ 2019-09-05";
+      table [
+        [ span ~cls:"time" @@ text "00:10"; text "Session @ 2019-08-18" ];
+        [ span ~cls:"time" @@ text "00:35"; a "/sounds.html#17a699b" @@ text "L3" ];
+        [ span ~cls:"time" @@ text "02:00"; a "/sounds.html#01e765f" @@ text "Sunday meditations 1" ];
+        [ span ~cls:"time" @@ text "05:11"; text "Session @ 2019-12-11" ];
+        [ span ~cls:"time" @@ text "07:20"; a "/sounds.html#5920850" @@ text "M44" ];
+        [ span ~cls:"time" @@ text "11:42"; a "/sounds.html#ec936b3" @@ text "Sunday Jam 2" ];
+        [ span ~cls:"time" @@ text "13:35"; a "/sounds.html#a46694f" @@ text "Syltextrakt (14 augusti 2019)" ];
+        [ span ~cls:"time" @@ text "22:01"; a "/sounds.html#f310aa7" @@ text "Negative space" ];
+        [ span ~cls:"time" @@ text "24:40"; a "/sounds.html#cbf4c4a" @@ text "Plague Ostinato" ];
+        [ span ~cls:"time" @@ text "31:30"; text "Session @ 2019-08-07" ];
+        [ span ~cls:"time" @@ text "35:11"; text "Session @ 2019-09-05" ];
       ]
     ]
   ]
