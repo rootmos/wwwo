@@ -60,7 +60,10 @@ let span ?(cls="") = fun k x ->
   else sprintf "<span>%s</span>" (k x)
 
 let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>"
-  (url_escape_string href |> html_escape_string) (k x)
+    (url_escape_string href |> html_escape_string) (k x)
+
+let button s = fun k x ->
+  sprintf "<a href=\"#\" onclick=\"%s\">%s</a>" s (k x)
 
 let img ?(embedd=true) ?(cls="") fn alt = fun _ ->
   let c = if cls <> "" then sprintf " class=\"%s\"" cls else "" in

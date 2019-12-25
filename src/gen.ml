@@ -219,30 +219,34 @@ let index = page None @@ seq [
 let bor19 = seq [
   table [[
     img ~cls:"cover" (Path.image "bor19-cover.jpg") "cover";
-    audio "https://rootmos-sounds.ams3.digitaloceanspaces.com/2019-12-23-best-of-rootmos-2019.mp3";
+    audio ~id:"mix" "https://rootmos-sounds.ams3.digitaloceanspaces.com/2019-12-23-best-of-rootmos-2019.mp3";
   ]];
   ul [
     a "https://www.mixcloud.com/rootmos/best-of-rootmos-2019/" @@ text "Mixcloud";
     seq [
       text "Tracks:";
+      String.concat "" [
+        "function seek(m, s) {";
+        "const ss = document.getElementById(\"mix\");";
+        "ss.currentTime = m * 60 + s; ss.play(); }";
+      ] |> script;
       table [
-        [ span ~cls:"time" @@ text "00:10"; text "Session @ 2019-08-18" ];
-        [ span ~cls:"time" @@ text "00:35"; a "/sounds.html#17a699b" @@ text "L3" ];
-        [ span ~cls:"time" @@ text "02:00"; a "/sounds.html#01e765f" @@ text "Sunday meditations 1" ];
-        [ span ~cls:"time" @@ text "05:11"; text "Session @ 2019-12-11" ];
-        [ span ~cls:"time" @@ text "07:20"; a "/sounds.html#5920850" @@ text "M44" ];
-        [ span ~cls:"time" @@ text "11:42"; a "/sounds.html#ec936b3" @@ text "Sunday Jam 2" ];
-        [ span ~cls:"time" @@ text "13:35"; a "/sounds.html#a46694f" @@ text "Syltextrakt (14 augusti 2019)" ];
-        [ span ~cls:"time" @@ text "22:01"; a "/sounds.html#f310aa7" @@ text "Negative space" ];
-        [ span ~cls:"time" @@ text "24:40"; a "/sounds.html#cbf4c4a" @@ text "Plague Ostinato" ];
-        [ span ~cls:"time" @@ text "31:30"; text "Session @ 2019-08-07" ];
-        [ span ~cls:"time" @@ text "35:11"; text "Session @ 2019-09-05" ];
+        [ span ~cls:"time" @@ button "seek(0,10)" @@ text "00:10"; text "Session @ 2019-08-18" ];
+        [ span ~cls:"time" @@ button "seek(0,35)" @@ text "00:35"; a "/sounds.html#17a699b" @@ text "L3" ];
+        [ span ~cls:"time" @@ button "seek(2,0)" @@ text "02:00"; a "/sounds.html#01e765f" @@ text "Sunday meditations 1" ];
+        [ span ~cls:"time" @@ button "seek(5,11)" @@ text "05:11"; text "Session @ 2019-12-11" ];
+        [ span ~cls:"time" @@ button "seek(7,20)" @@ text "07:20"; a "/sounds.html#5920850" @@ text "M44" ];
+        [ span ~cls:"time" @@ button "seek(11,42)" @@ text "11:42"; a "/sounds.html#ec936b3" @@ text "Sunday Jam 2" ];
+        [ span ~cls:"time" @@ button "seek(13,35)" @@ text "13:35"; a "/sounds.html#a46694f" @@ text "Syltextrakt (14 augusti 2019)" ];
+        [ span ~cls:"time" @@ button "seek(22,1)" @@ text "22:01"; a "/sounds.html#f310aa7" @@ text "Negative space" ];
+        [ span ~cls:"time" @@ button "seek(24,40)" @@ text "24:40"; a "/sounds.html#cbf4c4a" @@ text "Plague Ostinato" ];
+        [ span ~cls:"time" @@ button "seek(31,30)" @@ text "31:30"; text "Session @ 2019-08-07" ];
+        [ span ~cls:"time" @@ button "seek(35,11)" @@ text "35:11"; text "Session @ 2019-09-05" ];
       ]
     ]
   ]
 ] |> page ~only_subtitle:true (Some "Best of rootmos 2019")
     ~additional_css:[ Utils.load_file (Path.style "bor19.css") ]
-
 
 module ContentType = struct
   let is_video ct = Str.string_match (Str.regexp "^video/") ct 0
