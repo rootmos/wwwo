@@ -1,7 +1,6 @@
 #!/bin/sh
 
-# ensure we've loaded the ocaml environment
-. ~/.profile
+eval "$(opam config env)"
 
 SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
 
@@ -11,4 +10,4 @@ if [ $? -ne 0 ]; then
 fi
 
 (cd $SCRIPT_DIR && git fetch && git checkout origin/master 2>&1)
-$MAKE -C $SCRIPT_DIR fresh generate upload ENV=prod
+$MAKE -C "$SCRIPT_DIR/.." fresh generate upload ENV=prod

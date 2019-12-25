@@ -1,0 +1,12 @@
+div.gallery {
+  text-align: center;
+}
+
+img.gallery {
+  margin: 20px;
+}
+
+.video {
+  margin: 20px;
+  width: 700px;
+}

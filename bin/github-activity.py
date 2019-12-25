@@ -42,5 +42,4 @@ if __name__ == "__main__":
     args = p.parse_args()
 
     u = g.get_user(args.user)
-    with open(f"github-activity.{args.user}.commits.json", 'w') as f:
-        f.write(json.dumps(commits(u, args.commits)))
+    print(json.dumps(commits(u, args.commits)))

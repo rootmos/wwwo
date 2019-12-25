@@ -38,7 +38,10 @@ let title t = tag "title" (text t)
 let ul is x = tag "ul" (is >>| tag "li" |> seq) x
 let ol is x = tag "ol" (is >>| tag "li" |> seq) x
 let audio src = text @@
-  sprintf "<audio controls preload=\"none\" class=\"sound\"><source src=\"%s\"/></audio>"
+  sprintf "<audio controls preload=\"metadata\" class=\"sound\"><source src=\"%s\"/></audio>"
+  (url_escape_string src |> html_escape_string)
+let video src = text @@
+  sprintf "<video controls preload=\"metadata\" class=\"video\"><source src=\"%s\"/></video>"
   (url_escape_string src |> html_escape_string)
 let script s = text s |> tag "script"
 let table cs x = let tr cs = tag "tr" (cs >>| tag "td" |> seq) in
@@ -53,17 +56,12 @@ let span ?(cls = "") = fun k x ->
 let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>"
   (url_escape_string href |> html_escape_string) (k x)
 
-let img ?(cls = "") fn alt = fun _ ->
-  if cls <> "" then
-    sprintf "<img src=\"data:%s;base64,%s\" title=\"%s\" alt=\"%s\" class=\"%s\"/>"
-      (Magic_mime.lookup fn)
-      (Base64.encode_exn @@ Utils.load_file fn)
-      alt alt cls
-  else
-    sprintf "<img src=\"data:%s;base64,%s\" title=\"%s\" alt=\"%s\"/>"
-      (Magic_mime.lookup fn)
-      (Base64.encode_exn @@ Utils.load_file fn)
-      alt alt
+let img ?(embedd=true) ?(cls="") fn alt = fun _ ->
+  let c = if cls <> "" then sprintf " class=\"%s\"" cls else "" in
+  let a = if alt <> "" then sprintf " title=\"%s\" alt=\"%s\"" alt alt else "" in
+  if embedd then sprintf "<img src=\"data:%s;base64,%s\" %s%s/>"
+    (Magic_mime.lookup fn) (Base64.encode_exn @@ Utils.load_file fn) a c
+  else sprintf "<img src=\"%s\" %s%s/>" fn a c
 
 let svg ?(cls = "") fn =
   let s = Utils.load_file fn in

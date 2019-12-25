@@ -2,19 +2,26 @@ export ENV ?= dev
 export WEBROOT ?= $(shell pwd)/webroot
 PORT ?= 8080
 
-VENV = $(shell pwd)/venv
-HOST_PYTHON ?= python3
+BIN = $(shell pwd)/bin
+META = $(shell pwd)/meta
+VENV ?= $(shell pwd)/venv
+HOST_PYTHON ?= $(shell command -v python3)
 export PYTHON = $(VENV)/bin/python3
 export PIP = $(VENV)/bin/pip
 
-.PHONY: generate
-generate: build fa sounds.json github-activity.rootmos.commits.json
+generate: build fa meta
 	@mkdir -p $(WEBROOT)/$(ENV)
 	./src/gen
 
+.PHONY: meta
+meta: $(META)/sounds.json \
+	$(META)/github-activity.rootmos.commits.json \
+	$(META)/glenn.json \
+	$(META)/silly.json
+
 .PHONY: validate
 validate:
-	find $(WEBROOT)/$(ENV) -name "*.html" -exec ./validate.sh {} \;
+	find $(WEBROOT)/$(ENV) -name "*.html" -exec $(BIN)/validate.sh {} \;
 
 .PHONY: serve
 serve:
@@ -31,17 +38,23 @@ upload:
 .PHONY: clean
 clean:
 	$(MAKE) -C src clean
-	rm -rf $(WEBROOT) .flag.* $(VENV)
+	rm -rf $(WEBROOT) .flag.* $(VENV) $(META)
 
 .PHONY: fresh
 fresh:
-	rm -rf sounds.json github-activity.*.json
+	rm -rf $(META)
 
-sounds.json: .flag.deps
-	$(PYTHON) sounds.py > $@
+$(META)/sounds.json: .flag.deps
+	@mkdir -p "$(dir $@)"
+	$(PYTHON) $(BIN)/sounds.py > "$@"
 
-github-activity.%.commits.json: .flag.deps
-	$(PYTHON) github-activity.py $*
+$(META)/github-activity.%.commits.json: .flag.deps
+	@mkdir -p "$(dir $@)"
+	$(PYTHON) $(BIN)/github-activity.py $* > "$@"
+
+$(META)/%.json: .flag.deps
+	@mkdir -p "$(dir $@)"
+	$(PYTHON) $(BIN)/list.py --profile=do --prefix="$*" rootmos-static > "$@"
 
 .PHONY: deps
 deps: .flag.deps
@@ -66,5 +79,5 @@ fa.zip:
 
 fa: fa.zip
 	unzip $<
-	rm -rf fa
+	rm -rf $@
 	mv fontawesome-free-*-web $@

@@ -1,0 +1,6 @@
+type entry = {
+    url: string;
+    content_type: string;
+}
+
+type entries = entry list

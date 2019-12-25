@@ -9,6 +9,7 @@ module Path = struct
   let snippet = Filename.concat @@ Filename.concat root "snippet"
   let image = Filename.concat @@ Filename.concat root "image"
   let style = Filename.concat @@ Filename.concat root "css"
+  let meta = Filename.concat "meta"
 end
 
 let live_reload = js_src "http://livejs.com/live.js"
@@ -84,7 +85,8 @@ let page ?(only_subtitle=false) ?(additional_css=[]) subtitle b =
 
 let sounds =
   let open Sounds_t in
-  let js = Sounds_j.sounds_of_string (Utils.load_file "sounds.json") in
+  let js = Path.meta "sounds.json" |>
+    Utils.load_file |> Sounds_j.sounds_of_string in
   let s s0 s1 = Lenient_iso8601.compare s1.date s0.date in
   js |> List.sort s
 and audio_player_script = String.concat "" [
@@ -118,8 +120,8 @@ and sounds_snippet = let open Sounds_t in
   ]
 
 let activity = let open Github_t in
-  let cs = Utils.load_file "github-activity.rootmos.commits.json" |>
-    Github_j.commits_of_string in
+  let cs = Path.meta "github-activity.rootmos.commits.json" |>
+    Utils.load_file |> Github_j.commits_of_string in
   let s c0 c1 = Lenient_iso8601.compare c1.date c0.date in
   cs |> List.sort s
 
@@ -230,6 +232,26 @@ let bor19 = seq [
 ] |> page ~only_subtitle:true (Some "Best of rootmos 2019")
     ~additional_css:[ Utils.load_file (Path.style "bor19.css") ]
 
+
+module ContentType = struct
+  let is_video ct = Str.string_match (Str.regexp "^video/") ct 0
+  let is_image ct = Str.string_match (Str.regexp "^image/") ct 0
+end
+
+let gallery t fn =
+  let es = Utils.load_file fn |> Gallery_j.entries_of_string in
+  let g (e: Gallery_j.entry) =
+    if ContentType.is_video e.content_type then video e.url
+    else if ContentType.is_image e.content_type then
+      img ~cls:"gallery" ~embedd:false e.url ""
+    else failwith "content type not supported"
+  in List.map g es |> seq |> div ~cls:"gallery"
+    |> page ~only_subtitle:true (Some t)
+      ~additional_css:[ Utils.load_file (Path.style "gallery.css") ]
+
+let glenn = gallery "Glenn, Glenn, Glenn" (Path.meta "glenn.json")
+let silly = gallery "Silly things" (Path.meta "silly.json")
+
 let () =
   let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
   let in_root = Filename.concat webroot in
@@ -237,6 +259,8 @@ let () =
   Utils.write_file (in_root "sounds.html") sounds_page;
   Utils.write_file (in_root "activity.html") activity_page;
   Utils.write_file (in_root "bor19/index.html") bor19;
+  Utils.write_file (in_root "glenn/index.html") glenn;
+  Utils.write_file (in_root "silly/index.html") silly;
   posts |> List.iter @@ fun { url; html; title } ->
     Utils.write_file (in_root url) @@
       page ~only_subtitle:true (Some title) (text html)

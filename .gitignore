@@ -1,13 +1,8 @@
 .flag.*
-
 .merlin
-venv
-
-webroot
-
 .github_access_token
-sounds.json
-github-activity.*.json
-
+venv
+webroot
+meta
 fa
 fa.zip
