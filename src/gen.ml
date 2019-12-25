@@ -234,14 +234,14 @@ let bor19 = seq [
         [ span ~cls:"time" @@ button "seek(0,10)" @@ text "00:10"; text "Session @ 2019-08-18" ];
         [ span ~cls:"time" @@ button "seek(0,35)" @@ text "00:35"; a "/sounds.html#17a699b" @@ text "L3" ];
         [ span ~cls:"time" @@ button "seek(2,0)" @@ text "02:00"; a "/sounds.html#01e765f" @@ text "Sunday meditations 1" ];
-        [ span ~cls:"time" @@ button "seek(5,11)" @@ text "05:11"; text "Session @ 2019-12-11" ];
-        [ span ~cls:"time" @@ button "seek(7,20)" @@ text "07:20"; a "/sounds.html#5920850" @@ text "M44" ];
-        [ span ~cls:"time" @@ button "seek(11,42)" @@ text "11:42"; a "/sounds.html#ec936b3" @@ text "Sunday Jam 2" ];
-        [ span ~cls:"time" @@ button "seek(13,35)" @@ text "13:35"; a "/sounds.html#a46694f" @@ text "Syltextrakt (14 augusti 2019)" ];
+        [ span ~cls:"time" @@ button "seek(5,20)" @@ text "05:20"; text "Session @ 2019-12-11" ];
+        [ span ~cls:"time" @@ button "seek(7,21)" @@ text "07:21"; a "/sounds.html#5920850" @@ text "M44" ];
+        [ span ~cls:"time" @@ button "seek(11,47)" @@ text "11:47"; a "/sounds.html#ec936b3" @@ text "Sunday Jam 2" ];
+        [ span ~cls:"time" @@ button "seek(13,40)" @@ text "13:40"; a "/sounds.html#a46694f" @@ text "Syltextrakt (14 augusti 2019)" ];
         [ span ~cls:"time" @@ button "seek(22,1)" @@ text "22:01"; a "/sounds.html#f310aa7" @@ text "Negative space" ];
-        [ span ~cls:"time" @@ button "seek(24,40)" @@ text "24:40"; a "/sounds.html#cbf4c4a" @@ text "Plague Ostinato" ];
+        [ span ~cls:"time" @@ button "seek(24,45)" @@ text "24:45"; a "/sounds.html#cbf4c4a" @@ text "Plague Ostinato" ];
         [ span ~cls:"time" @@ button "seek(31,30)" @@ text "31:30"; text "Session @ 2019-08-07" ];
-        [ span ~cls:"time" @@ button "seek(35,11)" @@ text "35:11"; text "Session @ 2019-09-05" ];
+        [ span ~cls:"time" @@ button "seek(35,16)" @@ text "35:16"; text "Session @ 2019-09-05" ];
       ]
     ]
   ]
