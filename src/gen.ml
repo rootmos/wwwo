@@ -99,7 +99,7 @@ let sounds_page = let open Sounds_t in
   let r s = [
     text s.title;
     div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
-    audio s.url
+    audio ~id:(String.sub s.sha1 0 7) s.url
   ] in seq [
     sounds >>| r |> table;
     audio_player_script;
@@ -216,14 +216,14 @@ let bor19 = seq [
       text "Tracks:";
       ol [
         text "Session @ 2019-08-18";
-        text "L3";
-        text "Sunday meditations 1";
+        a "/sounds.html#17a699b" @@ text "L3";
+        a "/sounds.html#01e765f" @@ text "Sunday meditations 1";
         text "Session @ 2019-12-11";
-        text "M44";
-        text "Sunday Jam 2";
-        text "Syltextrakt (14 augusti 2019)";
-        text "Negative space";
-        text "Plague Ostinato";
+        a "/sounds.html#5920850" @@ text "M44";
+        a "/sounds.html#ec936b3" @@ text "Sunday Jam 2";
+        a "/sounds.html#a46694f" @@ text "Syltextrakt (14 augusti 2019)";
+        a "/sounds.html#f310aa7" @@ text "Negative space";
+        a "/sounds.html#cbf4c4a" @@ text "Plague Ostinato";
         text "Session @ 2019-08-07";
         text "Session @ 2019-09-05";
       ]
