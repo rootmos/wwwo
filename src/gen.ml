@@ -148,11 +148,22 @@ and activity_snippet = let open Github_t in
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
   ] in seq [
-    h2 @@ seq [
-      text "Activity";
-      span ~cls:"subtitle" @@ a "activity.html" @@ text "more"
-    ];
-    activity |> take 5 >>| r |> table;
+    h2 @@ text "Activity";
+    activity |> take 10 >>| r |> table;
+  ]
+
+let projects_snippet = let open Project_t in
+  let projects =
+    let ps = Path.meta "projects.json" |>
+      Utils.load_file |> Project_j.projects_of_string in
+    let s p0 p1 = Lenient_iso8601.compare p1.last_activity p0.last_activity in
+    ps |> List.sort s in
+  let r p = [
+    a p.repository_url @@ text p.name;
+    match p.description with Some d -> text d | None -> noop
+  ] in seq [
+    h2 @@ text "Projects";
+    projects >>| r |> table;
   ]
 
 let resolve h = Unix.getaddrinfo h ""
@@ -162,7 +173,7 @@ let resolve h = Unix.getaddrinfo h ""
   | _ -> Option.none
 
 let services_snippet = seq [
-  h2 @@ seq [ text "Services"; span ~cls:"subtitle" @@ text "what I host" ];
+  h2 @@ text "Services";
   ul @@ [
     seq [
       text "dns.infra.rootmos.io (";
@@ -207,11 +218,11 @@ let index = page None @@ seq [
     div ~cls:"slogan" @@ text "Some math, mostly programming and everything in between";
     social;
   ];
-  div ~cls:"content" @@ posts_snippet;
   div ~cls:"content" @@ sounds_snippet;
   div ~cls:"content" @@ activity_snippet;
+  div ~cls:"content" @@ projects_snippet;
+  div ~cls:"content" @@ posts_snippet;
   div ~cls:"content" @@ services_snippet;
-  div ~cls:"content" @@ md_snippet "projects.md";
   div ~cls:"content" @@ md_snippet "academic.md";
   div ~cls:"content" @@ resume_snippet;
 ]

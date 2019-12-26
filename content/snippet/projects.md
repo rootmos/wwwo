@@ -1,4 +1,4 @@
-# Projects <span class="subtitle">what I do on the weekends</span>
+# Projects <span class="subtitle"><a href="/projects.html">more</a></span>
 * [apl-hack](https://github.com/rootmos/apl-hack) &raquo;
   a place to collect things I learn about APL
 * [coq-hack](https://github.com/rootmos/coq-hack) &raquo;

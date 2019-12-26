@@ -9,7 +9,8 @@ $(1)_t.mli $(1)_t.ml $(1)_j.mli $(1)_j.ml
 endef
 
 gen: lenient_iso8601.ml \
-	$(call atd, sounds) $(call atd, github) $(call atd, gallery) \
+	$(call atd, sounds) $(call atd, github) \
+	$(call atd, gallery) $(call atd, project)\
 	common.ml utils.ml html.ml gen.ml
 	ocamlfind $(CC) -linkpkg \
 		-package $(shell echo "$(GEN_DEPS)" | tr ' ' ',') \

@@ -17,7 +17,8 @@ generate: build fa meta
 meta: $(META)/sounds.json \
 	$(META)/github-activity.rootmos.commits.json \
 	$(META)/glenn.json \
-	$(META)/silly.json
+	$(META)/silly.json \
+	$(META)/projects.json
 
 .PHONY: validate
 validate:
@@ -55,6 +56,10 @@ $(META)/github-activity.%.commits.json: .flag.deps
 $(META)/%.json: .flag.deps
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/list.py --profile=do --prefix="$*" rootmos-static > "$@"
+
+$(META)/projects.json: projects.json .flag.deps
+	@mkdir -p "$(dir $@)"
+	$(PYTHON) $(BIN)/projects.py "$<" > "$@"
 
 .PHONY: deps
 deps: .flag.deps

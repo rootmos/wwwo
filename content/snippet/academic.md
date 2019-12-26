@@ -1,4 +1,4 @@
-# Academic work <span class="subtitle">what I did in school</span>
+# Academic work
 * 2014 &raquo; Carleman-Sobolev classes and Green’s potentials for weighted Laplacians
   - Licentiate thesis ([DiVA](http://urn.kb.se/resolve?urn=urn:nbn:se:kth:diva-145012))
   - Paper 1: Carleman-Sobolev classes for small exponents (<a href="https://arxiv.org/abs/1404.3127">arXiv</a>,
