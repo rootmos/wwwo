@@ -152,18 +152,24 @@ and activity_snippet = let open Github_t in
     activity |> take 10 >>| r |> table;
   ]
 
-let projects_snippet = let open Project_t in
+let projects_snippet =
+  let open Project_t in
   let projects =
     let ps = Path.meta "projects.json" |>
       Utils.load_file |> Project_j.projects_of_string in
     let s p0 p1 = Lenient_iso8601.compare p1.last_activity p0.last_activity in
     ps |> List.sort s in
-  let r p = [
-    a p.repository_url @@ text p.name;
-    match p.description with Some d -> text d | None -> noop
-  ] in seq [
+  let r p = seq [
+    a p.url @@ text p.name;
+    (match p.description with Some d -> text (" » " ^ d) | None -> noop);
+    p.subprojects >>| (fun (s: subproject) -> seq [
+      a s.url @@ text s.name;
+      (match s.description with Some d -> text (" » " ^ d) | None -> noop);
+    ]) |> ul;
+  ]
+  in seq [
     h2 @@ text "Projects";
-    projects >>| r |> table;
+    projects >>| r |> ul;
   ]
 
 let resolve h = Unix.getaddrinfo h ""

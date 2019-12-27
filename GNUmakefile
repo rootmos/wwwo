@@ -45,19 +45,19 @@ clean:
 fresh:
 	rm -rf $(META)
 
-$(META)/sounds.json: .flag.deps
+$(META)/sounds.json: .flag.deps $(BIN)/sounds.py
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/sounds.py > "$@"
 
-$(META)/github-activity.%.commits.json: .flag.deps
+$(META)/github-activity.%.commits.json: .flag.deps $(BIN)/github-activity.py
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/github-activity.py $* > "$@"
 
-$(META)/%.json: .flag.deps
+$(META)/%.json: .flag.deps $(BIN)/list.py
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/list.py --profile=do --prefix="$*" rootmos-static > "$@"
 
-$(META)/projects.json: projects.json .flag.deps
+$(META)/projects.json: projects.json .flag.deps $(BIN)/projects.py
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/projects.py "$<" > "$@"
 

@@ -17,17 +17,26 @@ if __name__ == "__main__":
 
     ps = {}
     for p in raw:
-        if isinstance(p, str):
-            r = g.get_repo(f"{user}/{p}")
-            ps[p] = {
-                "name": p,
-                "description": r.description,
-                "repository_url": r.html_url,
-                "last_activity": r.pushed_at.isoformat() + "Z",
-                "date_created": r.created_at.isoformat() + "Z",
-            }
+        if isinstance(p, dict):
+            P = p
+        elif isinstance(p, str):
+            P = { "name": p }
         else:
             raise RuntimeError("unsupported project definition")
-    ps = sorted(ps.values(), key=(lambda p: p["last_activity"]))
-    ps.reverse()
-    print(json.dumps(ps))
+
+        r = g.get_repo(f"{user}/{P['name']}")
+
+        if "description" not in P:
+            P["description"] = r.description
+
+        if "url" not in P:
+            P["url"] = r.html_url
+
+        if "last_activity" not in P:
+            P["last_activity"] = r.pushed_at.isoformat() + "Z"
+
+        if "date_created" not in P:
+            P["date_created"] = r.created_at.isoformat() + "Z"
+
+        ps[P["name"]] = P
+    print(json.dumps(list(ps.values())))

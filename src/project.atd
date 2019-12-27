@@ -1,11 +1,18 @@
 type date = string wrap <ocaml module="Lenient_iso8601">
 
+type subproject = {
+    name: string;
+    ?description: string option;
+    url: string;
+}
+
 type project = {
     name: string;
     ?description: string option;
-    repository_url: string;
+    url: string;
     date_created: date;
     last_activity: date;
+    ~subprojects <ocaml default="[]">: subproject list;
 }
 
 type projects = project list
