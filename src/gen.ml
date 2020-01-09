@@ -93,9 +93,9 @@ let page ?(only_subtitle=false) ?(additional_css=[]) subtitle b =
   ]
 ]
 
-let sounds =
+let sounds fn =
   let open Sounds_t in
-  let js = Path.meta "sounds.json" |>
+  let js = Path.meta fn |>
     Utils.load_file |> Sounds_j.sounds_of_string in
   let s s0 s1 = Lenient_iso8601.compare s1.date s0.date in
   js |> List.sort s
@@ -112,9 +112,19 @@ let sounds_page = let open Sounds_t in
     audio ~id:(String.sub s.sha1 0 7) s.url
   ] in seq [
     p ~cls:(Some "c") @@ a "/bor19" @@ text "Best of rootmos 2019 mix";
-    sounds >>| r |> table;
+    sounds "sounds.json" >>| r |> table;
     audio_player_script;
   ] |> page (Some "sounds")
+
+let sounds_jam_page = let open Sounds_t in
+  let r s = [
+    text s.title;
+    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
+    audio ~id:(String.sub s.sha1 0 7) s.url
+  ] in seq [
+    sounds "sounds.practice.json" >>| r |> table;
+    audio_player_script;
+  ] |> page (Some "jam sessions")
 
 and sounds_snippet = let open Sounds_t in
   let r s = [
@@ -126,7 +136,7 @@ and sounds_snippet = let open Sounds_t in
       text "Sounds";
       span ~cls:"subtitle" @@ a "sounds.html" @@ text "all"
     ];
-    sounds |> take 5 >>| r |> table;
+    sounds "sounds.json" |> take 5 >>| r |> table;
     audio_player_script;
   ]
 
@@ -289,6 +299,7 @@ let () =
   let in_root = Filename.concat webroot in
   Utils.write_file (in_root "index.html") index;
   Utils.write_file (in_root "sounds.html") sounds_page;
+  Utils.write_file (in_root "jam.html") sounds_jam_page;
   Utils.write_file (in_root "activity.html") activity_page;
   Utils.write_file (in_root "bor19/index.html") bor19;
   Utils.write_file (in_root "glenn/index.html") glenn;

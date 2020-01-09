@@ -5,7 +5,7 @@ PORT ?= 8080
 BIN = $(shell pwd)/bin
 META = $(shell pwd)/meta
 VENV ?= $(shell pwd)/venv
-HOST_PYTHON ?= $(shell command -v python3)
+HOST_PYTHON ?= $(shell which python3)
 export PYTHON = $(VENV)/bin/python3
 export PIP = $(VENV)/bin/pip
 
@@ -15,6 +15,7 @@ generate: build fa meta
 
 .PHONY: meta
 meta: $(META)/sounds.json \
+	$(META)/sounds.practice.json \
 	$(META)/github-activity.rootmos.commits.json \
 	$(META)/glenn.json \
 	$(META)/silly.json \
@@ -47,7 +48,11 @@ fresh:
 
 $(META)/sounds.json: .flag.deps $(BIN)/sounds.py
 	@mkdir -p "$(dir $@)"
-	$(PYTHON) $(BIN)/sounds.py > "$@"
+	$(PYTHON) $(BIN)/sounds.py --profile=do > "$@"
+
+$(META)/sounds.%.json: .flag.deps $(BIN)/sounds.py
+	@mkdir -p "$(dir $@)"
+	$(PYTHON) $(BIN)/sounds.py --profile=do --prefix="$*" > "$@"
 
 $(META)/github-activity.%.commits.json: .flag.deps $(BIN)/github-activity.py
 	@mkdir -p "$(dir $@)"
