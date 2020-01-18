@@ -63,5 +63,7 @@
     "fb",
     "dont-fear-the-reaper",
     "ppx_ski",
-    "ldapy"
+    "ldapy",
+    "midi",
+    "spl"
 ]
