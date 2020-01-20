@@ -106,10 +106,11 @@ and audio_player_script = String.concat "" [
 ] |> script
 
 let sounds_page = let open Sounds_t in
-  let r s = [
+  let r s = let id = String.sub s.sha1 0 7 in [
     text s.title;
     div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
-    audio ~id:(String.sub s.sha1 0 7) s.url
+    audio ~id s.url;
+    a ("/sounds.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
   ] in seq [
     p ~cls:(Some "c") @@ a "/bor19" @@ text "Best of rootmos 2019 mix";
     sounds "sounds.json" >>| r |> table;
@@ -117,10 +118,11 @@ let sounds_page = let open Sounds_t in
   ] |> page (Some "sounds")
 
 let sounds_jam_page = let open Sounds_t in
-  let r s = [
+  let r s = let id = String.sub s.sha1 0 7 in [
     text s.title;
     div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
-    audio ~id:(String.sub s.sha1 0 7) s.url
+    audio ~id s.url;
+    a ("/jam.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
   ] in seq [
     sounds "sounds.practice.json" >>| r |> table;
     audio_player_script;

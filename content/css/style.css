@@ -66,6 +66,11 @@ svg.social:hover {
   fill: #ce2020;
 }
 
+svg.button {
+  height: 1.2em;
+  padding: 0.5em;
+}
+
 .slogan {
   font-size: 15px;
   font-style: italic;
