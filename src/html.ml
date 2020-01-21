@@ -37,7 +37,7 @@ let noop: 'a t = fun x -> text "" x
 let html x = seq [text "<!DOCTYPE html>"; tag "html" x]
 let body x =  tag "body" x
 let head x = tag "head" x
-let p ?(cls=None) ?(id=None) x = tag ~cls ~id "p" x
+let p ?(cls=None) ?(id=None) ?(style=None) x = tag ~cls ~id ~style "p" x
 let h1 x = tag "h1" x
 let h2 x = tag "h2" x
 let title t = tag "title" (text t)
@@ -63,10 +63,7 @@ let table ?(widths=None) cs =
   | [] -> []
   | c :: cs -> tr' c :: (cs >>| tr) in
   tag "table" (seq cs')
-let div ?(id="") ?(cls="") = fun k x ->
-  let c = if cls <> "" then sprintf " class=\"%s\"" cls else "" in
-  let i = if id <> "" then sprintf " id=\"%s\"" id else "" in
-  sprintf "<div%s%s>%s</div>" c i (k x)
+let div ?(id=None) ?(cls=None) ?(style=None) = tag ~id ~cls ~style "div"
 let span ?(cls="") = fun k x ->
   if cls <> "" then sprintf "<span class=\"%s\">%s</span>" cls (k x)
   else sprintf "<span>%s</span>" (k x)
@@ -77,9 +74,12 @@ let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>"
 let button s = fun k x ->
   sprintf "<a href=\"#\" onclick=\"%s\">%s</a>" s (k x)
 
-let img ?(embedd=true) ?(cls="") fn alt = fun _ ->
-  let c = if cls <> "" then sprintf " class=\"%s\"" cls else "" in
-  let a = if alt <> "" then sprintf " title=\"%s\" alt=\"%s\"" alt alt else "" in
+let img ?(embedd=true) ?(cls=None) ?(alt=None) fn = fun _ ->
+  let c = let open Option in
+    map (sprintf " class=\"%s\"") cls |> value ~default:"" in
+  let a = let open Option in
+    map (fun a -> sprintf " title=\"%s\" alt=\"%s\"" a a) alt
+    |> value ~default:"" in
   if embedd then sprintf "<img src=\"data:%s;base64,%s\" %s%s/>"
     (Magic_mime.lookup fn) (Base64.encode_exn @@ Utils.load_file fn) a c
   else sprintf "<img src=\"%s\" %s%s/>" fn a c

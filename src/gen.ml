@@ -42,9 +42,9 @@ let mk_post p =
 
   let md = Omd.of_string bs in
   let md = md |> Omd_representation.visit @@ function
-    | Omd_representation.Img (alt, src, title) ->
+    | Omd_representation.Img (alt, src, _) ->
         let src = Path.image src in
-        Omd_representation.Raw (img src title ()) :: [] |> Option.some
+        Omd_representation.Raw (img ~alt:(Some alt) src ()) :: [] |> Option.some
     | Omd_representation.Text "{{< toc >}}" -> Omd.toc md |> Option.some
     | _ -> None
 
@@ -79,8 +79,8 @@ let page ?(only_subtitle=false) ?(additional_css=[]) subtitle b =
       if Option.is_some subtitle then
         span ~cls:"subtitle" @@ a "/index.html" @@ text "back" else noop
     ];
-    div ~cls:"content" @@ b;
-    div ~cls:"footer" @@ seq [
+    div ~cls:(Some "content") @@ b;
+    div ~cls:(Some "footer") @@ seq [
       let t = Unix.time () |> Unix.gmtime in
       let c = Sys.getenv_opt "GIT_REV" |> Option.map (fun r ->
         a (sprintf "https://github.com/rootmos/wwwo/commit/%s" r) @@
@@ -108,7 +108,7 @@ and audio_player_script = String.concat "" [
 let sounds_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [
     text s.title;
-    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
     audio ~id s.url;
     a ("/sounds.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
   ] in seq [
@@ -121,7 +121,7 @@ let sounds_page = let open Sounds_t in
 let sounds_jam_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [
     text s.title;
-    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
     audio ~id s.url;
     a ("/jam.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
   ] in seq [
@@ -133,7 +133,7 @@ let sounds_jam_page = let open Sounds_t in
 and sounds_snippet = let open Sounds_t in
   let r s = [
     text s.title;
-    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 s.date;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
     audio s.url
   ] in seq [
     h2 @@ seq [
@@ -152,13 +152,13 @@ let activity = let open Github_t in
 
 let activity_page = let open Github_t in
   let r c = [
-    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 c.date;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
   ] in activity >>| r |> table |> page (Some "activity")
 and activity_snippet = let open Github_t in
   let r c = [
-    div ~cls:"date" @@ text @@ Lenient_iso8601.rfc822 c.date;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
   ] in seq [
@@ -233,23 +233,26 @@ let md_snippet s =
   text @@ Omd.to_html md
 
 let index = page None @@ seq [
-  div ~cls:"intro" @@ seq [
-    img ~cls:"avatar" (Path.image "rootmos.jpg") "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness";
-    div ~cls:"slogan" @@ text "Some math, mostly programming and everything in between";
+  div ~cls:(Some "intro") @@ seq [
+    img ~cls:(Some "avatar")
+      ~alt:(Some "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness")
+      (Path.image "rootmos.jpg");
+    div ~cls:(Some "slogan") @@
+      text "Some math, mostly programming and everything in between";
     social;
   ];
-  div ~cls:"content" @@ sounds_snippet;
-  div ~cls:"content" @@ activity_snippet;
-  div ~cls:"content" @@ projects_snippet;
-  div ~cls:"content" @@ posts_snippet;
-  div ~cls:"content" @@ services_snippet;
-  div ~cls:"content" @@ md_snippet "academic.md";
-  div ~cls:"content" @@ resume_snippet;
+  div ~cls:(Some "content") @@ sounds_snippet;
+  div ~cls:(Some "content") @@ activity_snippet;
+  div ~cls:(Some "content") @@ projects_snippet;
+  div ~cls:(Some "content") @@ posts_snippet;
+  div ~cls:(Some "content") @@ services_snippet;
+  div ~cls:(Some "content") @@ md_snippet "academic.md";
+  div ~cls:(Some "content") @@ resume_snippet;
 ]
 
 let bor19 = seq [
   table [[
-    img ~cls:"cover" (Path.image "bor19-cover.jpg") "cover";
+    img ~cls:(Some "cover") ~alt:(Some "cover") (Path.image "bor19-cover.jpg");
     audio ~id:"mix" "https://rootmos-sounds.ams3.digitaloceanspaces.com/2019-12-23-best-of-rootmos-2019.mp3";
   ]];
   ul [
@@ -289,9 +292,9 @@ let gallery t fn =
   let g (e: Gallery_j.entry) =
     if ContentType.is_video e.content_type then video e.url
     else if ContentType.is_image e.content_type then
-      img ~cls:"gallery" ~embedd:false e.url ""
+      img ~cls:(Some "gallery") ~embedd:false e.url
     else failwith "content type not supported"
-  in List.map g es |> seq |> div ~cls:"gallery"
+  in List.map g es |> seq |> div ~cls:(Some "gallery")
     |> page ~only_subtitle:true (Some t)
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ]
 
