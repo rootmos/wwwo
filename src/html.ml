@@ -22,11 +22,13 @@ let html_escape_string s =
 
 type 'a t = 'a -> string
 
-let tag ?(id=None) ?(cls=None) t: 'a t -> 'a t = fun k x -> match id, cls with
-| None, None -> sprintf "<%s>%s</%s>" t (k x) t
-| Some i, None -> sprintf "<%s id=\"%s\">%s</%s>" t i (k x) t
-| None, Some c -> sprintf "<%s class=\"%s\">%s</%s>" t c (k x) t
-| Some i, Some c -> sprintf "<%s id=\"%s\" class=\"%s\">%s</%s>" t i c (k x) t
+let tag ?(id=None) ?(cls=None) ?(style=None) t: 'a t -> 'a t = fun k x ->
+  let attrs = let open Option in [
+    map (sprintf " id=\"%s\"") id;
+    map (sprintf " class=\"%s\"") cls;
+    map (sprintf " style=\"%s\"") style;
+  ] >>| to_list |> List.flatten |> String.concat "" in
+  sprintf "<%s%s>%s</%s>" t attrs (k x) t
 let seq xs: 'a t = fun a ->
   String.concat "" @@ List.rev @@ List.fold_left (fun ys k' -> k' a :: ys) [] xs
 let text t: 'a t = fun _ -> t
@@ -51,8 +53,16 @@ let video src = text @@
   sprintf "<video controls preload=\"metadata\" class=\"video\"><source src=\"%s\"/></video>"
   (url_escape_string src |> html_escape_string)
 let script s = text s |> tag "script"
-let table cs x = let tr cs = tag "tr" (cs >>| tag "td" |> seq) in
-  tag "table" (cs >>| tr |> seq) x
+let table ?(widths=None) cs =
+  let tr cs = cs >>| tag "td" |> seq |> tag "tr" in
+  let tr' cs = match widths with None -> tr cs | Some ws ->
+    List.combine cs ws >>| (fun (c, w) ->
+      let style = Some (sprintf "width: %d%%" w) in tag ~style "td" c
+    ) |> seq |> tag "tr" in
+  let cs' = match cs with
+  | [] -> []
+  | c :: cs -> tr' c :: (cs >>| tr) in
+  tag "table" (seq cs')
 let div ?(id="") ?(cls="") = fun k x ->
   let c = if cls <> "" then sprintf " class=\"%s\"" cls else "" in
   let i = if id <> "" then sprintf " id=\"%s\"" id else "" in

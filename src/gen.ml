@@ -113,7 +113,7 @@ let sounds_page = let open Sounds_t in
     a ("/sounds.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
   ] in seq [
     p ~cls:(Some "c") @@ a "/bor19" @@ text "Best of rootmos 2019 mix";
-    sounds "sounds.json" >>| r |> table;
+    sounds "sounds.json" >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
   ] |> page (Some "sounds")
 
@@ -124,7 +124,7 @@ let sounds_jam_page = let open Sounds_t in
     audio ~id s.url;
     a ("/jam.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
   ] in seq [
-    sounds "sounds.practice.json" >>| r |> table;
+    sounds "sounds.practice.json" >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
   ] |> page (Some "jam sessions")
 
