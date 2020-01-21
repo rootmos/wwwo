@@ -116,6 +116,7 @@ let sounds_page = let open Sounds_t in
     sounds "sounds.json" >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
   ] |> page (Some "sounds")
+    ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
 
 let sounds_jam_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [
@@ -127,6 +128,7 @@ let sounds_jam_page = let open Sounds_t in
     sounds "sounds.practice.json" >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
   ] |> page (Some "jam sessions")
+    ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
 
 and sounds_snippet = let open Sounds_t in
   let r s = [
