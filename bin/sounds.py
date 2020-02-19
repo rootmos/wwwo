@@ -15,7 +15,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     session = boto3.Session(profile_name=args.profile)
-    s3 = session.resource("s3", endpoint_url="https://ams3.digitaloceanspaces.com")
+    s3 = session.resource("s3")
 
     pool = ThreadPoolExecutor(8)
     bucket = s3.Bucket("rootmos-sounds")

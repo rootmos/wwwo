@@ -48,11 +48,11 @@ fresh:
 
 $(META)/sounds.json: .flag.deps $(BIN)/sounds.py
 	@mkdir -p "$(dir $@)"
-	$(PYTHON) $(BIN)/sounds.py --profile=do > "$@"
+	$(PYTHON) $(BIN)/sounds.py > "$@"
 
 $(META)/sounds.%.json: .flag.deps $(BIN)/sounds.py
 	@mkdir -p "$(dir $@)"
-	$(PYTHON) $(BIN)/sounds.py --profile=do --prefix="$*" > "$@"
+	$(PYTHON) $(BIN)/sounds.py --prefix="$*" > "$@"
 
 $(META)/github-activity.%.commits.json: .flag.deps $(BIN)/github-activity.py
 	@mkdir -p "$(dir $@)"
