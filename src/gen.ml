@@ -125,7 +125,7 @@ let sounds_jam_page = let open Sounds_t in
     audio ~id s.url;
     a ("/jam.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
   ] in seq [
-    sounds "sounds.practice.json" >>| r |> table ~widths:(Some [80;10;5;5]);
+    sounds "sounds.sessions.json" >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
   ] |> page (Some "jam sessions")
     ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
