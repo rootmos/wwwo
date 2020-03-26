@@ -195,13 +195,6 @@ let resolve h = Unix.getaddrinfo h ""
 let services_snippet = seq [
   h2 @@ text "Services";
   ul @@ [
-    seq [
-      text "dns.infra.rootmos.io (";
-      a "https://www.digwebinterface.com/?hostnames=google.com&type=A&ns=self&nameservers=dns.rootmos.io"
-        @@ text "dig";
-      text @@ sprintf ") (%s) 53 UDP/TCP, 853 DNS over TLS"
-        (Option.get @@ resolve "dns.infra.rootmos.io");
-    ];
     a "https://ip.rootmos.io" (text "ip.rootmos.io");
   ]
 ]
