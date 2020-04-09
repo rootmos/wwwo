@@ -228,7 +228,7 @@ let resume_snippet = seq [
   ]
 ]
 
-let social = seq [
+let social = div ~cls:(Some "socials") @@ seq [
   a "https://github.com/rootmos" @@ svg ~cls:"social"
     "fa/svgs/brands/github.svg";
   a "https://soundcloud.com/rootmos" @@ svg ~cls:"social"
