@@ -16,6 +16,7 @@ generate: build fa meta
 .PHONY: meta
 meta: $(META)/sounds.json \
 	$(META)/sounds.sessions.json \
+	$(META)/sounds.demo.json \
 	$(META)/github-activity.rootmos.commits.json \
 	$(META)/glenn.json \
 	$(META)/silly.json \

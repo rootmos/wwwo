@@ -10,8 +10,11 @@ let wrap s =
   try Printer.Calendar.from_fstring "%FT%T%:z"
     (Str.global_replace (Str.regexp "\\.[0-9]+") "" s)
   with Invalid_argument _ ->
+  try Printer.Calendar.from_fstring "%FT%T%:z"
+    (Str.global_replace (Str.regexp "T\\([0-9]+\\):\\([0-9]+\\)\\+") "T\\1:\\2:00+" s)
+  with Invalid_argument _ ->
   let d = Printer.Date.from_fstring "%F" s in
-  Calendar.create d (Time.midday ())
+    Calendar.create d (Time.midday ())
 
 let unwrap t = Printer.Calendar.sprint "%a, %d %b %Y" t
 

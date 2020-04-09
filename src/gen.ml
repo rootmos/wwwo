@@ -144,6 +144,18 @@ and sounds_snippet = let open Sounds_t in
     audio_player_script;
   ]
 
+let demo_page = let open Sounds_t in
+  let r s = let id = String.sub s.sha1 0 7 in [
+    text s.title;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
+    audio ~id s.url;
+    a ("/demo.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
+  ] in seq [
+    sounds "sounds.demo.json" >>| r |> table ~widths:(Some [80;10;5;5]);
+    audio_player_script;
+  ] |> page (Some "demo")
+    ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
+
 let activity = let open Github_t in
   let cs = Path.meta "github-activity.rootmos.commits.json" |>
     Utils.load_file |> Github_j.commits_of_string in
@@ -300,6 +312,7 @@ let () =
   Utils.write_file (in_root "index.html") index;
   Utils.write_file (in_root "sounds.html") sounds_page;
   Utils.write_file (in_root "jam.html") sounds_jam_page;
+  Utils.write_file (in_root "demo.html") demo_page;
   Utils.write_file (in_root "activity.html") activity_page;
   Utils.write_file (in_root "bor19/index.html") bor19;
   Utils.write_file (in_root "glenn/index.html") glenn;
