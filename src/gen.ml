@@ -150,8 +150,16 @@ let demo_page = let open Sounds_t in
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
     audio ~id s.url;
     a ("/demo.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
-  ] in seq [
-    sounds "sounds.demo.json" >>| r |> table ~widths:(Some [80;10;5;5]);
+  ] in
+  let ss = sounds "sounds.demo.json" in
+  let l = ss >>| (fun s -> s.length) |> List.fold_left (+.) 0.0 in
+  let s = Float.to_int l in
+  let h = s / 3600 in
+  let m = (s - 3600*h)/60 in
+  let s = s - 3600*h - m*60 in
+  seq [
+    ss >>| r |> table ~widths:(Some [80;10;5;5]);
+    div ~cls:(Some "c") @@ text @@ sprintf "Length: %.2d:%.2d:%.2d" h m s;
     audio_player_script;
   ] |> page (Some "demo")
     ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
