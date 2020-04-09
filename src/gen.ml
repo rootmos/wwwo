@@ -138,7 +138,8 @@ and sounds_snippet = let open Sounds_t in
   ] in seq [
     h2 @@ seq [
       text "Sounds";
-      span ~cls:"subtitle" @@ a "sounds.html" @@ text "all"
+      span ~cls:"subtitle" @@ a "sounds.html" @@ text "all";
+      span ~cls:"subtitle" @@ a "demo.html" @@ text "demo"
     ];
     sounds "sounds.json" |> take 5 >>| r |> table;
     audio_player_script;
