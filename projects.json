@@ -65,5 +65,6 @@
     "ppx_ski",
     "ldapy",
     "midi",
-    "spl"
+    "spl",
+    "audio-journal"
 ]
