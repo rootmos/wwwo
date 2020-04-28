@@ -234,6 +234,8 @@ let social = div ~cls:(Some "socials") @@ seq [
     "fa/svgs/brands/github.svg";
   a "https://soundcloud.com/rootmos" @@ svg ~cls:"social"
     "fa/svgs/brands/soundcloud.svg";
+  a "https://twitch.tv/rootmos2" @@ svg ~cls:"social"
+    "fa/svgs/brands/twitch.svg";
   a "https://keybase.io/rootmos" @@ svg ~cls:"social"
     "fa/svgs/brands/keybase.svg";
 ]
