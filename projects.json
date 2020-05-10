@@ -66,5 +66,6 @@
     "ldapy",
     "midi",
     "spl",
-    "audio-journal"
+    "audio-journal",
+    "stream"
 ]
