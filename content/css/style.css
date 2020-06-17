@@ -119,3 +119,7 @@ img.avatar {
   display:inline-block;
   transform: rotate(180deg);
 }
+
+audio {
+  vertical-align: middle;
+}

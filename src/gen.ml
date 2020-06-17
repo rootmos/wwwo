@@ -142,6 +142,7 @@ and sounds_snippet = let open Sounds_t in
       span ~cls:"subtitle" @@ a "jam.html" @@ text "jam";
       span ~cls:"subtitle" @@ a "demo.html" @@ text "demo";
       span ~cls:"subtitle" @@ a "sounds.html" @@ text "all";
+      span ~cls:"subtitle" @@ a "bor19/index.html" @@ text "bor19";
     ];
     sounds "sounds.json" |> take 5 >>| r |> table;
     audio_player_script;
@@ -269,11 +270,10 @@ let index = page None @@ seq [
 ]
 
 let bor19 = seq [
-  table [[
-    img ~cls:(Some "cover") ~alt:(Some "cover") (Path.image "bor19-cover.jpg");
-    audio ~id:"mix" "https://rootmos-sounds.ams3.digitaloceanspaces.com/2019-12-23-best-of-rootmos-2019.mp3";
-  ]];
+  p ~cls:(Some "c") @@ img ~cls:(Some "cover") ~alt:(Some "cover")
+    (Path.image "bor19-cover.jpg");
   ul [
+    audio ~id:"mix" "https://rootmos-sounds.ams3.digitaloceanspaces.com/2019-12-23-best-of-rootmos-2019.mp3";
     a "https://www.mixcloud.com/rootmos/best-of-rootmos-2019/" @@ text "Mixcloud";
     seq [
       text "Tracks:";
