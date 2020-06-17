@@ -67,5 +67,6 @@
     "midi",
     "spl",
     "audio-journal",
-    "stream"
+    "stream",
+    "twitch-cli"
 ]
