@@ -306,13 +306,17 @@ module ContentType = struct
 end
 
 let gallery t ?(preamble=None) fn =
-  let es = Utils.load_file fn |> Gallery_j.entries_of_string in
+  let s (g0: Gallery_j.entry) (g1: Gallery_j.entry) =
+    Lenient_iso8601.compare g1.last_modified g0.last_modified in
+  let es = Utils.load_file fn |> Gallery_j.entries_of_string |> List.sort s in
   let g (e: Gallery_j.entry) =
     if ContentType.is_video e.content_type then video e.url
     else if ContentType.is_image e.content_type then
       img ~cls:(Some "gallery") ~embedd:false e.url
     else failwith "content type not supported"
-  in List.append (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list) (List.map g es)
+  in List.append
+    (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)
+    (List.map g es)
     |> seq |> div ~cls:(Some "gallery")
     |> page ~only_subtitle:true (Some t)
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ]

@@ -9,7 +9,11 @@ def url(o):
     return f"https://{o.bucket_name}.s3.eu-central-1.amazonaws.com/{urlencode(o.key)}"
 
 def render(o):
-    return { "url": url(o), "content_type": o.Object().content_type }
+    return {
+        "url": url(o),
+        "content_type": o.Object().content_type,
+        "last_modified": o.last_modified.isoformat(),
+    }
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Grab metadata about files stored on s3")
