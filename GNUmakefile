@@ -61,7 +61,7 @@ $(META)/github-activity.%.commits.json: .flag.deps $(BIN)/github-activity.py
 
 $(META)/%.json: .flag.deps $(BIN)/list.py
 	@mkdir -p "$(dir $@)"
-	$(PYTHON) $(BIN)/list.py --profile=do --prefix="$*" rootmos-static > "$@"
+	$(PYTHON) $(BIN)/list.py --prefix="$*" rootmos-static > "$@"
 
 $(META)/projects.json: projects.json .flag.deps $(BIN)/projects.py
 	@mkdir -p "$(dir $@)"

@@ -5,11 +5,11 @@ import json
 import argparse
 from urllib.parse import quote as urlencode
 
-def url(k):
-    return f"https://{bucket.name}.ams3.cdn.digitaloceanspaces.com/{urlencode(k)}"
+def url(o):
+    return f"https://{o.bucket_name}.s3.eu-central-1.amazonaws.com/{urlencode(o.key)}"
 
 def render(o):
-    return { "url": url(o.key), "content_type": o.Object().content_type }
+    return { "url": url(o), "content_type": o.Object().content_type }
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Grab metadata about files stored on s3")
@@ -21,7 +21,7 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     session = boto3.Session(profile_name=args.profile)
-    s3 = session.resource("s3", endpoint_url="https://ams3.digitaloceanspaces.com")
+    s3 = session.resource("s3")
     bucket = s3.Bucket(args.bucket)
     os = bucket.objects.all()
 

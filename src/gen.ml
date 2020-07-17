@@ -226,7 +226,7 @@ let services_snippet = seq [
 let resume_snippet = seq [
   h2 @@ text "Resume";
   p @@ seq [
-    (let url = "https://rootmos-static.ams3.cdn.digitaloceanspaces.com/resume-gustav-behm.pdf"
+    (let url = "https://rootmos-static.s3.eu-central-1.amazonaws.com/resume-gustav-behm.pdf"
     in a url @@ text "PDF");
     text " (updated 30 Nov 2018)";
   ]
@@ -273,7 +273,7 @@ let bor19 = seq [
   p ~cls:(Some "c") @@ img ~cls:(Some "cover") ~alt:(Some "cover")
     (Path.image "bor19-cover.jpg");
   ul [
-    audio ~id:"mix" "https://rootmos-sounds.ams3.digitaloceanspaces.com/2019-12-23-best-of-rootmos-2019.mp3";
+    audio ~id:"mix" "https://rootmos-sounds.s3.eu-central-1.amazonaws.com/2019-12-23-best-of-rootmos-2019.mp3";
     a "https://www.mixcloud.com/rootmos/best-of-rootmos-2019/" @@ text "Mixcloud";
     seq [
       text "Tracks:";
