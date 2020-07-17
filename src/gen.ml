@@ -305,19 +305,27 @@ module ContentType = struct
   let is_image ct = Str.string_match (Str.regexp "^image/") ct 0
 end
 
-let gallery t fn =
+let gallery t ?(preamble=None) fn =
   let es = Utils.load_file fn |> Gallery_j.entries_of_string in
   let g (e: Gallery_j.entry) =
     if ContentType.is_video e.content_type then video e.url
     else if ContentType.is_image e.content_type then
       img ~cls:(Some "gallery") ~embedd:false e.url
     else failwith "content type not supported"
-  in List.map g es |> seq |> div ~cls:(Some "gallery")
+  in List.append (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list) (List.map g es)
+    |> seq |> div ~cls:(Some "gallery")
     |> page ~only_subtitle:true (Some t)
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ]
 
 let glenn = gallery "Glenn, Glenn, Glenn" (Path.meta "glenn.json")
 let silly = gallery "Silly things" (Path.meta "silly.json")
+let clips = gallery "Silly clips" (Path.meta "clips.json")
+let stellar_drift =
+  let latest_url = "https://rootmos-builds.s3.eu-central-1.amazonaws.com/stellar-drift/latest/stellar-drift" in
+  let preamble = a latest_url @@ text "Latest build" in
+  gallery "Stellar Drift project page"
+    ~preamble:(Some preamble)
+    (Path.meta "projects/stellar-drift.json")
 
 let () =
   let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
@@ -330,6 +338,8 @@ let () =
   Utils.write_file (in_root "bor19/index.html") bor19;
   Utils.write_file (in_root "glenn/index.html") glenn;
   Utils.write_file (in_root "silly/index.html") silly;
+  Utils.write_file (in_root "clips/index.html") clips;
+  Utils.write_file (in_root "stellar-drift/index.html") stellar_drift;
   posts |> List.iter @@ fun { url; html; title } ->
     Utils.write_file (in_root url) @@
       page ~only_subtitle:true (Some title) (text html)

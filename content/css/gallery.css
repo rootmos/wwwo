@@ -10,3 +10,7 @@ img.gallery {
   margin: 20px;
   width: 700px;
 }
+
+div.preamble {
+  padding: 10px;
+}

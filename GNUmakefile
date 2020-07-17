@@ -20,6 +20,8 @@ meta: $(META)/sounds.json \
 	$(META)/github-activity.rootmos.commits.json \
 	$(META)/glenn.json \
 	$(META)/silly.json \
+	$(META)/clips.json \
+	$(META)/projects/stellar-drift.json \
 	$(META)/projects.json
 
 .PHONY: validate
@@ -62,6 +64,10 @@ $(META)/github-activity.%.commits.json: .flag.deps $(BIN)/github-activity.py
 $(META)/%.json: .flag.deps $(BIN)/list.py
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/list.py --prefix="$*" rootmos-static > "$@"
+
+$(META)/projects/%.json: .flag.deps $(BIN)/list.py
+	@mkdir -p "$(dir $@)"
+	$(PYTHON) $(BIN)/list.py --prefix="projects/$*" rootmos-static > "$@"
 
 $(META)/projects.json: projects.json .flag.deps $(BIN)/projects.py
 	@mkdir -p "$(dir $@)"
