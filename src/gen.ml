@@ -244,7 +244,7 @@ let social = div ~cls:(Some "socials") @@ seq [
 ]
 
 let md_snippet s =
-  let raw = Utils.load_file @@ Path.snippet s in
+  let raw = Utils.load_file s in
   let md = raw |> Omd.of_string |> Omd_representation.visit @@ function
     | Omd_representation.H1 t -> Some (Omd_representation.H2 t :: [])
     | Omd_representation.H2 t -> Some (Omd_representation.H3 t :: [])
@@ -265,7 +265,7 @@ let index = page None @@ seq [
   div ~cls:(Some "content") @@ projects_snippet;
   div ~cls:(Some "content") @@ posts_snippet;
   div ~cls:(Some "content") @@ services_snippet;
-  div ~cls:(Some "content") @@ md_snippet "academic.md";
+  div ~cls:(Some "content") @@ md_snippet (Path.snippet "academic.md");
   div ~cls:(Some "content") @@ resume_snippet;
 ]
 
@@ -324,12 +324,17 @@ let gallery t ?(preamble=None) fn =
 let glenn = gallery "Glenn, Glenn, Glenn" (Path.meta "glenn.json")
 let silly = gallery "Silly things" (Path.meta "silly.json")
 let clips = gallery "Silly clips" (Path.meta "clips.json")
-let stellar_drift =
-  let latest_url = "https://rootmos-builds.s3.eu-central-1.amazonaws.com/stellar-drift/latest/stellar-drift" in
-  let preamble = a latest_url @@ text "Latest build" in
-  gallery "Stellar Drift project page"
-    ~preamble:(Some preamble)
-    (Path.meta "projects/stellar-drift.json")
+
+let project human_title p =
+  let preamble =
+    let path = Path.meta (sprintf "projects/%s/preamble.md" p) in
+    match Utils.file_exists path with
+      false -> None
+    | true -> Some (md_snippet path) in
+  let path = Path.meta (sprintf "projects/%s/gallery.json" p) in
+  match Utils.file_exists path with
+    true -> gallery human_title ~preamble path
+  | false -> failwith "not implemented"
 
 let () =
   let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
@@ -343,7 +348,8 @@ let () =
   Utils.write_file (in_root "glenn/index.html") glenn;
   Utils.write_file (in_root "silly/index.html") silly;
   Utils.write_file (in_root "clips/index.html") clips;
-  Utils.write_file (in_root "stellar-drift/index.html") stellar_drift;
+  Utils.write_file (in_root "stellar-drift/index.html")
+    @@ project "Stellar Drift project page" "stellar-drift";
   posts |> List.iter @@ fun { url; html; title } ->
     Utils.write_file (in_root url) @@
       page ~only_subtitle:true (Some title) (text html)

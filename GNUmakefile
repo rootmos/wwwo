@@ -21,7 +21,8 @@ meta: $(META)/sounds.json \
 	$(META)/glenn.json \
 	$(META)/silly.json \
 	$(META)/clips.json \
-	$(META)/projects/stellar-drift.json \
+	$(META)/projects/stellar-drift/gallery.json \
+	$(META)/projects/stellar-drift/preamble.md \
 	$(META)/projects.json
 
 .PHONY: validate
@@ -65,13 +66,18 @@ $(META)/%.json: .flag.deps $(BIN)/list.py
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/list.py --prefix="$*" rootmos-static > "$@"
 
-$(META)/projects/%.json: .flag.deps $(BIN)/list.py
+$(META)/projects/%/gallery.json: .flag.deps $(BIN)/list.py
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/list.py --prefix="projects/$*" rootmos-static > "$@"
 
 $(META)/projects.json: projects.json .flag.deps $(BIN)/projects.py
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/projects.py "$<" > "$@"
+
+# TODO: project generic
+$(META)/projects/stellar-drift/%.md:
+	@mkdir -p "$(dir $@)"
+	aws s3 cp "s3://rootmos-builds/stellar-drift/latest/www/$*.md" "$@"
 
 .PHONY: deps
 deps: .flag.deps

@@ -16,3 +16,8 @@ let write_file filename s =
   let oc = open_out filename in
   output_string oc s;
   close_out oc
+
+let file_exists p =
+  match Unix.stat p with
+    _ -> true
+  | exception Unix.Unix_error(Unix.ENOENT, _, _) -> false
