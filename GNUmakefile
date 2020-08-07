@@ -21,6 +21,7 @@ meta: $(META)/sounds.json \
 	$(META)/glenn.json \
 	$(META)/silly.json \
 	$(META)/clips.json \
+	$(META)/twitch.json \
 	$(META)/projects/stellar-drift/gallery.json \
 	$(META)/projects/stellar-drift/preamble.md \
 	$(META)/projects.json
@@ -57,6 +58,10 @@ $(META)/sounds.json: .flag.deps $(BIN)/sounds.py
 $(META)/sounds.%.json: .flag.deps $(BIN)/sounds.py
 	@mkdir -p "$(dir $@)"
 	$(PYTHON) $(BIN)/sounds.py --prefix="$*" > "$@"
+
+$(META)/twitch.json: .flag.deps $(BIN)/twitch.py
+	@mkdir -p "$(dir $@)"
+	$(PYTHON) $(BIN)/twitch.py > "$@"
 
 $(META)/github-activity.%.commits.json: .flag.deps $(BIN)/github-activity.py
 	@mkdir -p "$(dir $@)"

@@ -190,6 +190,19 @@ and activity_snippet = let open Github_t in
     activity |> take 10 >>| r |> table;
   ]
 
+let twitch_snippet = let open Twitch_t in
+  let vods = Path.meta "twitch.json" |>
+      Utils.load_file |> Twitch_j.videos_of_string in
+  let s v0 v1 = Lenient_iso8601.compare v1.date v0.date in
+  let vods = List.sort s vods in
+  let r v = [
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 v.date;
+    a v.url @@ text v.title;
+  ] in seq [
+    h2 @@ text "Twitch highlights";
+    vods |> take 5 >>| r |> table;
+  ]
+
 let projects_snippet =
   let open Project_t in
   let projects =
@@ -261,6 +274,7 @@ let index = page None @@ seq [
     social;
   ];
   div ~cls:(Some "content") @@ sounds_snippet;
+  div ~cls:(Some "content") @@ twitch_snippet;
   div ~cls:(Some "content") @@ activity_snippet;
   div ~cls:(Some "content") @@ projects_snippet;
   div ~cls:(Some "content") @@ posts_snippet;

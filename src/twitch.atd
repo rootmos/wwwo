@@ -1,0 +1,11 @@
+type date = string wrap <ocaml module="Lenient_iso8601">
+
+type video = {
+    video_id: string;
+    title: string;
+    url: string;
+    date: date;
+    duration: float;
+}
+
+type videos = video list
