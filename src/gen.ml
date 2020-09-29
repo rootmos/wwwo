@@ -148,6 +148,9 @@ and sounds_snippet = let open Sounds_t in
     audio_player_script;
   ]
 
+let practice_page = let open Sounds_t in
+  text "hello???" |> page (Some "practice")
+
 let demo_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [
     text s.title;
@@ -357,6 +360,7 @@ let () =
   Utils.write_file (in_root "sounds.html") sounds_page;
   Utils.write_file (in_root "jam.html") sounds_jam_page;
   Utils.write_file (in_root "demo.html") demo_page;
+  Utils.write_file (in_root "practice.html") practice_page;
   Utils.write_file (in_root "activity.html") activity_page;
   Utils.write_file (in_root "bor19/index.html") bor19;
   Utils.write_file (in_root "glenn/index.html") glenn;
