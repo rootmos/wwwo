@@ -52,6 +52,8 @@ let audio ?(id="") src = text @@
 let video src = text @@
   sprintf "<video controls preload=\"metadata\" class=\"video\"><source src=\"%s\"/></video>"
   (url_escape_string src |> html_escape_string)
+let canvas id width height = text @@
+  sprintf "<canvas id=\"%s\" width=\"%d\" height=\"%d\" />" id width height
 let script s = text s |> tag "script"
 let table ?(widths=None) cs =
   let tr cs = cs >>| tag "td" |> seq |> tag "tr" in

@@ -10,6 +10,7 @@ module Path = struct
   let image = Filename.concat @@ Filename.concat root "image"
   let style = Filename.concat @@ Filename.concat root "css"
   let meta = Filename.concat "meta"
+  let src = Filename.concat "src"
 end
 
 let live_reload = js_src "http://livejs.com/live.js"
@@ -64,12 +65,14 @@ let posts_snippet = seq [
   ) |> ul
 ]
 
-let page ?(only_subtitle=false) ?(additional_css=[]) subtitle b =
+let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) subtitle b =
   let t = "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
   () |> html @@ seq [
   head @@ seq [
     title @@ t;
     if local then live_reload else tracking;
+    seq @@ if chartjs then [js_src "https://cdnjs.com/libraries/Chart.js"]
+    else [];
     css @@ Utils.load_file (Path.style "style.css") :: additional_css;
     text "<meta charset=\"UTF-8\">";
   ];
@@ -149,8 +152,12 @@ and sounds_snippet = let open Sounds_t in
   ]
 
 let practice_page = let open Sounds_t in
-  let js = Path.meta "sounds.practice.json" |> Utils.load_file in
-  script (sprintf "ss = %s;" js) |> page (Some "practice")
+  let ss = Path.meta "sounds.practice.json" |> Utils.load_file in
+  let js = Path.src "practice.js" |> Utils.load_file in
+  seq [
+    canvas "myChart" 400 400;
+    script (sprintf "ss = %s;%s" ss js);
+  ] |> page ~chartjs:true (Some "practice")
 
 let demo_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [

@@ -4,6 +4,10 @@ GEN_DEPS = magic-mime base64 yaml omd calendar atdgen camomile
 .PHONY: install
 install: gen
 
+.PHONY: scripts
+scripts: practice.js
+	cp "$^" $(TARGET)
+
 define atd
 $(1)_t.mli $(1)_t.ml $(1)_j.mli $(1)_j.ml
 endef
