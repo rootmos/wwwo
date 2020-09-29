@@ -149,7 +149,8 @@ and sounds_snippet = let open Sounds_t in
   ]
 
 let practice_page = let open Sounds_t in
-  text "hello???" |> page (Some "practice")
+  let js = Path.meta "sounds.practice.json" |> Utils.load_file in
+  script (sprintf "ss = %s;" js) |> page (Some "practice")
 
 let demo_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [
