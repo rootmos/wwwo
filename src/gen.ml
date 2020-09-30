@@ -161,19 +161,28 @@ let practice_page =
   let f s = function
     | None -> Some s.length
     | Some l -> Some (l +. s.length) in
-  let ds =
-    sounds "sounds.practice.json" |>
-    List.fold_left (fun ds s -> Dates.update s.date (f s) ds) Dates.empty in
+  let ss = sounds "sounds.practice.json" in
+  let ds = List.fold_left (fun ds s -> Dates.update s.date (f s) ds)
+    Dates.empty ss in
   let labels = Dates.to_seq ds
     |> Seq.map (fun (d, _) -> Lenient_iso8601.Date.iso8601 d)
     |> List.of_seq |> Practice_j.string_of_labels in
   let data = Dates.to_seq ds
-    |> Seq.map (fun (_, s) -> Float.round @@ s /. 60.)
+    |> Seq.map (fun (_, s) -> (Float.round @@ s /. 6.) /. 10.)
     |> List.of_seq |> Practice_j.string_of_data in
   let js = Path.src "practice.js" |> Utils.load_file in
+  let r s = let id = String.sub s.sha1 0 7 in [
+    text s.title;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
+    audio ~id s.url;
+  ] in
   seq [
-    canvas "myChart" 400 400;
-    script (sprintf "labels = %s; data = %s; %s" labels data js);
+    div @@ seq [
+      canvas "chart" 300 100;
+      script (sprintf "labels = %s; data = %s; %s" labels data js);
+    ];
+    ss >>| r |> table ~widths:(Some [80;10;10]);
+    audio_player_script;
   ] |> page ~chartjs:true (Some "practice")
 
 let demo_page = let open Sounds_t in

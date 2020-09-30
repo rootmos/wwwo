@@ -1,5 +1,5 @@
-var ctx = document.getElementById("myChart").getContext("2d");
-var myChart = new Chart(ctx, {
+var ctx = document.getElementById("chart");
+var chart = new Chart(ctx, {
     type: 'bar',
     data: {
         labels,
@@ -10,14 +10,5 @@ var myChart = new Chart(ctx, {
             borderColor: 'rgba(204, 51, 255, 1)',
             borderWidth: 2
         }]
-    },
-    options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero: true
-                }
-            }]
-        }
     }
 });
