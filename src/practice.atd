@@ -1,0 +1,2 @@
+type labels = string list
+type data = int list

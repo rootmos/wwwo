@@ -14,7 +14,7 @@ endef
 
 gen: lenient_iso8601.ml \
 	$(call atd, sounds) $(call atd, twitch) \
-	$(call atd, github) \
+	$(call atd, github) $(call atd, practice) \
 	$(call atd, gallery) $(call atd, project) \
 	common.ml utils.ml html.ml gen.ml
 	ocamlfind $(CC) -linkpkg \

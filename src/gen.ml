@@ -13,13 +13,16 @@ module Path = struct
   let src = Filename.concat "src"
 end
 
-let live_reload = js_src "http://livejs.com/live.js"
+let livejs_src = "http://livejs.com/live.js"
+let chartjs_src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
+let tracking_id = "UA-124878438-2"
+
 let tracking = seq [
-  js_src "https://www.googletagmanager.com/gtag/js?id=UA-124878438-2";
+  js_src (sprintf "https://www.googletagmanager.com/gtag/js?id=%s" tracking_id);
   String.concat "" [
     "window.dataLayer = window.dataLayer || [];";
     "function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
-    "gtag('config', 'UA-124878438-2')";
+    sprintf "gtag('config', '%s')" tracking_id;
   ] |> script
 ]
 
@@ -70,8 +73,8 @@ let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) subtitle b
   () |> html @@ seq [
   head @@ seq [
     title @@ t;
-    if local then live_reload else tracking;
-    seq @@ if chartjs then [js_src "https://cdnjs.com/libraries/Chart.js"]
+    if local then js_src livejs_src else tracking;
+    seq @@ if chartjs then [js_src chartjs_src]
     else [];
     css @@ Utils.load_file (Path.style "style.css") :: additional_css;
     text "<meta charset=\"UTF-8\">";
@@ -151,12 +154,16 @@ and sounds_snippet = let open Sounds_t in
     audio_player_script;
   ]
 
-let practice_page = let open Sounds_t in
-  let ss = Path.meta "sounds.practice.json" |> Utils.load_file in
+let practice_page =
+  let open Sounds_t in
+  let open Practice_t in
+  let ss = sounds "sounds.practice.json" in
+  let ls = Practice_j.string_of_labels [ "foo"; "bar"; "baz" ] in
+  let ds = Practice_j.string_of_data [ 1; 2; 3 ] in
   let js = Path.src "practice.js" |> Utils.load_file in
   seq [
     canvas "myChart" 400 400;
-    script (sprintf "ss = %s;%s" ss js);
+    script (sprintf "labels = %s; data = %s; %s" ls ds js);
   ] |> page ~chartjs:true (Some "practice")
 
 let demo_page = let open Sounds_t in
