@@ -2,6 +2,28 @@ var data = data.map(function(e) {
     return { date: moment(e.date), minutes: e.minutes };
 });
 
+var chart = new Chart(document.getElementById("chart"), {
+    type: "bar",
+    data: {
+        datasets: [{
+            label: "minutes",
+            data: [],
+            backgroundColor: "rgba(204, 51, 255, 0.2)",
+            borderColor: "rgba(204, 51, 255, 1)",
+            borderWidth: 2,
+            fill: true,
+        }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                type: "time",
+                time: { unit: "day" }
+            }]
+        }
+    }
+});
+
 function render(last_n_days) {
     var ds = [];
     if(last_n_days) {
@@ -17,27 +39,8 @@ function render(last_n_days) {
         ds = data.map(function (e) { return {x: e.date, y: e.minutes}; });
     }
 
-    new Chart(document.getElementById("chart"), {
-        type: "bar",
-        data: {
-            datasets: [{
-                label: "minutes",
-                data: ds,
-                backgroundColor: "rgba(204, 51, 255, 0.2)",
-                borderColor: "rgba(204, 51, 255, 1)",
-                borderWidth: 2,
-                fill: true,
-            }]
-        },
-        options: {
-            scales: {
-                xAxes: [{
-                    type: "time",
-                    time: { unit: "day" }
-                }]
-            }
-        }
-    });
+    chart.data.datasets[0].data = ds;
+    chart.update();
 }
 
 render(7);
