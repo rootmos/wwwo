@@ -157,13 +157,23 @@ and sounds_snippet = let open Sounds_t in
 let practice_page =
   let open Sounds_t in
   let open Practice_t in
-  let ss = sounds "sounds.practice.json" in
-  let ls = Practice_j.string_of_labels [ "foo"; "bar"; "baz" ] in
-  let ds = Practice_j.string_of_data [ 1; 2; 3 ] in
+  let module Dates = Map.Make(Lenient_iso8601.Date) in
+  let f s = function
+    | None -> Some s.length
+    | Some l -> Some (l +. s.length) in
+  let ds =
+    sounds "sounds.practice.json" |>
+    List.fold_left (fun ds s -> Dates.update s.date (f s) ds) Dates.empty in
+  let labels = Dates.to_seq ds
+    |> Seq.map (fun (d, _) -> Lenient_iso8601.Date.iso8601 d)
+    |> List.of_seq |> Practice_j.string_of_labels in
+  let data = Dates.to_seq ds
+    |> Seq.map (fun (_, s) -> Float.round @@ s /. 60.)
+    |> List.of_seq |> Practice_j.string_of_data in
   let js = Path.src "practice.js" |> Utils.load_file in
   seq [
     canvas "myChart" 400 400;
-    script (sprintf "labels = %s; data = %s; %s" ls ds js);
+    script (sprintf "labels = %s; data = %s; %s" labels data js);
   ] |> page ~chartjs:true (Some "practice")
 
 let demo_page = let open Sounds_t in

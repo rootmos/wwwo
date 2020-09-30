@@ -112,8 +112,8 @@ let minimize_js s =
   let s = Str.global_replace (Str.regexp "[ \t]*=[ \t]*") "=" s in
   let s = Str.global_replace (Str.regexp "[ \t]*{[ \t]*") "{" s in
   let s = Str.global_replace (Str.regexp "[ \t]*}[ \t]*") "}" s in
-  let s = Str.global_replace (Str.regexp "[ \t]*\[[ \t]*") "[" s in
-  let s = Str.global_replace (Str.regexp "[ \t]*\][ \t]*") "]" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*\\[[ \t]*") "[" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*\\][ \t]*") "]" s in
   let s = Str.global_replace (Str.regexp "[ \t]*,[ \t]*") "," s in
   s
 

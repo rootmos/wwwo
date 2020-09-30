@@ -1,2 +1,2 @@
 type labels = string list
-type data = int list
+type data = float list
