@@ -1,0 +1,5 @@
+type entry = {
+   date: string;
+   minutes: float;
+}
+type data = entry list

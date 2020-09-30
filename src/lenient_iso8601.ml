@@ -20,3 +20,10 @@ let unwrap t = Printer.Calendar.sprint "%a, %d %b %Y" t
 
 let rfc822 t = Printer.Calendar.sprint "%a, %d %b %Y" t
 let compare t t' = Calendar.compare t t'
+
+module Date = struct
+  type z = t
+  type t = z
+  let compare t t' = Date.compare (Calendar.to_date t) (Calendar.to_date t')
+  let iso8601 t = Printer.Date.sprint "%F" (Calendar.to_date t)
+end

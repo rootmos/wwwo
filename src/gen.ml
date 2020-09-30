@@ -10,15 +10,19 @@ module Path = struct
   let image = Filename.concat @@ Filename.concat root "image"
   let style = Filename.concat @@ Filename.concat root "css"
   let meta = Filename.concat "meta"
+  let src = Filename.concat "src"
 end
 
-let live_reload = js_src "http://livejs.com/live.js"
+let livejs_src = "http://livejs.com/live.js"
+let chartjs_src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
+let momentjs_src = "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js"
+let tracking_id = "UA-124878438-2"
 let tracking = seq [
-  js_src "https://www.googletagmanager.com/gtag/js?id=UA-124878438-2";
+  js_src (sprintf "https://www.googletagmanager.com/gtag/js?id=%s" tracking_id);
   String.concat "" [
     "window.dataLayer = window.dataLayer || [];";
     "function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
-    "gtag('config', 'UA-124878438-2')";
+    sprintf "gtag('config', '%s')" tracking_id;
   ] |> script
 ]
 
@@ -64,12 +68,14 @@ let posts_snippet = seq [
   ) |> ul
 ]
 
-let page ?(only_subtitle=false) ?(additional_css=[]) subtitle b =
+let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) subtitle b =
   let t = "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
   () |> html @@ seq [
   head @@ seq [
     title @@ t;
-    if local then live_reload else tracking;
+    if local then js_src livejs_src else tracking;
+    seq @@ if chartjs then [js_src momentjs_src; js_src chartjs_src]
+    else [];
     css @@ Utils.load_file (Path.style "style.css") :: additional_css;
     text "<meta charset=\"UTF-8\">";
   ];
@@ -147,6 +153,43 @@ and sounds_snippet = let open Sounds_t in
     sounds "sounds.json" |> take 5 >>| r |> table;
     audio_player_script;
   ]
+
+let practice_page =
+  let open Sounds_t in
+  let module Dates = Map.Make(Lenient_iso8601.Date) in
+  let f s = function
+    | None -> Some s.length
+    | Some l -> Some (l +. s.length) in
+  let ss = sounds "sounds.practice.json" in
+  let ds = List.fold_left (fun ds s -> Dates.update s.date (f s) ds)
+    Dates.empty ss in
+  let data = Dates.to_seq ds
+    |> Seq.map (fun (d, s) -> let open Practice_t in {
+      date =  Lenient_iso8601.Date.iso8601 d;
+      minutes = (Float.round @@ s /. 6.) /. 10.;
+    })
+    |> List.of_seq |> Practice_j.string_of_data in
+  let js = Path.src "practice.js" |> Utils.load_file in
+  let r s = let id = String.sub s.sha1 0 7 in [
+    text s.title;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
+    audio ~id s.url;
+  ] in
+  seq [
+    div @@ seq [
+      canvas "chart" 300 100;
+      script (sprintf "data = %s; %s" data js);
+    ];
+    div ~cls:(Some "buttons") @@ seq [
+      span ~cls:"range" @@ button "render(7)" @@ text "week";
+      span ~cls:"range" @@ button "render(30)" @@ text "month";
+      span ~cls:"range" @@ button "render()" @@ text "all";
+    ];
+    ss >>| r |> table ~widths:(Some [80;10;10]);
+    audio_player_script;
+  ] |> page ~chartjs:true
+    ~additional_css:[ Utils.load_file (Path.style "practice.css") ]
+    (Some "practice")
 
 let demo_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [
@@ -357,6 +400,7 @@ let () =
   Utils.write_file (in_root "sounds.html") sounds_page;
   Utils.write_file (in_root "jam.html") sounds_jam_page;
   Utils.write_file (in_root "demo.html") demo_page;
+  Utils.write_file (in_root "practice.html") practice_page;
   Utils.write_file (in_root "activity.html") activity_page;
   Utils.write_file (in_root "bor19/index.html") bor19;
   Utils.write_file (in_root "glenn/index.html") glenn;

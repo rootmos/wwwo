@@ -52,7 +52,8 @@ let audio ?(id="") src = text @@
 let video src = text @@
   sprintf "<video controls preload=\"metadata\" class=\"video\"><source src=\"%s\"/></video>"
   (url_escape_string src |> html_escape_string)
-let script s = text s |> tag "script"
+let canvas id width height = text @@
+  sprintf "<canvas id=\"%s\" width=\"%d\" height=\"%d\" />" id width height
 let table ?(widths=None) cs =
   let tr cs = cs >>| tag "td" |> seq |> tag "tr" in
   let tr' cs = match widths with None -> tr cs | Some ws ->
@@ -98,8 +99,22 @@ let minimize_css s =
   let s = Str.global_replace (Str.regexp ":[ \t]+") ":" s in
   let s = Str.global_replace (Str.regexp "[ \t]*{[ \t]*") "{" s in
   let s = Str.global_replace (Str.regexp "[ \t]*}[ \t]*") "}" s in
-  let s = Str.global_replace (Str.regexp "[ \t]*;[ \t]*") ";" s
-  in s
+  let s = Str.global_replace (Str.regexp "[ \t]*;[ \t]*") ";" s in
+  s
 
 let css ls = let body = ls |> String.concat "" |> minimize_css in
   text @@ sprintf "<style type=\"text/css\">%s</style>" body
+
+(* TODO: this is too aggressive since it doesn't respect quotes *)
+let minimize_js s =
+  let s = Str.global_replace (Str.regexp "\n") "" s in
+  let s = Str.global_replace (Str.regexp ":[ \t]+") ":" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*=[ \t]*") "=" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*{[ \t]*") "{" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*}[ \t]*") "}" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*\\[[ \t]*") "[" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*\\][ \t]*") "]" s in
+  let s = Str.global_replace (Str.regexp "[ \t]*,[ \t]*") "," s in
+  s
+
+let script s = text (minimize_js s) |> tag "script"

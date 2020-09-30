@@ -9,7 +9,7 @@ HOST_PYTHON ?= $(shell which python3)
 export PYTHON = $(VENV)/bin/python3
 export PIP = $(VENV)/bin/pip
 
-generate: build fa meta
+generate: build fa meta scripts
 	@mkdir -p $(WEBROOT)/$(ENV)
 	GIT_REV=$(shell git rev-parse HEAD) ./src/gen
 
@@ -17,6 +17,7 @@ generate: build fa meta
 meta: $(META)/sounds.json \
 	$(META)/sounds.sessions.json \
 	$(META)/sounds.demo.json \
+	$(META)/sounds.practice.json \
 	$(META)/github-activity.rootmos.commits.json \
 	$(META)/glenn.json \
 	$(META)/silly.json \
@@ -37,6 +38,11 @@ serve:
 .PHONY: build
 build: deps
 	$(MAKE) -C src install
+
+.PHONY: scripts
+scripts:
+	mkdir -p $(WEBROOT)/$(ENV)/scripts
+	$(MAKE) -C src scripts TARGET=$(WEBROOT)/$(ENV)/scripts
 
 .PHONY: upload
 upload:
