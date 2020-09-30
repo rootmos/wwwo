@@ -15,8 +15,8 @@ end
 
 let livejs_src = "http://livejs.com/live.js"
 let chartjs_src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
+let momentjs_src = "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js"
 let tracking_id = "UA-124878438-2"
-
 let tracking = seq [
   js_src (sprintf "https://www.googletagmanager.com/gtag/js?id=%s" tracking_id);
   String.concat "" [
@@ -74,7 +74,7 @@ let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) subtitle b
   head @@ seq [
     title @@ t;
     if local then js_src livejs_src else tracking;
-    seq @@ if chartjs then [js_src chartjs_src]
+    seq @@ if chartjs then [js_src momentjs_src; js_src chartjs_src]
     else [];
     css @@ Utils.load_file (Path.style "style.css") :: additional_css;
     text "<meta charset=\"UTF-8\">";
@@ -156,7 +156,6 @@ and sounds_snippet = let open Sounds_t in
 
 let practice_page =
   let open Sounds_t in
-  let open Practice_t in
   let module Dates = Map.Make(Lenient_iso8601.Date) in
   let f s = function
     | None -> Some s.length
@@ -164,11 +163,11 @@ let practice_page =
   let ss = sounds "sounds.practice.json" in
   let ds = List.fold_left (fun ds s -> Dates.update s.date (f s) ds)
     Dates.empty ss in
-  let labels = Dates.to_seq ds
-    |> Seq.map (fun (d, _) -> Lenient_iso8601.Date.iso8601 d)
-    |> List.of_seq |> Practice_j.string_of_labels in
   let data = Dates.to_seq ds
-    |> Seq.map (fun (_, s) -> (Float.round @@ s /. 6.) /. 10.)
+    |> Seq.map (fun (d, s) -> let open Practice_t in {
+      date =  Lenient_iso8601.Date.iso8601 d;
+      minutes = (Float.round @@ s /. 6.) /. 10.;
+    })
     |> List.of_seq |> Practice_j.string_of_data in
   let js = Path.src "practice.js" |> Utils.load_file in
   let r s = let id = String.sub s.sha1 0 7 in [
@@ -179,11 +178,18 @@ let practice_page =
   seq [
     div @@ seq [
       canvas "chart" 300 100;
-      script (sprintf "labels = %s; data = %s; %s" labels data js);
+      script (sprintf "data = %s; %s" data js);
+    ];
+    div ~cls:(Some "buttons") @@ seq [
+      span ~cls:"range" @@ button "render(7)" @@ text "week";
+      span ~cls:"range" @@ button "render(30)" @@ text "month";
+      span ~cls:"range" @@ button "render()" @@ text "all";
     ];
     ss >>| r |> table ~widths:(Some [80;10;10]);
     audio_player_script;
-  ] |> page ~chartjs:true (Some "practice")
+  ] |> page ~chartjs:true
+    ~additional_css:[ Utils.load_file (Path.style "practice.css") ]
+    (Some "practice")
 
 let demo_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [

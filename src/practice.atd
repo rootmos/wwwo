@@ -1,2 +1,5 @@
-type labels = string list
-type data = float list
+type entry = {
+   date: string;
+   minutes: float;
+}
+type data = entry list
