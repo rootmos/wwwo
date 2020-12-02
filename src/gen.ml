@@ -291,6 +291,8 @@ let resume_snippet = seq [
 let social = div ~cls:(Some "socials") @@ seq [
   a "https://github.com/rootmos" @@ svg ~cls:"social"
     "fa/svgs/brands/github.svg";
+  a "https://git.sr.ht/~rootmos" @@ svg ~cls:"social"
+    (Path.image "sourcehut.svg");
   a "https://soundcloud.com/rootmos" @@ svg ~cls:"social"
     "fa/svgs/brands/soundcloud.svg";
   a "https://twitch.tv/rootmos2" @@ svg ~cls:"social"

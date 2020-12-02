@@ -86,9 +86,9 @@ let img ?(embedd=true) ?(cls=None) ?(alt=None) fn = fun _ ->
   else sprintf "<img src=\"%s\" %s%s/>" fn a c
 
 let svg ?(cls = "") fn =
-  let s = Utils.load_file fn in
+  let s = Utils.load_file fn |> String.trim in
   let s = match cls with "" -> s | _ ->
-    Str.replace_first (Str.regexp "svg") (sprintf "svg class=\"%s\"" cls) s in
+    Str.replace_first (Str.regexp "<svg") (sprintf "<svg class=\"%s\"" cls) s in
   text s
 
 let js_src url = fun _ ->
