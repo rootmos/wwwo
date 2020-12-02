@@ -288,7 +288,7 @@ let resume_snippet = seq [
   ]
 ]
 
-let social = div ~cls:(Some "socials") @@ seq [
+let social = seq @@ List.rev [
   a "https://github.com/rootmos" @@ svg ~cls:"social"
     "fa/svgs/brands/github.svg";
   a "https://git.sr.ht/~rootmos" @@ svg ~cls:"social"
