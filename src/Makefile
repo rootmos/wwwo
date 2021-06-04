@@ -1,5 +1,5 @@
 CC = ocamlc
-GEN_DEPS = magic-mime base64 yaml omd calendar atdgen camomile
+GEN_DEPS = magic-mime base64 yaml omd.1.3.1 calendar atdgen camomile
 
 .PHONY: install
 install: gen
@@ -12,13 +12,25 @@ define atd
 $(1)_t.mli $(1)_t.ml $(1)_j.mli $(1)_j.ml
 endef
 
+define strip_versions
+$(foreach d,$(1),$(shell echo "$(d)" | sed 's#\(\.[0-9]\+\)\+$$##'))
+endef
+
+null :=
+space := $(null) #
+comma := ,
+
+define packages
+$(subst $(space),$(comma),$(call strip_versions,$(1)))
+endef
+
 gen: lenient_iso8601.ml \
 	$(call atd, sounds) $(call atd, twitch) \
 	$(call atd, github) $(call atd, practice) \
 	$(call atd, gallery) $(call atd, project) \
 	common.ml utils.ml html.ml gen.ml
 	ocamlfind $(CC) -linkpkg \
-		-package $(shell echo "$(GEN_DEPS)" | tr ' ' ',') \
+		-package $(call packages,$(GEN_DEPS)) \
 		-o $@ $^
 
 %_t.mli %_t.ml %_j.mli %_j.ml: %.atd
