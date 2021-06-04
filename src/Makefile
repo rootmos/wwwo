@@ -1,5 +1,11 @@
-CC = ocamlc
 GEN_DEPS = magic-mime base64 yaml omd.1.3.1 calendar atdgen camomile
+
+CC = ocamlc
+ifneq (,$(shell command -v gsed 2>/dev/null))
+SED = gsed
+else
+SED = sed
+endif
 
 .PHONY: install
 install: gen
@@ -13,7 +19,7 @@ $(1)_t.mli $(1)_t.ml $(1)_j.mli $(1)_j.ml
 endef
 
 define strip_versions
-$(foreach d,$(1),$(shell echo "$(d)" | sed 's#\(\.[0-9]\+\)\+$$##'))
+$(foreach d,$(1),$(shell echo "$(d)" | $(SED) 's#\(\.[0-9]\+\)\+$$##'))
 endef
 
 null :=
