@@ -34,6 +34,7 @@ def commits(u, N):
                         "url": c.html_url,
                         "message": c.commit.message,
                     })
+    return cs
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description="Fetch users recent GitHub activity")
