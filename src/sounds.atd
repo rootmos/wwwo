@@ -8,7 +8,6 @@ type sound = {
     artist: string;
     composer: string;
     date: date;
-    year: int;
     length: float;
 }
 
