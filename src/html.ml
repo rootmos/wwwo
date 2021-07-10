@@ -46,11 +46,11 @@ let ul is = match is with
 | _ -> tag "ul" (is >>| tag "li" |> seq)
 let ol is x = tag "ol" (is >>| tag "li" |> seq) x
 let audio ?(id="") src = text @@
-  sprintf "<audio%s controls preload=\"metadata\" class=\"sound\"><source src=\"%s\"/></audio>"
+  sprintf "<audio%s controls class=\"sound\"><source src=\"%s\"/></audio>"
   (if id <> "" then sprintf " id=\"%s\"" id else "")
   (url_escape_string src |> html_escape_string)
 let video src = text @@
-  sprintf "<video controls preload=\"metadata\" class=\"video\"><source src=\"%s\"/></video>"
+  sprintf "<video controls class=\"video\"><source src=\"%s\"/></video>"
   (url_escape_string src |> html_escape_string)
 let canvas id width height = text @@
   sprintf "<canvas id=\"%s\" width=\"%d\" height=\"%d\" />" id width height
