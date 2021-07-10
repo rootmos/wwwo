@@ -141,7 +141,7 @@ and sounds_snippet = let open Sounds_t in
   let r s = [
     text s.title;
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
-    audio s.url
+    audio s.url;
   ] in seq [
     h2 @@ seq [
       text "Sounds";
@@ -174,6 +174,7 @@ let practice_page =
     text s.title;
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
     audio ~id s.url;
+    a ("/practice.html#" ^ id) @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
   ] in
   seq [
     div @@ seq [
@@ -185,7 +186,7 @@ let practice_page =
       span ~cls:"range" @@ button "render(30)" @@ text "month";
       span ~cls:"range" @@ button "render()" @@ text "all";
     ];
-    ss >>| r |> table ~widths:(Some [80;10;10]);
+    ss >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
   ] |> page ~chartjs:true
     ~additional_css:[ Utils.load_file (Path.style "practice.css") ]
