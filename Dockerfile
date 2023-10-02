@@ -19,8 +19,6 @@ COPY src/deps /tmp/deps
 RUN xargs opam install --yes < /tmp/deps && rm /tmp/deps
 
 COPY src src
-#RUN make build
+RUN eval $(opam env) && make build
 
-#RUN apk add tidy
-
-#RUN make build
+RUN apk add tidyhtml

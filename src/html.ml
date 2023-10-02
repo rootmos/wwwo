@@ -1,10 +1,10 @@
 open Printf
 open Common
-open CamomileLibraryDefault
+open Camomile
 
 let url_escape_string s: string =
   let b = Camomile.UTF8.Buf.create 0 in
-  let f c = let cp = CamomileLibrary.UChar.code c in
+  let f c = let cp = Camomile.UChar.code c in
     if cp > 0 && cp < 0x7f then Camomile.UTF8.Buf.add_char b c
     else
       let b' = Camomile.UTF8.Buf.create 0 in
