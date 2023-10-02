@@ -4,10 +4,24 @@ on: [ push ]
 jobs:
   ubuntu:
     runs-on: ubuntu-latest
+    env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        DOCKER_REPO: ${{ vars.DOCKER_REPO }}
+        ECR_ROLE_ARN: ${{ vars.ECR_ROLE_ARN }}
+        AWS_PROFILE: ecr
     steps:
     - name: Check out repository code
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
-    - run: make docker
+    - name: Configure AWS CLI profiles
+      run: |
+        mkdir -p "$HOME/.aws"
+        envsubst < .github/aws.config.template > "$HOME/.aws/config"
+
+    - name: Log in to ECR
+      run: .github/ecr-login
+
+    #- run: make docker

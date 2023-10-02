@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+DOCKER_REPO=${DOCKER_REPO-$1}
+
+HOST=$(sed "s,\(\w\+\)/.*,\1," <<< "$DOCKER_REPO")
+IFS='.' read -ra PARTS <<< "$HOST"
+REGION="${PARTS[3]}"
+
+aws ecr get-login-password --region="$REGION" --profile="$AWS_PROFILE" \
+    | docker login --username AWS --password-stdin "$HOST"
