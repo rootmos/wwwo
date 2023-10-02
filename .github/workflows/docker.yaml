@@ -10,6 +10,7 @@ jobs:
         DOCKER_REPO: ${{ vars.DOCKER_REPO }}
         ECR_ROLE_ARN: ${{ vars.ECR_ROLE_ARN }}
         AWS_PROFILE: ecr
+        DOCKER_IMAGE_NAME: publisher
     steps:
     - name: Check out repository code
       uses: actions/checkout@v3
@@ -24,4 +25,12 @@ jobs:
     - name: Log in to ECR
       run: .github/ecr-login
 
-    #- run: make docker
+    - name: Build Docker image
+      run: make docker
+
+    - name: Tag and push images
+      run: |
+          for t in "$DOCKER_REPO:latest" "$DOCKER_REPO:$GITHUB_SHA"; do
+              docker tag "$(cat .docker.image)" "$t"
+              docker push "$t"
+          done
