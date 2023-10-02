@@ -52,6 +52,7 @@ upload:
 clean:
 	$(MAKE) -C src clean
 	rm -rf $(WEBROOT) .flag.* $(VENV) $(META)
+	rm -f .docker.image
 
 .PHONY: fresh
 fresh:
@@ -115,3 +116,8 @@ fa: fa.zip
 	unzip $<
 	rm -rf $@
 	mv fontawesome-free-*-web $@
+
+.PHONY:
+docker: .docker.image
+.docker.image: Dockerfile
+	sudo -A docker build --iidfile=$@ --progress=plain .

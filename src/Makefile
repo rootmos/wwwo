@@ -1,4 +1,4 @@
-GEN_DEPS = magic-mime base64 yaml omd.1.3.1 calendar atdgen camomile
+GEN_DEPS = $(shell grep -v ocamlfind deps)
 
 CC = ocamlc
 ifneq (,$(shell command -v gsed 2>/dev/null))
@@ -51,5 +51,5 @@ clean:
 deps: .flag.opam-install
 
 .flag.opam-install:
-	opam install --yes ocamlfind $(GEN_DEPS)
+	opam install --yes $(shell cat deps)
 	@touch $@
