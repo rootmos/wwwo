@@ -7,7 +7,7 @@ jobs:
     env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        DOCKER_REPO: ${{ vars.DOCKER_REPO }}
+        DOCKER_IMAGE: ${{ vars.DOCKER_IMAGE }}
         ECR_ROLE_ARN: ${{ vars.ECR_ROLE_ARN }}
         AWS_PROFILE: ecr
         DOCKER_IMAGE_NAME: publisher
@@ -25,19 +25,16 @@ jobs:
     - name: Log in to ECR
       run: .github/ecr-login
 
-    #- name: Try pull latest image to use as cache
-      #run: docker pull "$DOCKER_REPO:latest" || true
-
     - name: Build Docker image
       run: |
-          docker buildx build --push -t "$DOCKER_REPO" \
+          docker buildx build --push -t "$DOCKER_IMAGE" \
             --cache-to type=inline \
-            --cache-from type=registry,ref="$DOCKER_REPO" \
+            --cache-from type=registry,ref="$DOCKER_IMAGE" \
             --iidfile=.docker.image --progress=plain .
 
     - name: Tag and push images
       run: |
-          for t in "$DOCKER_REPO:$GITHUB_REF_NAME" "$DOCKER_REPO:$GITHUB_SHA"; do
+          for t in "$DOCKER_IMAGE:$GITHUB_REF_NAME" "$DOCKER_IMAGE:$GITHUB_SHA"; do
               docker tag "$(cat .docker.image)" "$t"
               docker push "$t"
           done
