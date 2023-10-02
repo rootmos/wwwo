@@ -25,12 +25,19 @@ jobs:
     - name: Log in to ECR
       run: .github/ecr-login
 
+    #- name: Try pull latest image to use as cache
+      #run: docker pull "$DOCKER_REPO:latest" || true
+
     - name: Build Docker image
-      run: make docker
+      run: |
+          docker buildx build --push -t "$DOCKER_REPO" \
+            --cache-to type=inline \
+            --cache-from type=registry,ref="$DOCKER_REPO" \
+            --iidfile=.docker.image --progress=plain .
 
     - name: Tag and push images
       run: |
-          for t in "$DOCKER_REPO:latest" "$DOCKER_REPO:$GITHUB_SHA"; do
+          for t in "$DOCKER_REPO:$GITHUB_REF_NAME" "$DOCKER_REPO:$GITHUB_SHA"; do
               docker tag "$(cat .docker.image)" "$t"
               docker push "$t"
           done
