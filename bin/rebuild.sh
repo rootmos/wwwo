@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
-eval "$(opam config env)"
+set -o nounset -o pipefail -o errexit
+
+eval $(opam env)
 
 SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
 
