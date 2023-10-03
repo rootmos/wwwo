@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+DOCKER_IMAGE=${DOCKER_IMAGE-$1}
+SUDO=${SUDO-}
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+$SUDO docker buildx build --push -t "$DOCKER_IMAGE" \
+  --cache-to type=inline \
+  --cache-from type=registry,ref="$DOCKER_IMAGE" \
+  --iidfile="$TMP/docker.image" --progress=plain .
+
+echo 1>&2 "built image: $(<$TMP/docker.image)"
+cat "$TMP/docker.image"

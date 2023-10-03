@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
+cd "$SCRIPT_DIR"/..
+
+set -a
+. .env
+set +a
+
+"$SCRIPT_DIR"/docker-build > "$TMP/docker.image"
+
+"$SCRIPT_DIR"/reconfigure-lambda "$(<$TMP/docker.image)"
+
+"$SCRIPT_DIR"/invoke-lambda

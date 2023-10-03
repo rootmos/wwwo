@@ -2,16 +2,48 @@
 
 set -o nounset -o pipefail -o errexit
 
-DOCKER_IMAGE=${DOCKER_IMAGE-$1}
-DOCKER_IMAGE_ID=${DOCKER_IMAGE_ID-${2-$(cat .docker.image)}}
-LAMBDA_ARN=${LAMBDA_ARN-$3}
+DOCKER_IMAGE_ID=${DOCKER_IMAGE_ID-$1}
+LAMBDA_ARN=${LAMBDA_ARN-$2}
 REGION=$(cut -d':' -f 4 <<< "$LAMBDA_ARN")
+SUDO=${SUDO-}
 
-IMAGE_URI=$(docker inspect "$DOCKER_IMAGE_ID" --format '{{ index .RepoDigests 0 }}')
+IMAGE_URI=$($SUDO docker inspect "$DOCKER_IMAGE_ID" --format '{{ index .RepoDigests 0 }}')
 echo 1>&2 "setting image uri: $IMAGE_URI"
 
-aws lambda update-function-code \
-    --profile="$AWS_PROFILE" \
-    --region="$REGION" \
-    --function-name="$LAMBDA_ARN" \
-    --image-uri="$IMAGE_URI"
+if [ -n "${AWS_PROFILE-}" ]; then
+    ARGS+=("--profile=$AWS_PROFILE")
+fi
+
+ARGS=("--function-name="$LAMBDA_ARN"")
+ARGS+=("--region=$REGION")
+ARGS+=()
+
+if [ -n "${AWS_PROFILE-}" ]; then
+    ARGS+=("--profile=$AWS_PROFILE")
+fi
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+aws lambda update-function-code "${ARGS[@]}" "--image-uri=$IMAGE_URI" > "$TMP/update.json"
+CODE_0=$(jq -r .CodeSha256 < "$TMP/update.json")
+STATUS=$(jq -r .LastUpdateStatus < "$TMP/update.json")
+
+while true; do
+    aws lambda get-function "${ARGS[@]}" > "$TMP/status.json"
+    STATUS=$(jq -r .Configuration.LastUpdateStatus < "$TMP/status.json")
+    CODE_1=$(jq -r .Configuration.CodeSha256 < "$TMP/status.json")
+    if [ "$STATUS" == "InProgress" ]; then
+        echo 1>&2 "waiting for update to complete..."
+        sleep 2
+    else
+        if [ "$CODE_0" != "$CODE_1" ]; then
+            echo 1>&2 "unexpected state:"
+            echo 1>&2 "  status: $STATUS"
+            echo 1>&2 "  code: $CODE_1 (expected $CODE_0)"
+            exit 1
+        else
+            break
+        fi
+    fi
+done

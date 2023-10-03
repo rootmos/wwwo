@@ -30,6 +30,5 @@ def main():
     logger.debug(f"args: {args}")
 
     handler = f"{package_name}.main.handler"
-
     logger.debug(f"handler={handler}")
-    awslambdaric.bootstrap(None, f"{package_name}.main.handler", os.environ["AWS_LAMBDA_RUNTIME_API"])
+    awslambdaric.bootstrap(os.getcwd(), handler, os.environ["AWS_LAMBDA_RUNTIME_API"])

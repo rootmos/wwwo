@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+LAMBDA_ARN=${LAMBDA_ARN-$1}
+REGION=$(cut -d':' -f 4 <<< "$LAMBDA_ARN")
+
+ARGS=("--function-name="$LAMBDA_ARN"")
+ARGS+=("--region=$REGION")
+ARGS+=("--invocation-type=RequestResponse")
+ARGS+=("--log-type=Tail")
+
+if [ -n "${AWS_PROFILE-}" ]; then
+    ARGS+=("--profile=$AWS_PROFILE")
+fi
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+echo 1>&2 "invoking lambda: $LAMBDA_ARN"
+
+aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
+
+jq -r .LogResult < "$TMP/result.json" | base64 -d

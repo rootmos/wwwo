@@ -26,18 +26,14 @@ jobs:
       run: .github/ecr-login
 
     - name: Build Docker image
-      run: |
-          docker buildx build --push -t "$DOCKER_IMAGE" \
-            --cache-to type=inline \
-            --cache-from type=registry,ref="$DOCKER_IMAGE" \
-            --iidfile=.docker.image --progress=plain .
+      run: .github/docker-build > docker.image
 
     - name: Tag and push images
       run: |
           for t in "$DOCKER_IMAGE:$GITHUB_REF_NAME" "$DOCKER_IMAGE:$GITHUB_SHA"; do
-              docker tag "$(cat .docker.image)" "$t"
+              docker tag "$(cat docker.image)" "$t"
               docker push "$t"
           done
 
     - name: Reconfigure the Lambda function's image
-      run: .github/reconfigure-lambda
+      run: .github/reconfigure-lambda "$(cat docker.image)"
