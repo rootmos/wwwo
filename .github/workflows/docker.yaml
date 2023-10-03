@@ -8,9 +8,9 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         DOCKER_IMAGE: ${{ vars.DOCKER_IMAGE }}
-        ECR_ROLE_ARN: ${{ vars.ECR_ROLE_ARN }}
+        ROLE_ARN: ${{ vars.ROLE_ARN }}
+        LAMBDA_ARN: ${{ vars.LAMBDA_ARN }}
         AWS_PROFILE: ecr
-        DOCKER_IMAGE_NAME: publisher
     steps:
     - name: Check out repository code
       uses: actions/checkout@v3
@@ -38,3 +38,6 @@ jobs:
               docker tag "$(cat .docker.image)" "$t"
               docker push "$t"
           done
+
+    - name: Reconfigure the Lambda function's image
+      run: .github/reconfigure-lambda
