@@ -3,6 +3,7 @@ FROM alpine:3.18.4
 RUN apk update && apk add \
     bash make gcc musl-dev \
     python3 py3-pip \
+    g++ cmake autoconf automake libtool elfutils-dev python3-dev \
     opam \
     tidyhtml
 
@@ -26,9 +27,6 @@ COPY meta/Pipfile meta/Pipfile.lock meta/pyproject.toml meta/setup.cfg meta/
 RUN bin/python-deps meta
 
 COPY lambda/Pipfile lambda/Pipfile.lock lambda/pyproject.toml lambda/setup.cfg lambda/
-RUN apk add \
-    g++ cmake autoconf automake libtool \
-    elfutils-dev python3-dev
 RUN bin/python-deps lambda
 
 # build
