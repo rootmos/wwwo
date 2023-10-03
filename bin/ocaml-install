@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+PROJECT=${1-.}
+
+eval "$(opam env --set-switch "$(cat "$PROJECT/switch")")"
+
+make -C "$PROJECT" build

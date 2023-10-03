@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+PROJECT=${1-.}
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+export PIP_ROOT_USER_ACTION=ignore
+
+pip install \
+    "pipenv >=2023.9.8" \
+    "pipx >=1.2.0, <1.3"
+
+cd "$PROJECT"
+pipenv requirements | grep -v '^-e .$' > "$TMP/requirements.txt"
+
+echo 1>&2 "installing python dependecies:"
+sed 's/^/  /' "$TMP/requirements.txt"
+
+pip install -r "$TMP/requirements.txt"

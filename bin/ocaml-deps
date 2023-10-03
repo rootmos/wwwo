@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+PROJECT=${1-.}
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+eval "$(opam env --set-switch "$(cat "$PROJECT/switch")")"
+
+cat "$PROJECT/deps.*" > "$TMP/deps"
+
+echo 1>&2 "installing ocaml dependecies:"
+sed 's/^/  /' "$TMP/deps"
+
+opam install --yes < "$TMP/deps"

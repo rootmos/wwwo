@@ -92,8 +92,17 @@ $(META)/projects/stellar-drift/%.md:
 	aws s3 cp "s3://rootmos-builds/stellar-drift/latest/www/$*.md" "$@"
 
 .PHONY: deps
-deps: .flag.deps
-.flag.deps: .flag.requirements.txt
+deps: .python.deps .src.deps
+
+.PHONY: python-deps
+python-deps: .python.deps
+.python.deps: requirements.txt | $(VENV)
+	$(PIP) install -r $<
+	@touch $@
+
+.PHONY: src-deps
+src-deps: .src.deps
+.src.deps:
 	$(MAKE) -C src deps
 	@touch $@
 
@@ -116,8 +125,3 @@ fa: fa.zip
 	unzip $<
 	rm -rf $@
 	mv fontawesome-free-*-web $@
-
-.PHONY:
-docker: .docker.image
-.docker.image: Dockerfile
-	sudo -A docker build --iidfile=$@ --progress=plain .

@@ -1,8 +1,11 @@
-.flag.*
-.merlin
-.github_access_token
+.*.flag
+
+build
+**/*.egg-info
+
 venv
-webroot
-meta
+
 fa
 fa.zip
+
+webroot

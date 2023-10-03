@@ -2,27 +2,37 @@ FROM alpine:3.18.4
 
 RUN apk update && apk add \
     bash make gcc musl-dev \
-    python3 \
+    python3 py3-pip \
     opam \
-    git \
     tidyhtml
 
 WORKDIR /workdir
-
-COPY GNUmakefile requirements.txt .
-RUN make .flag.requirements.txt
-
-RUN opam init --bare --disable-sandboxing --shell-setup
-RUN opam switch create default 4.14.1
-
-COPY src/deps /tmp/deps
-RUN xargs opam install --yes < /tmp/deps && rm /tmp/deps
-
-RUN make fa
-
 COPY bin bin
 
-COPY src src
-RUN eval $(opam env) && make build
+# ocmal deps
 
-ENTRYPOINT [ "/workdir/bin/rebuild.sh" ]
+COPY generator/switch generator/
+RUN bin/ocaml-prepare generator
+
+COPY generator/deps.* generator/
+RUN bin/ocaml-deps generator
+
+# python deps
+
+COPY meta/Pipfile meta/Pipfile.lock meta/pyproject.toml meta/setup.cfg meta/
+RUN bin/python-deps meta
+
+COPY lambda/Pipfile lambda/Pipfile.lock lambda/pyproject.toml lambda/setup.cfg lambda/
+RUN bin/python-deps lambda
+
+# build
+
+COPY meta/src meta/src
+RUN bin/python-install meta
+
+COPY lambda/src lambda/src
+RUN bin/python-install lambda
+
+# RUN make fa
+
+ENTRYPOINT [ "/usr/bin/www-lambda" ]

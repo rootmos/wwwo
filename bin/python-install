@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+PROJECT=${1-.}
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+export PIP_ROOT_USER_ACTION=ignore
+
+cd "$PROJECT"
+pipenv install --system --site-packages

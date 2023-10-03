@@ -1,4 +1,4 @@
-GEN_DEPS = $(shell grep -v ocamlfind deps)
+GEN_DEPS = $(shell cat deps.compile)
 
 CC = ocamlc
 ifneq (,$(shell command -v gsed 2>/dev/null))
