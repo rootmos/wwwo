@@ -37,3 +37,6 @@ jobs:
 
     - name: Reconfigure the Lambda function's image
       run: .github/reconfigure-lambda "$(cat docker.image)"
+
+    - name: Invoke the Lambda function
+      run: .github/invoke-lambda
