@@ -7,22 +7,28 @@ RUN apk update && apk add \
     tidyhtml
 
 WORKDIR /workdir
-COPY bin bin
 
 # ocmal deps
 
+COPY bin/ocaml-prepare bin/
 COPY generator/switch generator/
 RUN bin/ocaml-prepare generator
 
+COPY bin/ocaml-deps bin/
 COPY generator/deps.* generator/
 RUN bin/ocaml-deps generator
 
 # python deps
 
+COPY bin/python* bin/
+
 COPY meta/Pipfile meta/Pipfile.lock meta/pyproject.toml meta/setup.cfg meta/
 RUN bin/python-deps meta
 
 COPY lambda/Pipfile lambda/Pipfile.lock lambda/pyproject.toml lambda/setup.cfg lambda/
+RUN apk add \
+    g++ cmake autoconf automake libtool \
+    elfutils-dev python3-dev
 RUN bin/python-deps lambda
 
 # build

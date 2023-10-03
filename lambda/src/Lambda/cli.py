@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def parse_args():
     parser = argparse.ArgumentParser(
-            description="Lambda function harness",
+            description="AWS Lambda harness",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument("-v", "--version", action="version", version=f"%(prog)s {package_version}")
@@ -22,8 +22,6 @@ def parse_args():
 
     return parser.parse_args()
 
-def handler(
-
 def main():
     args = parse_args()
     if args.log_file is not None:
@@ -31,4 +29,7 @@ def main():
     util.setup_logger(args.log)
     logger.debug(f"args: {args}")
 
-    awslambdaric.bootstrap(None, "lambda.main.handler", os.environ["AWS_LAMBDA_RUNTIME_API"])
+    handler = f"{package_name}.main.handler"
+
+    logger.debug(f"handler={handler}")
+    awslambdaric.bootstrap(None, f"{package_name}.main.handler", os.environ["AWS_LAMBDA_RUNTIME_API"])
