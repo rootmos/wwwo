@@ -3,15 +3,18 @@
 set -o nounset -o pipefail -o errexit
 
 SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
+ROOT=${ROOT-$SCRIPT_DIR}
 
 META=$SCRIPT_DIR/meta.mk
 META_JOBS=1
 WORKDIR=
-while getopts "m:J:w:-" OPT; do
+ENVIRONMENT=prod
+while getopts "m:J:w:e:-" OPT; do
     case $OPT in
         m) META=$OPTARG ;;
         J) META_JOBS=$OPTARG ;;
         w) WORKDIR=$OPTARG ;;
+        e) ENVIRONMENT=$OPTARG ;;
         -) break ;;
         ?) exit 2 ;;
     esac
@@ -19,10 +22,28 @@ done
 shift $((OPTIND-1))
 
 if [ -z "$WORKDIR" ]; then
-    WORKDIR="$SCRIPT_DIR/.workdirs/$(date --utc +%FT%H%M%SZ)"
+    WORKDIR="$ROOT/.workdirs/$(date --utc +%FT%H%M%SZ)"
 fi
 
 echo 1>&2 "workdir: $WORKDIR"
 
 mkdir -p "$WORKDIR/meta"
 make -f "$META" -j"$META_JOBS" -C "$WORKDIR/meta"
+
+GENERATOR_EXE=${GENERATOR_EXE-}
+if [ -z "$GENERATOR_EXE" ]; then
+    GENERATOR_EXE="${GENERATOR_EXE_PREFIX-wwwo-}generator"
+    if ! command -v "$GENERATOR_EXE" &>/dev/null; then
+        GENERATOR_EXE="$ROOT/generator/src/gen.exe"
+        if [ ! "$GENERATOR_EXE" ]; then
+            echo 1>& "unable to figure out generator"
+        fi
+    fi
+fi
+
+cp -rv "$ROOT/content" "$WORKDIR/content"
+
+export WEBROOT="$WORKDIR/webroot"
+mkdir -p "$WEBROOT"
+
+(cd "$WORKDIR" && env ENV="$ENVIRONMENT" "$GENERATOR_EXE")
