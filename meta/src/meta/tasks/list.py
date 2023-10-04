@@ -14,6 +14,16 @@ def render(o):
         "last_modified": o.last_modified.isoformat(),
     }
 
+def objects(bucket, prefix=None, profile=None):
+    session = boto3.Session(profile_name=profile)
+    s3 = session.resource("s3")
+    bucket = s3.Bucket(bucket)
+
+    for o in bucket.objects.all():
+        if prefix and not o.key.startswith(prefix):
+            continue
+        yield render(o)
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Grab metadata about files stored on s3")
     parser.add_argument("--profile")
@@ -25,14 +35,6 @@ def parse_args():
 
 def main():
     args = parse_args()
-    session = boto3.Session(profile_name=args.profile)
-    s3 = session.resource("s3")
-    bucket = s3.Bucket(args.bucket)
 
-    os = []
-    for o in bucket.objects.all():
-        if args.prefix and not o.key.startswith(args.prefix):
-            continue
-        os.append(render(o))
-
+    os = list(objects(args.bucket, prefix=args.prefix, profile=args.profile))
     print(json.dumps(os))

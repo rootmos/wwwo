@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
+
+META=$SCRIPT_DIR/meta.mk
+META_JOBS=1
+WORKDIR=
+while getopts "m:J:w:-" OPT; do
+    case $OPT in
+        m) META=$OPTARG ;;
+        J) META_JOBS=$OPTARG ;;
+        w) WORKDIR=$OPTARG ;;
+        -) break ;;
+        ?) exit 2 ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [ -z "$WORKDIR" ]; then
+    WORKDIR="$SCRIPT_DIR/.workdirs/$(date --utc +%FT%H%M%SZ)"
+fi
+
+echo 1>&2 "workdir: $WORKDIR"
+
+mkdir -p "$WORKDIR/meta"
+make -f "$META" -j"$META_JOBS" -C "$WORKDIR/meta"
