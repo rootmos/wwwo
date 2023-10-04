@@ -236,7 +236,7 @@ and activity_snippet = let open Github_t in
   ]
 
 let twitch_snippet = let open Twitch_t in
-  let vods = Path.meta "twitch.json" |>
+  let vods = Path.meta "twitch.rootmos2.json" |>
       Utils.load_file |> Twitch_j.videos_of_string in
   let s v0 v1 = Lenient_iso8601.compare v1.date v0.date in
   let vods = List.sort s vods in

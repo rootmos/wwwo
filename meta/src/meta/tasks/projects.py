@@ -52,10 +52,10 @@ def main():
             P["url"] = r.html_url
 
         if "last_activity" not in P:
-            P["last_activity"] = r.pushed_at.isoformat() + "Z"
+            P["last_activity"] = r.pushed_at.isoformat()
 
         if "date_created" not in P:
-            P["date_created"] = r.created_at.isoformat() + "Z"
+            P["date_created"] = r.created_at.isoformat()
 
         ps[P["name"]] = P
     print(json.dumps(list(ps.values())))

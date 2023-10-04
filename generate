@@ -28,7 +28,7 @@ fi
 echo 1>&2 "workdir: $WORKDIR"
 
 mkdir -p "$WORKDIR/meta"
-make -f "$META" -j"$META_JOBS" -C "$WORKDIR/meta"
+make -f "$META" -j"$META_JOBS" -C "$WORKDIR/meta" PROJECTS_SPEC="$ROOT/projects.json"
 
 GENERATOR_EXE=${GENERATOR_EXE-}
 if [ -z "$GENERATOR_EXE" ]; then
