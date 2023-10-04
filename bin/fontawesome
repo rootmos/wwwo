@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
+TARGET=${TARGET-$SCRIPT_DIR/../.fontawesome}
+
+. "$SCRIPT_DIR/fetch.sh"
+
+mkdir -p "$TARGET"
+
+export FETCH_CACHE="$TARGET/.cache"
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+fetch -s "https://use.fontawesome.com/releases/v5.9.0/fontawesome-free-5.9.0-web.zip" \
+    "800b9aea20e4ae9425b6b8f593d14fbf6a92856abbc22b90f32148097e167f45" \
+    "$TMP/fa.zip"
+
+if [ -n "${1-}" ]; then
+    unzip "$TMP/fa.zip" -d "$TMP/root"
+    mkdir -p "$1"
+    cp -rv "$TMP/root/fontawesome-free-"*"-web/"* "$1"
+fi

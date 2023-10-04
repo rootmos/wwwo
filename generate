@@ -41,7 +41,13 @@ if [ -z "$GENERATOR_EXE" ]; then
     fi
 fi
 
-cp -rv "$ROOT/content" "$WORKDIR/content"
+if [ ! -d "$WORKDIR/content" ]; then
+    cp -rv "$ROOT/content" "$WORKDIR/content"
+fi
+
+if [ ! -d "$WORKDIR/fa" ]; then
+    "$SCRIPT_DIR/bin/fontawesome" "$WORKDIR/fa"
+fi
 
 export WEBROOT="$WORKDIR/webroot"
 mkdir -p "$WEBROOT"

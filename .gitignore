@@ -9,6 +9,5 @@ venv
 fa
 fa.zip
 
-webroot
-
+.fontawesome
 .workdirs

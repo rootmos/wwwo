@@ -26,7 +26,7 @@ RUN apk update && apk add \
     bash make gcc musl-dev \
     python3 py3-pip \
     g++ cmake autoconf automake libtool elfutils-dev python3-dev \
-    tidyhtml
+    wget tidyhtml
 
 WORKDIR /workdir
 
@@ -52,6 +52,7 @@ RUN bin/python-install lambda
 
 COPY --from=ocaml-builder /usr/bin/wwwo-generator /usr/bin/wwwo-generator
 
-# RUN make fa
+COPY bin/fontawesome bin/
+RUN bin/fontawesome
 
 ENTRYPOINT [ "/usr/bin/wwwo-lambda" ]

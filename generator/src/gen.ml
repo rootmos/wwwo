@@ -11,6 +11,7 @@ module Path = struct
   let style = Filename.concat @@ Filename.concat root "css"
   let meta = Filename.concat "meta"
   let src = Filename.concat "src"
+  let js = Filename.concat @@ Filename.concat root "js"
 end
 
 let livejs_src = "http://livejs.com/live.js"
@@ -169,7 +170,7 @@ let practice_page =
       minutes = (Float.round @@ s /. 6.) /. 10.;
     })
     |> List.of_seq |> Practice_j.string_of_data in
-  let js = Path.src "practice.js" |> Utils.load_file in
+  let js = Path.js "practice.js" |> Utils.load_file in
   let r s = let id = String.sub s.sha1 0 7 in [
     text s.title;
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 s.date;
