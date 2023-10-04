@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import requests
 import os
 import stat
@@ -99,6 +97,6 @@ def vods(user_id, token=None, typ=None):
 
     return vs
 
-if __name__ == "__main__":
+def main():
     vs = vods(64348860, typ="highlight")
     print(json.dumps(vs))

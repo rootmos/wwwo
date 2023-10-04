@@ -1,17 +1,16 @@
-#!/usr/bin/env python3
-
 import boto3
 import json
 import argparse
+
 from concurrent.futures import ThreadPoolExecutor
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Grab metadata about files stored on s3")
-    parser.add_argument("--prefix", action="store")
-    parser.add_argument("--profile", action="store")
+    parser = argparse.ArgumentParser(description="Grab metadata about sounds stored on s3")
+    parser.add_argument("--prefix")
+    parser.add_argument("--profile")
     return parser.parse_args()
 
-if __name__ == "__main__":
+def main():
     args = parse_args()
 
     session = boto3.Session(profile_name=args.profile)
