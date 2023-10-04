@@ -3,6 +3,7 @@ import json
 import os
 import re
 import requests
+import base64
 
 import boto3
 
@@ -27,16 +28,24 @@ def fetch_secret(arn, profile=None):
     sm = session.client(service_name="secretsmanager", region_name=arn.split(":")[3])
     return sm.get_secret_value(SecretId=arn)["SecretString"]
 
+def download_thumbnail(url_template, width, height):
+    url = url_template.replace("%{width}", str(width)).replace("%{height}", str(height))
+    r = requests.get(url)
+    return str(base64.b64encode(r.content), "UTF-8")
+
 class Crawler:
     helix_url = "https://api.twitch.tv/helix"
     oauth2_url = "https://id.twitch.tv/oauth2"
 
-    def __init__(self):
+    def __init__(self, thumbnail_width, thumbnail_height):
         self.client_id = os.environ["TWITCH_CLIENT_ID"]
         self.client_secret = fetch_secret(os.environ["TWITCH_CLIENT_SECRET_ARN"])
 
         self._token = None
         self._user_id = None
+
+        self.thumbnail_width = thumbnail_width
+        self.thumbnail_height = thumbnail_height
 
     @property
     def token(self):
@@ -53,7 +62,6 @@ class Crawler:
         return self._token
 
     def vods(self, user_id, typ=None):
-        print(typ)
         h = {
             "Client-ID": self.client_id,
             "Authorization": f"Bearer {self.token}",
@@ -76,6 +84,7 @@ class Crawler:
                     "url": i["url"],
                     "duration": float(parse_duration(i["duration"])),
                     "date": i["published_at"],
+                    "thumbnail": download_thumbnail(i["thumbnail_url"], self.thumbnail_width, self.thumbnail_height),
                 }
 
             if "cursor" not in j["pagination"]: break
@@ -99,6 +108,9 @@ def parse_args():
 
     parser.add_argument("--type", default="highlight")
 
+    parser.add_argument("--thumbnail-width", type=int, default=320)
+    parser.add_argument("--thumbnail-height", type=int, default=180)
+
     parser.add_argument("login")
 
     return parser.parse_args()
@@ -106,7 +118,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    c = Crawler()
+    c = Crawler(thumbnail_width=args.thumbnail_width, thumbnail_height=args.thumbnail_height)
 
     user_id = c.user_id(args.login)
     vs = list(c.vods(user_id, typ=args.type))
