@@ -52,7 +52,7 @@ RUN bin/python-install lambda
 
 COPY --from=ocaml-builder /usr/bin/wwwo-generator /usr/bin/wwwo-generator
 
-COPY bin/fontawesome bin/
+COPY bin/fontawesome bin/fetch.sh bin/
 RUN bin/fontawesome
 
 ENTRYPOINT [ "/usr/bin/wwwo-lambda" ]
