@@ -1,5 +1,8 @@
-gen
+.opam
+.switch*
+.deps*
 
+*.exe
 *.cmi
 *.cmo
 *_j.ml

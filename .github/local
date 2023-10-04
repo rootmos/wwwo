@@ -2,8 +2,21 @@
 
 set -o nounset -o pipefail -o errexit
 
-TMP=$(mktemp -d)
-trap 'rm -rf $TMP' EXIT
+DO_LOGIN=
+DO_BUILD=
+DO_RECONFIGURE=
+DO_INVOKE=
+while getopts "lbri-" OPT; do
+    case $OPT in
+        l) DO_LOGIN=1 ;;
+        b) DO_BUILD=1 ;;
+        r) DO_RECONFIGURE=1 ;;
+        i) DO_INVOKE=1 ;;
+        -) break ;;
+        ?) exit 2 ;;
+    esac
+done
+shift $((OPTIND-1))
 
 SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
 cd "$SCRIPT_DIR"/..
@@ -12,8 +25,18 @@ set -a
 . .env
 set +a
 
-"$SCRIPT_DIR"/docker-build > "$TMP/docker.image"
+if [ -n "$DO_LOGIN" ]; then
+    "$SCRIPT_DIR"/ecr-login > ".docker.image"
+fi
 
-"$SCRIPT_DIR"/reconfigure-lambda "$(<$TMP/docker.image)"
+if [ -n "$DO_BUILD" ]; then
+    "$SCRIPT_DIR"/docker-build > ".docker.image"
+fi
 
-"$SCRIPT_DIR"/invoke-lambda
+if [ -n "$DO_RECONFIGURE" ]; then
+    "$SCRIPT_DIR"/reconfigure-lambda ".docker.image"
+fi
+
+if [ -n "$DO_INVOKE" ]; then
+    "$SCRIPT_DIR"/invoke-lambda
+fi
