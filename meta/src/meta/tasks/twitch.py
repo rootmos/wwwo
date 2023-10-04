@@ -1,17 +1,10 @@
-import requests
-import os
-import stat
-import re
+import argparse
 import json
+import os
+import re
+import requests
 
-helix_url = "https://api.twitch.tv/helix"
-oauth2_url = "https://id.twitch.tv/oauth2"
-
-client_id = "dqfe0to2kp1pj0yvs3rpvuupdn1u6d"
-with open(os.path.expanduser("~/.twitch.client-secret"), "r") as f:
-    client_secret = f.read().split('\n')[0]
-
-token_path = os.path.expanduser("~/.twitch.token")
+import boto3
 
 def parse_duration(string):
     p = re.compile("([0-9]+)([dDhHmMsS])")
@@ -29,74 +22,92 @@ def parse_duration(string):
             secs += n * 60 * 60 * 24
     return secs
 
-def new_token():
-    params = {
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "grant_type": "client_credentials",
-        "scope": "",
-    }
-    r = requests.post(oauth2_url + "/token", params=params)
-    r.raise_for_status()
-    return r.json()["access_token"]
+def fetch_secret(arn, profile=None):
+    session = boto3.Session(profile_name=profile)
+    sm = session.client(service_name="secretsmanager", region_name=arn.split(":")[3])
+    return sm.get_secret_value(SecretId=arn)["SecretString"]
 
-def validate_token(t):
-    r = requests.get(oauth2_url + "/validate", headers={ "Authorization": f"OAuth {t}" })
-    if r.status_code == 401:
-        return False
-    r.raise_for_status()
-    return True
+class Crawler:
+    helix_url = "https://api.twitch.tv/helix"
+    oauth2_url = "https://id.twitch.tv/oauth2"
 
-def get_token():
-    t = None
+    def __init__(self):
+        self.client_id = os.environ["TWITCH_CLIENT_ID"]
+        self.client_secret = fetch_secret(os.environ["TWITCH_CLIENT_SECRET_ARN"])
 
-    if os.path.exists(token_path):
-        with open(token_path, "r") as f:
-            t = f.read()
+        self._token = None
+        self._user_id = None
 
-    if t is not None:
-        if not validate_token(t):
-            t = None
+    @property
+    def token(self):
+        if self._token is None:
+            params = {
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "grant_type": "client_credentials",
+                "scope": "",
+            }
+            r = requests.post(Crawler.oauth2_url + "/token", params=params)
+            r.raise_for_status()
+            self._token = r.json()["access_token"]
+        return self._token
 
-    if t is None:
-        t = new_token()
-        with open(token_path, "w") as f:
-            f.write(t)
-        os.chmod(token_path, 0o600)
+    def vods(self, user_id, typ=None):
+        print(typ)
+        h = {
+            "Client-ID": self.client_id,
+            "Authorization": f"Bearer {self.token}",
+        }
+        p = { "user_id": user_id }
+        vs = []
 
-    return t
+        while True:
+            r = requests.get(Crawler.helix_url + "/videos", params=p, headers=h)
+            r.raise_for_status()
+            j = r.json()
+            for i in j["data"]:
+                if typ is not None:
+                    if typ != i["type"]:
+                        break
 
-def vods(user_id, token=None, typ=None):
-    token = token or get_token()
-    h = {
-        "Client-ID": client_id,
-        "Authorization": f"Bearer {token}",
-    }
-    p = { "user_id": user_id }
-    vs = []
+                yield {
+                    "video_id": i["id"],
+                    "title": i["title"],
+                    "url": i["url"],
+                    "duration": float(parse_duration(i["duration"])),
+                    "date": i["published_at"],
+                }
 
-    while True:
-        r = requests.get(helix_url + "/videos", params=p, headers=h)
+            if "cursor" not in j["pagination"]: break
+            p["after"] = j["pagination"]["cursor"]
+
+        return vs
+
+    def user_id(self, login):
+        h = {
+            "Client-ID": self.client_id,
+            "Authorization": f"Bearer {self.token}",
+        }
+        p = { "login": [login] }
+        r = requests.get(Crawler.helix_url + "/users", params=p, headers=h)
         r.raise_for_status()
-        j = r.json()
-        for i in j["data"]:
-            if typ is not None:
-                if typ != i["type"]:
-                    break
+        [u] = r.json()["data"]
+        return u["id"]
 
-            vs.append({
-                "video_id": i["id"],
-                "title": i["title"],
-                "url": i["url"],
-                "duration": float(parse_duration(i["duration"])),
-                "date": i["published_at"],
-            })
+def parse_args():
+    parser = argparse.ArgumentParser(description="Fetch metadata about Twitch vods")
 
-        if "cursor" not in j["pagination"]: break
-        p["after"] = j["pagination"]["cursor"]
+    parser.add_argument("--type", default="highlight")
 
-    return vs
+    parser.add_argument("login")
+
+    return parser.parse_args()
 
 def main():
-    vs = vods(64348860, typ="highlight")
+    args = parse_args()
+
+    c = Crawler()
+
+    user_id = c.user_id(args.login)
+    vs = list(c.vods(user_id, typ=args.type))
     print(json.dumps(vs))
