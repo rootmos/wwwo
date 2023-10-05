@@ -52,11 +52,11 @@ if [ -z "$GENERATOR_EXE" ]; then
 fi
 echo 1>&2 "using generator: $(which "$GENERATOR_EXE")"
 
-if [ ! -d "$WORKDIR/fa" ]; then
-    "$SCRIPT_DIR/bin/fontawesome" "$WORKDIR/fa"
-fi
+"$SCRIPT_DIR/bin/fontawesome" "$WORKDIR/fa"
 
 export WEBROOT="$WORKDIR/webroot"
 mkdir -p "$WEBROOT"
 
 env -C "$WORKDIR" ENV="$ENVIRONMENT" "$GENERATOR_EXE"
+
+find "$WEBROOT/$ENVIRONMENT" -name "*.html" -exec tidy -quiet -errors --doctype=html5 {} \;
