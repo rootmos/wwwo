@@ -4,10 +4,6 @@
 build
 **/*.egg-info
 
-venv
-
-fa
-fa.zip
-
 .fontawesome
 .workdirs
+workdir

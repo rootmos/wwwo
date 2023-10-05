@@ -19,11 +19,13 @@ done
 shift $((OPTIND-1))
 
 SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
-cd "$SCRIPT_DIR"/..
+ROOT=${ROOT-"$SCRIPT_DIR"/..}
 
-set -a
-. .env
-set +a
+if [ -f "$ROOT/.env" ]; then
+    set -a
+    . "$ROOT/.env"
+    set +a
+fi
 
 if [ -n "$DO_LOGIN" ]; then
     "$SCRIPT_DIR"/ecr-login > ".docker.image"
