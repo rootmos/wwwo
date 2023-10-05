@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+
+import argparse
+import datetime
+import getpass
+import json
+import os
+import random
+import shutil
+import socket
+import subprocess
+import sys
+import time
+import tomllib
+
+situations = ["now", "os", "git", "lsb" ]
+formats = [ "json", "env", "html", "c" ]
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+            description="Where, who, and what am I?",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument("-C", "--directory", metavar="DIR", default=os.getcwd(), help="change directory to DIR")
+    parser.add_argument("-o", "--output")
+
+    for s in situations:
+        parser.add_argument(f"--{s}", metavar="BOOL", action=argparse.BooleanOptionalAction,
+            default = True,
+            help = f"figure out the {s} situation")
+
+    parser.add_argument("-s", "--style", choices=formats, default=formats[0])
+    parser.add_argument("-p", "--var-prefix", default="BUILD_")
+
+    return parser.parse_args()
+
+def figure_out_now(now=None):
+    now = now or datetime.datetime.now().astimezone()
+    return {
+        "iso8601": now.isoformat(timespec="seconds"),
+        "epoch": time.mktime(now.timetuple()),
+    }
+
+def figure_out_os():
+    return {
+        "pid": os.getpid(),
+        "cwd": os.getcwd(),
+        "uid": os.getuid(),
+        "gid": os.getgid(),
+        "user": getpass.getuser(),
+        "hostname": socket.gethostname(),
+    }
+
+def figure_out_lsb():
+    lsb_exe = shutil.which("lsb_release")
+    if not lsb_exe:
+        return None
+
+    p = subprocess.run(["lsb_relase", "--all"], executable=lsb_exe, check=True, text=True, stdout=subprocess.PIPE)
+    i = {}
+    for l in p.stdout.splitlines():
+        (k, v) = l.split(":")
+        i[k] = v.strip()
+    return i
+
+def figure_out_git():
+    git_exe = shutil.which("git")
+    if not git_exe:
+        return None
+
+    p = subprocess.run([git_exe, "rev-parse", "--is-inside-work-tree"], stderr=subprocess.DEVNULL)
+    if p.returncode != 0:
+        return None
+
+    def git(*args):
+        p = subprocess.run([git_exe] + list(args), check=True, text=True, stdout=subprocess.PIPE)
+        for l in p.stdout.splitlines():
+            yield l.rstrip()
+
+    def git1(*args):
+        return list(git(*args))[0]
+
+    dirty = len(list(git("status", "--porcelain"))) > 0
+
+    d = {
+        "ref_id": git1("rev-parse", "HEAD"),
+        "branch": git1("rev-parse", "--abbrev-ref", "HEAD"),
+        "dirty": dirty,
+    }
+
+    if dirty:
+        d["user_name"] = git1("config", "user.name")
+        d["user_email"] = git1("config", "user.email")
+        d["signing_key"] = git1("config", "user.signingkey")
+    else:
+        d["user_name"] = git1("--no-pager", "log", "--format=format:%an", "-n1")
+        d["user_email"] = git1("--no-pager", "log", "--format=format:%ae", "-n1")
+        d["author_date"] = git1("--no-pager", "log", "--format=format:%aI", "-n1")
+        d["signing_key"] = git1("--no-pager", "log", "--format=format:%GP", "-n1")
+
+    return d
+
+def dump_json(d, stream):
+    stream.write(json.dumps(d))
+
+def dump_env(d, stream):
+    for k, v in d.items():
+        stream.write(f"{k.upper()}=")
+        if v == True:
+            stream.write("1")
+        elif v == False:
+            pass
+        else:
+            stream.write(f'"{v}"')
+        stream.write("\n")
+
+def dump(d, fmt="json", stream=None):
+    globals()["dump_" + fmt](d, stream)
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    if args.directory:
+        os.chdir(args.directory)
+
+    ls = locals()
+    situation = {}
+    ss = vars(args)
+    for s in situations:
+        if s in ss and not ss[s]:
+            continue
+        i = ls[f"figure_out_{s}"]()
+        if i is not None:
+            situation[s] = i
+
+    f = open(args.output, "w") if args.output else sys.stdout
+    dump(situation, fmt=args.style, stream=f)
