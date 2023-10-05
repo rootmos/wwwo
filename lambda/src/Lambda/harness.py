@@ -19,6 +19,8 @@ def parse_args():
     parser.add_argument("--log", default=env("LOG_LEVEL", "WARN"), help="set log level")
     parser.add_argument("--log-file", metavar="FILE", default=env("LOG_FILE"), help="redirect stdout and stderr to FILE")
 
+    parser.add_argument("-C", "--directory", metavar="DIR", help="change to directory DIR before executing handler")
+
     return parser.parse_args()
 
 args = None
@@ -45,8 +47,22 @@ def setup_logger(level, ctx):
 
     l.addHandler(ch)
 
+    return l, ch
+
 def entrypoint(event, ctx):
+    assert(args is not None)
     remove_default_logging()
-    logger = setup_logger(args.log, ctx)
-    from . import main
-    return main.main(event, ctx)
+    logger, handler = setup_logger(args.log, ctx)
+
+    try:
+        if args.directory is not None:
+            logger.debug(f"changing directory: {args.directory}")
+            os.chdir(args.directory)
+        else:
+            logger.debug(f"working directory: {os.getcwd()}")
+        from . import main
+        return main.main(event, ctx)
+    except Exception as e:
+        logger.error(e)
+    finally:
+        handler.flush()

@@ -37,7 +37,10 @@ projects.json: $(PROJECTS_SPEC)
 %.json:
 	$(META_BIN_PREFIX)list --prefix="$*" rootmos-static --output="$@"
 
-projects/%/gallery.json projects/%/preamble.md:
+projects/%/gallery.json:
 	@mkdir -p "projects/$*"
 	$(META_BIN_PREFIX)project gallery "$*" rootmos-static --output="projects/$*/gallery.json"
+
+projects/%/preamble.md:
+	@mkdir -p "projects/$*"
 	$(META_BIN_PREFIX)project preamble "$*" rootmos-builds --output="projects/$*/preamble.md"

@@ -31,7 +31,7 @@ if [ -z "$WORKDIR" ]; then
     WORKDIR="$ROOT/.workdirs/$(date --utc +%FT%H%M%SZ)"
 fi
 
-WORKDIR=$(realpath "$WORKDIR")
+WORKDIR=$(realpath -m "$WORKDIR")
 echo 1>&2 "workdir: $WORKDIR"
 mkdir -p "$WORKDIR"
 
@@ -50,13 +50,14 @@ if [ -z "$GENERATOR_EXE" ]; then
         fi
     fi
 fi
-echo 1>&2 "using generator: $(which "$GENERATOR_EXE")"
+GENERATOR_EXE=$(which "$GENERATOR_EXE")
+echo 1>&2 "using generator: $GENERATOR_EXE"
 
 "$SCRIPT_DIR/bin/fontawesome" "$WORKDIR/fa"
 
 export WEBROOT="$WORKDIR/webroot"
 mkdir -p "$WEBROOT"
 
-env -C "$WORKDIR" ENV="$ENVIRONMENT" "$GENERATOR_EXE"
+(cd "$WORKDIR" && ENV="$ENVIRONMENT" "$GENERATOR_EXE")
 
 find "$WEBROOT/$ENVIRONMENT" -name "*.html" -exec tidy -quiet -errors --doctype=html5 {} \;

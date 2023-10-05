@@ -37,21 +37,21 @@ RUN bin/python-deps lambda
 COPY meta/Pipfile meta/Pipfile.lock meta/pyproject.toml meta/setup.cfg meta/
 RUN bin/python-deps meta
 
-# python; install: lambda
-COPY lambda/src lambda/src
-RUN bin/python-install lambda
-
-# python; install: meta
-COPY meta/src meta/src
-RUN bin/python-install meta
-
 # ocaml: install
 COPY generator/Makefile generator/
 COPY generator/src generator/src
 RUN buildml -C generator -m install
 
+# python; install: meta
+COPY meta/src meta/src
+RUN bin/python-install meta
+
 # content
 COPY generate meta.mk .
 COPY content content
 
-ENTRYPOINT [ "/usr/bin/wwwo-lambda" ]
+# python; install: lambda
+COPY lambda/src lambda/src
+RUN bin/python-install lambda
+
+ENTRYPOINT [ "/usr/bin/wwwo-lambda", "-C", "/workdir" ]

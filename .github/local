@@ -28,15 +28,15 @@ if [ -f "$ROOT/.env" ]; then
 fi
 
 if [ -n "$DO_LOGIN" ]; then
-    "$SCRIPT_DIR"/ecr-login > ".docker.image"
+    "$SCRIPT_DIR"/ecr-login
 fi
 
 if [ -n "$DO_BUILD" ]; then
-    "$SCRIPT_DIR"/docker-build > ".docker.image"
+    "$SCRIPT_DIR"/docker-build > "$ROOT/.docker.image"
 fi
 
 if [ -n "$DO_RECONFIGURE" ]; then
-    "$SCRIPT_DIR"/reconfigure-lambda ".docker.image"
+    "$SCRIPT_DIR"/reconfigure-lambda "$(<"$ROOT/.docker.image")"
 fi
 
 if [ -n "$DO_INVOKE" ]; then

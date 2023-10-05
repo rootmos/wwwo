@@ -8,7 +8,7 @@ EXE_PREFIX ?= wwwo-
 
 .PHONY: install
 install: build
-	install -D "src/gen.exe" "$(DESTDIR)$(PREFIX)/bin/$(EXE_PREFIX)generator"
+	install -sD "src/gen.exe" "$(DESTDIR)$(PREFIX)/bin/$(EXE_PREFIX)generator"
 
 .PHONY: clean
 clean:

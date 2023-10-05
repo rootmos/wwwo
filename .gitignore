@@ -2,7 +2,7 @@
 .*.flag
 
 build
-**/*.egg-info
+*.egg-info
 
 .fontawesome
 .workdirs
