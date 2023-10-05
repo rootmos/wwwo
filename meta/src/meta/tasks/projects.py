@@ -3,29 +3,24 @@ import json
 import os
 import sys
 
-import boto3
+from meta.common import fetch_secret, output
+
 from github import Github
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Grab project metadata")
+    parser = argparse.ArgumentParser(description="Grab projects metadata")
 
-    parser.add_argument("--profile")
+    parser.add_argument("-o", "--output")
 
     parser.add_argument("--user")
     parser.add_argument("projects_spec", metavar="PROJECTS_SPEC")
 
     return parser.parse_args()
 
-def fetch_github_token(args):
-    arn = os.environ["GITHUB_TOKEN_ARN"]
-    session = boto3.Session(profile_name=args.profile)
-    sm = session.client(service_name="secretsmanager", region_name=arn.split(":")[3])
-    return sm.get_secret_value(SecretId=arn)["SecretString"]
-
 def main():
     args = parse_args()
 
-    g = Github(fetch_github_token(args))
+    g = Github(fetch_secret(os.environ["GITHUB_TOKEN_ARN"]))
 
     user = args.user
     if user is None:
@@ -58,4 +53,6 @@ def main():
             P["date_created"] = r.created_at.isoformat()
 
         ps[P["name"]] = P
-    print(json.dumps(list(ps.values())))
+
+    with output(args.output) as f:
+        f.write(json.dumps(list(ps.values())))

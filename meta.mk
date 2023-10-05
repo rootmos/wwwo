@@ -20,24 +20,24 @@ META += projects/stellar-drift/preamble.md
 fetch: $(META)
 
 sounds.json:
-	$(META_BIN_PREFIX)sounds > "$@"
+	$(META_BIN_PREFIX)sounds --output="$@"
 
 sounds.%.json:
-	$(META_BIN_PREFIX)sounds --prefix="$*" > "$@"
+	$(META_BIN_PREFIX)sounds --prefix="$*" --output="$@"
 
 twitch.%.json:
-	$(META_BIN_PREFIX)twitch "$*" > "$@"
+	$(META_BIN_PREFIX)twitch "$*" --output="$@"
 
 github-activity.%.commits.json:
-	$(META_BIN_PREFIX)github "$*" > "$@"
+	$(META_BIN_PREFIX)github "$*" --output="$@"
 
 projects.json: $(PROJECTS_SPEC)
-	$(META_BIN_PREFIX)projects "$<" > "$@"
+	$(META_BIN_PREFIX)projects "$<" --output="$@"
 
 %.json:
-	$(META_BIN_PREFIX)list --prefix="$*" rootmos-static > "$@"
+	$(META_BIN_PREFIX)list --prefix="$*" rootmos-static --output="$@"
 
 projects/%/gallery.json projects/%/preamble.md:
 	@mkdir -p "projects/$*"
-	$(META_BIN_PREFIX)project gallery "$*" rootmos-static > "projects/$*/gallery.json"
-	$(META_BIN_PREFIX)project preamble "$*" rootmos-builds > "projects/$*/preamble.md"
+	$(META_BIN_PREFIX)project gallery "$*" rootmos-static --output="projects/$*/gallery.json"
+	$(META_BIN_PREFIX)project preamble "$*" rootmos-builds --output="projects/$*/preamble.md"

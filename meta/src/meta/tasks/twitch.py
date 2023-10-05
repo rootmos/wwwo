@@ -5,7 +5,7 @@ import re
 import requests
 import base64
 
-import boto3
+from meta.common import fetch_secret, output
 
 def parse_duration(string):
     p = re.compile("([0-9]+)([dDhHmMsS])")
@@ -22,11 +22,6 @@ def parse_duration(string):
         elif t == "d" or t == "D":
             secs += n * 60 * 60 * 24
     return secs
-
-def fetch_secret(arn, profile=None):
-    session = boto3.Session(profile_name=profile)
-    sm = session.client(service_name="secretsmanager", region_name=arn.split(":")[3])
-    return sm.get_secret_value(SecretId=arn)["SecretString"]
 
 def download_thumbnail(url_template, width, height):
     url = url_template.replace("%{width}", str(width)).replace("%{height}", str(height))
@@ -106,6 +101,8 @@ class Crawler:
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch metadata about Twitch vods")
 
+    parser.add_argument("-o", "--output")
+
     parser.add_argument("--type", default="highlight")
 
     parser.add_argument("--thumbnail-width", type=int, default=320)
@@ -122,4 +119,5 @@ def main():
 
     user_id = c.user_id(args.login)
     vs = list(c.vods(user_id, typ=args.type))
-    print(json.dumps(vs))
+    with output(args.output) as f:
+        f.write(json.dumps(vs))

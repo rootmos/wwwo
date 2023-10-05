@@ -18,8 +18,20 @@ fetch -s "https://use.fontawesome.com/releases/v5.9.0/fontawesome-free-5.9.0-web
     "800b9aea20e4ae9425b6b8f593d14fbf6a92856abbc22b90f32148097e167f45" \
     "$TMP/fa.zip"
 
+PREFIX="fontawesome-free-5.9.0-web"
+
+EXTRACT=()
+EXTRACT+=("svgs/solid/share-alt.svg")
+EXTRACT+=("svgs/brands/keybase.svg")
+EXTRACT+=("svgs/brands/twitch.svg")
+EXTRACT+=("svgs/brands/soundcloud.svg")
+EXTRACT+=("svgs/brands/github.svg")
+
 if [ -n "${1-}" ]; then
-    unzip "$TMP/fa.zip" -d "$TMP/root"
-    mkdir -p "$1"
-    cp -rv "$TMP/root/fontawesome-free-"*"-web/"* "$1"
+    ARGS=()
+    for e in "${EXTRACT[@]}"; do
+        ARGS+=("$PREFIX/$e")
+    done
+    unzip "$TMP/fa.zip" "${ARGS[@]}" -d "$TMP/root"
+    rsync -av "$TMP/root/$PREFIX/" "$1"
 fi

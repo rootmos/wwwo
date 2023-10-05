@@ -3,8 +3,9 @@ import json
 import argparse
 import os
 
-import boto3
 from github import Github
+
+from meta.common import fetch_secret, output
 
 def commits(u, N):
     cs = []
@@ -34,23 +35,18 @@ def commits(u, N):
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch recent GitHub activity")
 
-    parser.add_argument("--profile")
+    parser.add_argument("-o", "--output")
 
     parser.add_argument("--commits", metavar='N', dest="commits", type=int, default=10)
     parser.add_argument("user")
 
     return parser.parse_args()
 
-def fetch_github_token(args):
-    arn = os.environ["GITHUB_TOKEN_ARN"]
-    session = boto3.Session(profile_name=args.profile)
-    sm = session.client(service_name="secretsmanager", region_name=arn.split(":")[3])
-    return sm.get_secret_value(SecretId=arn)["SecretString"]
-
 def main():
     args = parse_args()
 
-    g = Github(fetch_github_token(args))
+    g = Github(fetch_secret(os.environ["GITHUB_TOKEN_ARN"]))
 
     u = g.get_user(args.user)
-    print(json.dumps(commits(u, args.commits)))
+    with output(args.output) as f:
+        f.write(json.dumps(commits(u, args.commits)))

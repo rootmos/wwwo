@@ -2,6 +2,8 @@ import json
 import argparse
 from urllib.parse import quote as urlencode
 
+from meta.common import output
+
 import boto3
 
 def url(o):
@@ -14,9 +16,8 @@ def render(o):
         "last_modified": o.last_modified.isoformat(),
     }
 
-def objects(bucket, prefix=None, profile=None):
-    session = boto3.Session(profile_name=profile)
-    s3 = session.resource("s3")
+def objects(bucket, prefix=None):
+    s3 = boto3.resource("s3")
     bucket = s3.Bucket(bucket)
 
     for o in bucket.objects.all():
@@ -26,7 +27,8 @@ def objects(bucket, prefix=None, profile=None):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Grab metadata about files stored on s3")
-    parser.add_argument("--profile")
+
+    parser.add_argument("-o", "--output")
 
     parser.add_argument("--prefix")
     parser.add_argument("bucket")
@@ -36,5 +38,6 @@ def parse_args():
 def main():
     args = parse_args()
 
-    os = list(objects(args.bucket, prefix=args.prefix, profile=args.profile))
-    print(json.dumps(os))
+    os = list(objects(args.bucket, prefix=args.prefix))
+    with output(args.output) as f:
+        f.write(json.dumps(os))
