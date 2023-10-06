@@ -1,8 +1,18 @@
-.env
-.*.flag
+.git
+.github
+**/tmp
+**/.gitignore
 
-build
+**/.k
+
+.env
+**/.*.flag
+**/.docker.image
+
+**/build
+**/dist
 **/*.egg-info
+**/__pycache__
 
 .fontawesome
 .workdirs

@@ -1,17 +1,8 @@
-FROM alpine:3.18.4
+FROM alpine:3.18.4 as generator-builder
 
-RUN apk update && apk add \
-    bash make gcc musl-dev \
-    opam \
-    python3 py3-pip \
-    g++ cmake autoconf automake libtool elfutils-dev python3-dev \
-    wget rsync tidyhtml
+RUN apk update && apk add bash make gcc musl-dev opam
 
 WORKDIR /workdir
-
-# fortawesome
-COPY bin/fontawesome bin/fetch.sh bin/
-RUN bin/fontawesome
 
 # ocaml: prepare
 COPY bin/buildml /usr/bin/
@@ -26,32 +17,70 @@ RUN buildml -C generator -s
 COPY generator/deps generator/
 RUN buildml -C generator -d
 
-# python: prepare
-COPY bin/python* bin/
-
-# python; deps: lambda
-COPY lambda/Pipfile lambda/Pipfile.lock lambda/pyproject.toml lambda/setup.cfg lambda/
-RUN bin/python-deps lambda
-
-# python; deps: meta
-COPY meta/Pipfile meta/Pipfile.lock meta/pyproject.toml meta/setup.cfg meta/
-RUN bin/python-deps meta
-
 # ocaml: install
 COPY generator/Makefile generator/
 COPY generator/src generator/src
 RUN buildml -C generator -m install
 
-# python; install: meta
-COPY meta/src meta/src
-RUN bin/python-install meta
 
-# content
+
+FROM alpine:3.18.4 as meta-builder
+
+RUN apk update && apk add bash python3 py3-pip
+
+WORKDIR /workdir
+
+COPY bin/buildpy /usr/bin/
+
+RUN buildpy -p
+
+COPY meta/Pipfile meta/Pipfile.lock meta/pyproject.toml meta/setup.cfg meta/
+RUN buildpy -C meta -d
+
+COPY meta/src meta/src
+RUN buildpy -C meta -b -T /meta.tar.gz
+
+
+
+FROM alpine:3.18.4 as lambda-builder
+
+RUN apk update && apk add bash \
+    python3-dev py3-pip \
+    make gcc musl-dev g++ cmake autoconf automake libtool elfutils-dev
+
+WORKDIR /workdir
+
+COPY bin/buildpy /usr/bin/
+
+RUN buildpy -p
+
+COPY lambda/Pipfile lambda/Pipfile.lock lambda/pyproject.toml lambda/setup.cfg lambda/
+RUN buildpy -C lambda -d
+
+COPY lambda/src lambda/src
+RUN buildpy -C lambda -b -T /lambda.tar.gz
+
+
+
+FROM alpine:3.18.4
+
+RUN apk update && apk add bash \
+    python3 wget rsync tidyhtml
+
+WORKDIR /workdir
+
+COPY bin/fontawesome bin/fetch.sh bin/
+RUN bin/fontawesome
+
+COPY --from=lambda-builder /lambda.tar.gz /
+RUN tar xf /lambda.tar.gz -C /
+
+COPY --from=meta-builder /meta.tar.gz /
+RUN tar xf /meta.tar.gz -C /
+
+COPY --from=generator-builder /usr/bin/wwwo-generator /usr/bin/wwwo-generator
+
 COPY generate meta.mk .
 COPY content content
-
-# python; install: lambda
-COPY lambda/src lambda/src
-RUN bin/python-install lambda
 
 ENTRYPOINT [ "/usr/bin/wwwo-lambda", "-C", "/workdir" ]

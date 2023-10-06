@@ -2,6 +2,12 @@
 
 set -o nounset -o pipefail -o errexit
 
+if [ -f "./.env" ]; then
+    set -a
+    . "./.env"
+    set +a
+fi
+
 LAMBDA_ARN=${LAMBDA_ARN-$1}
 REGION=$(cut -d':' -f 4 <<< "$LAMBDA_ARN")
 

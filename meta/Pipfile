@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-meta = {file = ".", editable = true}
+meta = {file = "."}
 
 [dev-packages]
 

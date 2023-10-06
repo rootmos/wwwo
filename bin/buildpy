@@ -1,0 +1,104 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+export PIP_ROOT_USER_ACTION=ignore
+
+ACTION=bundle
+BUILDPY_PROJECT_ROOT=${BUILDPY_PROJECT_ROOT-}
+BUILDPY_TARGET=
+TARBALL=
+while getopts "t:C:pdbT:-" OPT; do
+    case $OPT in
+        t) BUILDPY_TARGET=$OPTARG ;;
+        C) cd $OPTARG ;;
+        p) ACTION=prepare ;;
+        d) ACTION=deps ;;
+        b) ACTION=bundle ;;
+        T) TARBALL=$OPTARG ;;
+        -) break ;;
+        ?) exit 2 ;;
+    esac
+done
+
+if [ "$ACTION" = "prepare" ]; then
+    exec pip install "pipenv >=2023.9.8"
+fi
+
+if [ -z "$BUILDPY_PROJECT_ROOT" ]; then
+    BUILDPY_PROJECT_ROOT=$(pwd)
+fi
+
+if [ -z "$BUILDPY_TARGET" ]; then
+    BUILDPY_TARGET=$(basename "$BUILDPY_PROJECT_ROOT")
+fi
+
+if [ -z "$TARBALL" ]; then
+    TARBALL=$(readlink -f "./$BUILDPY_TARGET.tar.gz")
+fi
+
+echo 1>&2 "installing $BUILDPY_TARGET: $BUILDPY_PROJECT_ROOT"
+cd "$BUILDPY_PROJECT_ROOT"
+
+if [ "$ACTION" = "deps" ]; then
+    PKG_DIRs=("src")
+    DUMMY_PKG_DIRs=()
+    for d in "${PKG_DIRs[@]}"; do
+        if [ ! -d "$d" ]; then
+            echo 1>&2 "preparing dummy package dir: $d"
+            DUMMY_PKG_DIRs+=("$d")
+            mkdir "$d"
+        fi
+    done
+
+    pipenv install
+
+    for d in "${DUMMY_PKG_DIRs[@]}"; do
+        echo 1>&2 "removing dummy package dir: $d"
+        find "$d" -type d -name "*.egg-info" -exec rm -rv {} +
+        rmdir "$d"
+    done
+
+    exit 0
+fi
+
+pipenv install .
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+cat <<EOF > "$TMP/scripts.py"
+import os
+import sys
+
+import setuptools.config.setupcfg
+
+c = setuptools.config.setupcfg.read_configuration("setup.cfg")
+ep = c["options"]["entry_points"]
+cs = ep["console_scripts"]
+
+venv = sys.argv[1]
+destdir = os.environ.get("DESTDIR", "/")
+prefix = os.environ.get("PREFIX", "/usr")
+
+for c in cs:
+    fn = c.split()[0]
+    src = os.path.join(venv, "bin", fn)
+    dst = os.path.join(destdir, prefix, "bin", fn)
+    sys.stderr.write(f"symlink: {dst} -> {src}\n")
+    os.symlink(src, dst)
+    sys.stdout.write(f"{dst}\n")
+EOF
+
+VENV=$(pipenv --venv)
+
+pipenv run python3 "$TMP/scripts.py" "$VENV" > "$TMP/scripts"
+mapfile -t SCRIPTS < "$TMP/scripts"
+
+echo 1>&2 "creating tarball $TARBALL:"
+echo 1>&2 "  $BUILDPY_PROJECT_ROOT"
+echo 1>&2 "  $VENV"
+for s in "${SCRIPTS[@]}"; do
+    echo 1>&2 "  $s"
+done
+tar -czf "$TARBALL" -C/ "$BUILDPY_PROJECT_ROOT" "$VENV" "${SCRIPTS[@]}"
