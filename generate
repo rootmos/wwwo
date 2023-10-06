@@ -31,7 +31,7 @@ if [ -z "$WORKDIR" ]; then
     WORKDIR="$ROOT/.workdirs/$(date --utc +%FT%H%M%SZ)"
 fi
 
-WORKDIR=$(realpath -m "$WORKDIR")
+WORKDIR=$(readlink -f "$WORKDIR")
 echo 1>&2 "workdir: $WORKDIR"
 mkdir -p "$WORKDIR"
 

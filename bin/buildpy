@@ -40,8 +40,12 @@ fi
 echo 1>&2 "installing $BUILDPY_TARGET: $BUILDPY_PROJECT_ROOT"
 cd "$BUILDPY_PROJECT_ROOT"
 
+export LC_ALL='en_US.UTF-8'
+export LANG='en_US.UTF-8'
+export PIPENV_VENV_IN_PROJECT=True
+
+PKG_DIRs=("src") # TODO: get from configuration
 if [ "$ACTION" = "deps" ]; then
-    PKG_DIRs=("src")
     DUMMY_PKG_DIRs=()
     for d in "${PKG_DIRs[@]}"; do
         if [ ! -d "$d" ]; then
@@ -95,10 +99,16 @@ VENV=$(pipenv --venv)
 pipenv run python3 "$TMP/scripts.py" "$VENV" > "$TMP/scripts"
 mapfile -t SCRIPTS < "$TMP/scripts"
 
-echo 1>&2 "creating tarball $TARBALL:"
-echo 1>&2 "  $BUILDPY_PROJECT_ROOT"
-echo 1>&2 "  $VENV"
-for s in "${SCRIPTS[@]}"; do
-    echo 1>&2 "  $s"
+INCLUDE=("$VENV")
+for p in "${PKG_DIRs[@]}"; do
+    INCLUDE+=("$BUILDPY_PROJECT_ROOT/$p")
 done
-tar -czf "$TARBALL" -C/ "$BUILDPY_PROJECT_ROOT" "$VENV" "${SCRIPTS[@]}"
+for s in "${SCRIPTS[@]}"; do
+    INCLUDE+=("$s")
+done
+
+echo 1>&2 "creating tarball $TARBALL:"
+for i in "${INCLUDE[@]}"; do
+    echo 1>&2 "  $i"
+done
+tar -czf "$TARBALL" -C/ "${INCLUDE[@]}"
