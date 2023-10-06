@@ -2,7 +2,13 @@
 
 set -o nounset -o pipefail -o errexit
 
+export LC_ALL='en_US.UTF-8'
+export LANG='en_US.UTF-8'
+export PIPENV_VENV_IN_PROJECT=True
 export PIP_ROOT_USER_ACTION=ignore
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
 
 ACTION=bundle
 BUILDPY_PROJECT_ROOT=${BUILDPY_PROJECT_ROOT-}
@@ -40,11 +46,15 @@ fi
 echo 1>&2 "installing $BUILDPY_TARGET: $BUILDPY_PROJECT_ROOT"
 cd "$BUILDPY_PROJECT_ROOT"
 
-export LC_ALL='en_US.UTF-8'
-export LANG='en_US.UTF-8'
-export PIPENV_VENV_IN_PROJECT=True
+cat <<EOF > "$TMP/package-dirs.py"
+import setuptools.config.pyprojecttoml
+c = setuptools.config.pyprojecttoml.read_configuration("pyproject.toml")
+for d in c["tool"]["setuptools"]["package-dir"].values():
+    print(d)
+EOF
+pipenv run python3 "$TMP/package-dirs.py" > "$TMP/package-dirs"
+mapfile -t PKG_DIRs < "$TMP/package-dirs"
 
-PKG_DIRs=("src") # TODO: get from configuration
 if [ "$ACTION" = "deps" ]; then
     DUMMY_PKG_DIRs=()
     for d in "${PKG_DIRs[@]}"; do
@@ -68,25 +78,18 @@ fi
 
 pipenv install .
 
-TMP=$(mktemp -d)
-trap 'rm -rf $TMP' EXIT
-
 cat <<EOF > "$TMP/scripts.py"
 import os
 import sys
 
-import setuptools.config.setupcfg
-
-c = setuptools.config.setupcfg.read_configuration("setup.cfg")
-ep = c["options"]["entry_points"]
-cs = ep["console_scripts"]
+import setuptools.config.pyprojecttoml
 
 venv = sys.argv[1]
 destdir = os.environ.get("DESTDIR", "/")
 prefix = os.environ.get("PREFIX", "/usr")
 
-for c in cs:
-    fn = c.split()[0]
+c = setuptools.config.pyprojecttoml.read_configuration("pyproject.toml")
+for fn in c["project"]["scripts"].keys():
     src = os.path.join(venv, "bin", fn)
     dst = os.path.join(destdir, prefix, "bin", fn)
     sys.stderr.write(f"symlink: {dst} -> {src}\n")

@@ -34,7 +34,7 @@ COPY bin/buildpy /usr/bin/
 
 RUN buildpy -p
 
-COPY meta/Pipfile meta/Pipfile.lock meta/pyproject.toml meta/setup.cfg meta/
+COPY meta/Pipfile meta/Pipfile.lock meta/pyproject.toml meta/
 RUN buildpy -C meta -d
 
 COPY meta/src meta/src
@@ -54,7 +54,7 @@ COPY bin/buildpy /usr/bin/
 
 RUN buildpy -p
 
-COPY lambda/Pipfile lambda/Pipfile.lock lambda/pyproject.toml lambda/setup.cfg lambda/
+COPY lambda/Pipfile lambda/Pipfile.lock lambda/pyproject.toml lambda/
 RUN buildpy -C lambda -d
 
 COPY lambda/src lambda/src
