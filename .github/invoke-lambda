@@ -27,4 +27,23 @@ echo 1>&2 "invoking lambda: $LAMBDA_ARN"
 
 aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
 
-jq -r .LogResult < "$TMP/result.json" | base64 -d
+EXIT=0
+
+STATUS_CODE=$(jq -r .StatusCode "$TMP/result.json")
+if [ "$STATUS_CODE" != 200 ]; then
+    echo 1>&2 "invocation status code: $STATUS_CODE != 200"
+    jq -r . "$TMP/result.json" | sed 's/^/  /' 1>&2
+    EXIT=1
+fi
+
+FUNCTION_ERROR=$(jq -r .FunctionError "$TMP/result.json")
+if [ "$FUNCTION_ERROR" != "null" ]; then
+    echo 1>&2 "invocation errored! ($FUNCTION_ERROR)"
+    jq -r . "$TMP/result.json" | sed 's/^/  /' 1>&2
+    EXIT=2
+fi
+
+echo 1>&2 "log:"
+jq -r .LogResult "$TMP/result.json" | base64 -d | sed 's/^/  /' 1>&2
+
+exit "$EXIT"

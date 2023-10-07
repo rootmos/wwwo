@@ -64,5 +64,6 @@ def entrypoint(event, ctx):
         return main.main(event, ctx)
     except Exception as e:
         logger.error(e)
+        raise
     finally:
         handler.flush()
