@@ -92,9 +92,9 @@ c = setuptools.config.pyprojecttoml.read_configuration("pyproject.toml")
 for fn in c["project"]["scripts"].keys():
     src = os.path.join(venv, "bin", fn)
     dst = os.path.join(destdir, prefix, "bin", fn)
-    sys.stderr.write(f"symlink: {dst} -> {src}\n")
+    sys.stderr.write(f"symlink: {dst} -> {src}\\n")
     os.symlink(src, dst)
-    sys.stdout.write(f"{dst}\n")
+    sys.stdout.write(f"{dst}\\n")
 EOF
 
 VENV=$(pipenv --venv)

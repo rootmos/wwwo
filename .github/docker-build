@@ -14,10 +14,22 @@ SUDO=${SUDO-}
 TMP=$(mktemp -d)
 trap 'rm -rf $TMP' EXIT
 
-$SUDO docker buildx build --push -t "$DOCKER_IMAGE" \
-  --cache-to type=inline \
-  --cache-from type=registry,ref="$DOCKER_IMAGE" \
-  --iidfile="$TMP/docker.image" --progress=plain .
+ARGS=()
+ARGS+=("--progress=plain")
+ARGS+=("--iidfile=$TMP/docker.image")
+ARGS+=("--tag=$DOCKER_IMAGE")
+ARGS+=(".")
+
+if [ -n "${GITHUB_ACTION-}" ]; then
+    docker buildx build \
+        --output=type=docker \
+        --cache-to type=gha,mode=max \
+        --cache-from type=gha \
+        --load \
+        "${ARGS[@]}"
+else
+  $SUDO docker build "${ARGS[@]}"
+fi
 
 echo 1>&2 "built image: $(<$TMP/docker.image)"
 cat "$TMP/docker.image"
