@@ -5,7 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lambda"
 version = "0.0.1"
-dependencies = [ "awslambdaric >= 2.0.7, < 2.1" ]
+dependencies = [
+  "awslambdaric >= 2.0.7, < 2.1",
+  "boto3 >= 1.28.62, < 1.29",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

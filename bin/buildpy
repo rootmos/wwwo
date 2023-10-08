@@ -4,7 +4,7 @@ set -o nounset -o pipefail -o errexit
 
 export LC_ALL='en_US.UTF-8'
 export LANG='en_US.UTF-8'
-export PIPENV_VENV_IN_PROJECT=True
+export PIPENV_VENV_IN_PROJECT=True # https://pipenv.pypa.io/en/latest/configuration/#pipenv.environments.Setting.PIPENV_VENV_IN_PROJECT
 export PIP_ROOT_USER_ACTION=ignore
 
 TMP=$(mktemp -d)

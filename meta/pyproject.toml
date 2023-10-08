@@ -5,7 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "meta"
 version = "0.0.1"
-dependencies = [ "boto3 >= 1.28.57, < 1.29", "PyGithub >= 2.1.1, < 2.2", ]
+dependencies = [
+  "boto3 >= 1.28.62, < 1.29",
+  "PyGithub >= 2.1.1, < 2.2",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
