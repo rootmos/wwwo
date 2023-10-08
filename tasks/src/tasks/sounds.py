@@ -4,7 +4,7 @@ import argparse
 
 from concurrent.futures import ThreadPoolExecutor
 
-from meta.common import output
+from .common import output
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Grab metadata about sounds stored on s3")

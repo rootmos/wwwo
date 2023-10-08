@@ -3,9 +3,9 @@ import json
 import sys
 
 import boto3
-from meta.common import output
+from .common import output
 
-import meta.tasks.list
+import tasks.list
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Grab project metadata")
@@ -28,7 +28,7 @@ def main():
     args = parse_args()
 
     if args.cmd == "gallery":
-        gs = list(meta.tasks.list.objects(args.bucket, prefix=f"projects/{args.project}/"))
+        gs = list(tasks.list.objects(args.bucket, prefix=f"projects/{args.project}/"))
         with output(args.output) as f:
             f.write(json.dumps(gs))
     elif args.cmd == "preamble":

@@ -2,7 +2,7 @@
 shell: .install.flag
 	pipenv shell
 
-.install.flag: setup.cfg
+.install.flag: pyproject.toml
 	pipenv install -e .
 	touch $@
 

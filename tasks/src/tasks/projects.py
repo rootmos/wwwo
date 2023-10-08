@@ -3,7 +3,7 @@ import json
 import os
 import sys
 
-from meta.common import fetch_secret, output
+from .common import fetch_secret, output
 
 from github import Github
 

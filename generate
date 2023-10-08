@@ -11,53 +11,143 @@ if [ -f "$ROOT/.env" ]; then
     set +a
 fi
 
-META=$SCRIPT_DIR/meta.mk
+FORCE=
+META_SPEC=$SCRIPT_DIR/meta.mk
 META_JOBS=1
 WORKDIR=
 ENVIRONMENT=prod
-while getopts "m:J:w:e:-" OPT; do
+UPLOAD=
+DRY_RUN=
+while getopts "fm:J:w:e:u:n-" OPT; do
     case $OPT in
-        m) META=$OPTARG ;;
+        f) FORCE=1 ;;
+        m) META_SPEC=$OPTARG ;;
         J) META_JOBS=$OPTARG ;;
         w) WORKDIR=$OPTARG ;;
         e) ENVIRONMENT=$OPTARG ;;
+        u) UPLOAD=$OPTARG ;;
+        n) DRY_RUN=-n ;;
         -) break ;;
         ?) exit 2 ;;
     esac
 done
 shift $((OPTIND-1))
 
+
+h() {
+    echo 1>&2 "+ $*"
+}
+
+q() {
+    echo 1>&2 "? $*"
+}
+
+w() {
+    echo 1>&2 "! $*"
+}
+
+e() {
+    echo 1>&2 "!!$*"
+    exit 1
+}
+
+o() {
+    sed 's/^/| /'
+}
+
+
+# workdir
+
 if [ -z "$WORKDIR" ]; then
     WORKDIR="$ROOT/.workdirs/$(date --utc +%FT%H%M%SZ)"
 fi
 
 WORKDIR=$(readlink -f "$WORKDIR")
-echo 1>&2 "workdir: $WORKDIR"
-mkdir -p "$WORKDIR"
+h "workdir: $WORKDIR"
+mkdir -pv "$WORKDIR" 2>&1 | o
 
-rsync -avc "$ROOT/content/" "$WORKDIR/content"
 
-mkdir -p "$WORKDIR/meta"
-make -f "$META" -j"$META_JOBS" -C "$WORKDIR/meta" PROJECTS_SPEC="$WORKDIR/content/projects.json"
+# content
+
+if [ -n "${FORCE-}" ]; then
+    h "removing previous content: $WORKDIR/content"
+    rm -rfv "$WORKDIR/content" 2>&1 | o
+fi
+
+h "copying content: $ROOT/content -> $WORKDIR/content"
+rsync -avc "$ROOT/content/" "$WORKDIR/content" 2>&1 | o
+
+
+# meta
+
+if [ -n "${FORCE-}" ]; then
+    h "removing previous meta: $WORKDIR/meta"
+    rm -rfv "$WORKDIR/meta" 2>&1 | o
+fi
+
+h "fetching meta: $META_SPEC -> $WORKDIR/meta"
+mkdir -pv "$WORKDIR/meta" 2>&1 | o
+make -f "$META_SPEC" -j"$META_JOBS" -C "$WORKDIR/meta" PROJECTS_SPEC="$WORKDIR/content/projects.json" 2>&1 | o
+
+
+# fontawesome
+
+if [ -n "${FORCE-}" ]; then
+    h "removing previous fontawesome: $WORKDIR/fa"
+    rm -rfv "$WORKDIR/fa" 2>&1 | o
+fi
+
+h "preparing fontawesome"
+"$SCRIPT_DIR/bin/fontawesome" "$WORKDIR/fa" 2>&1 | o
+
+
+# figure out generator
 
 GENERATOR_EXE=${GENERATOR_EXE-}
-if [ -z "$GENERATOR_EXE" ]; then
+if [ -n "$GENERATOR_EXE" ]; then
+    GENERATOR_EXE=$(which "$GENERATOR_EXE")
+    h "using generator (\$GENERATOR_EXE): $GENERATOR_EXE"
+else
     GENERATOR_EXE="${GENERATOR_EXE_PREFIX-wwwo-}generator"
+    q "trying generator: $GENERATOR_EXE"
     if ! command -v "$GENERATOR_EXE" &>/dev/null; then
         GENERATOR_EXE="$ROOT/generator/src/gen.exe"
-        if [ ! "$GENERATOR_EXE" ]; then
-            echo 1>& "unable to figure out generator"
+        q "trying generator: $GENERATOR_EXE"
+        if [ ! -f "$GENERATOR_EXE" ]; then
+            e "unable to figure out generator"
         fi
     fi
+    GENERATOR_EXE=$(which "$GENERATOR_EXE")
+    h "using generator: $GENERATOR_EXE"
 fi
-GENERATOR_EXE=$(which "$GENERATOR_EXE")
-echo 1>&2 "using generator: $GENERATOR_EXE"
 
-"$SCRIPT_DIR/bin/fontawesome" "$WORKDIR/fa"
+
+# webroot
 
 export WEBROOT="$WORKDIR/webroot"
+if [ -n "${FORCE-}" ]; then
+    h "removing previous webroot: $WORKDIR/webroot"
+    rm -rfv "$WORKDIR/webroot" 2>&1 | o
+fi
+
 mkdir -p "$WEBROOT"
+h "generating $ENVIRONMENT: $WEBROOT"
+(cd "$WORKDIR" && ENV="$ENVIRONMENT" "$GENERATOR_EXE") 2>&1 | o
 
-(cd "$WORKDIR" && ENV="$ENVIRONMENT" "$GENERATOR_EXE")
 
-find "$WEBROOT/$ENVIRONMENT" -name "*.html" -exec tidy -quiet -errors --doctype=html5 {} \;
+# verify
+
+if command -v tidy &>/dev/null; then
+    h "verifying html"
+    find "$WEBROOT/$ENVIRONMENT" -name "*.html" -exec tidy -quiet -errors --doctype=html5 {} \; 2>&1 | o
+else
+    w "skipping verify: tify not found"
+fi
+
+
+# upload
+
+if [ -n "$UPLOAD" ]; then
+    h "upload: $WEBROOT/$ENVIRONMENT -> $UPLOAD"
+    ${TASKS_EXE_PREFIX-wwwo-}upload ${DRY_RUN} "$WEBROOT/$ENVIRONMENT" "$UPLOAD" 2>&1 | o
+fi

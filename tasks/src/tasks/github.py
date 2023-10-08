@@ -5,7 +5,7 @@ import os
 
 from github import Github
 
-from meta.common import fetch_secret, output
+from .common import fetch_secret, output
 
 def commits(u, N):
     cs = []

@@ -2,7 +2,7 @@ import json
 import argparse
 from urllib.parse import quote as urlencode
 
-from meta.common import output
+from .common import output
 
 import boto3
 

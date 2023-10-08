@@ -5,7 +5,7 @@ import re
 import requests
 import base64
 
-from meta.common import fetch_secret, output
+from .common import fetch_secret, output
 
 def parse_duration(string):
     p = re.compile("([0-9]+)([dDhHmMsS])")

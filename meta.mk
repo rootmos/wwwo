@@ -1,5 +1,5 @@
 PROJECTS_SPEC ?=
-META_BIN_PREFIX ?= wwwo-
+TASKS_EXE_PREFIX ?= wwwo-
 
 META =
 
@@ -20,27 +20,27 @@ META += projects/stellar-drift/preamble.md
 fetch: $(META)
 
 sounds.json:
-	$(META_BIN_PREFIX)sounds --output="$@"
+	$(TASKS_EXE_PREFIX)sounds --output="$@"
 
 sounds.%.json:
-	$(META_BIN_PREFIX)sounds --prefix="$*" --output="$@"
+	$(TASKS_EXE_PREFIX)sounds --prefix="$*" --output="$@"
 
 twitch.%.json:
-	$(META_BIN_PREFIX)twitch "$*" --output="$@"
+	$(TASKS_EXE_PREFIX)twitch "$*" --output="$@"
 
 github-activity.%.commits.json:
-	$(META_BIN_PREFIX)github "$*" --output="$@"
+	$(TASKS_EXE_PREFIX)github "$*" --output="$@"
 
 projects.json: $(PROJECTS_SPEC)
-	$(META_BIN_PREFIX)projects "$<" --output="$@"
+	$(TASKS_EXE_PREFIX)projects "$<" --output="$@"
 
 %.json:
-	$(META_BIN_PREFIX)list --prefix="$*" rootmos-static --output="$@"
+	$(TASKS_EXE_PREFIX)list --prefix="$*" rootmos-static --output="$@"
 
 projects/%/gallery.json:
 	@mkdir -p "projects/$*"
-	$(META_BIN_PREFIX)project gallery "$*" rootmos-static --output="projects/$*/gallery.json"
+	$(TASKS_EXE_PREFIX)project gallery "$*" rootmos-static --output="projects/$*/gallery.json"
 
 projects/%/preamble.md:
 	@mkdir -p "projects/$*"
-	$(META_BIN_PREFIX)project preamble "$*" rootmos-builds --output="projects/$*/preamble.md"
+	$(TASKS_EXE_PREFIX)project preamble "$*" rootmos-builds --output="projects/$*/preamble.md"
