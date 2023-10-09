@@ -131,17 +131,20 @@ if [ -n "${FORCE-}" ]; then
 fi
 
 mkdir -p "$WEBROOT"
-h "generating $ENVIRONMENT: $WEBROOT"
+h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
 (cd "$WORKDIR" && ENV="$ENVIRONMENT" "$GENERATOR_EXE") 2>&1 | o
 
 
-# verify
+# tidy
 
+mapfile -t HTMLs < <(find "$WEBROOT/$ENVIRONMENT" -name "*.html")
 if command -v tidy &>/dev/null; then
-    h "verifying html"
-    find "$WEBROOT/$ENVIRONMENT" -name "*.html" -exec tidy -quiet -errors --doctype=html5 {} \; 2>&1 | o
+    for html in "${HTMLs[@]}"; do
+        h "tidy: $html"
+        tidy -modify --doctype html5 "$html" 2>&1 | o
+    done
 else
-    w "skipping verify: tify not found"
+    w "skipping tidy"
 fi
 
 
