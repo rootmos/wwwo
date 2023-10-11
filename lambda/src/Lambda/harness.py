@@ -59,11 +59,11 @@ def region_of_arn(arn):
 def publish(topic_arn, subject, payload):
     boto3.client("sns", region_name=region_of_arn(topic_arn)).publish(
         TopicArn = topic_arn,
-        Subject = subject,
+        Subject = subject[:100],
         MessageStructure = "json",
         Message = json.dumps({
             "default": json.dumps(payload),
-            "SMS": subject,
+            "SMS": subject[:140],
             "EMAIL": json.dumps(payload, indent=4),
         }),
     )
