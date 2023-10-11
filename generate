@@ -135,19 +135,6 @@ h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
 (cd "$WORKDIR" && ENV="$ENVIRONMENT" "$GENERATOR_EXE") 2>&1 | o
 
 
-# tidy
-
-mapfile -t HTMLs < <(find "$WEBROOT/$ENVIRONMENT" -name "*.html")
-if command -v tidy &>/dev/null; then
-    for html in "${HTMLs[@]}"; do
-        h "tidy: $html"
-        tidy -modify --doctype html5 "$html" 2>&1 | o
-    done
-else
-    w "skipping tidy"
-fi
-
-
 # upload
 
 if [ -n "$UPLOAD" ]; then
