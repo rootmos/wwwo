@@ -5,133 +5,250 @@ import datetime
 import getpass
 import json
 import os
-import random
 import shutil
 import socket
 import subprocess
 import sys
-import time
-import tomllib
+import html
 
-situations = ["now", "os", "git", "lsb" ]
-formats = [ "json", "env", "html", "c" ]
+class Situation:
+    @staticmethod
+    def add_arguments(parser):
+        pass
+
+    @staticmethod
+    def figure_out(args):
+        return None
+
+class Now(Situation):
+    key = "now"
+
+    @staticmethod
+    def figure_out(args):
+        now = datetime.datetime.now().astimezone()
+        return {
+            "iso8601": now.isoformat(timespec="seconds"),
+            "epoch": int(now.timestamp()),
+        }
+
+class OS(Situation):
+    key = "os"
+
+    @staticmethod
+    def figure_out(args):
+        return {
+            "pid": os.getpid(),
+            "cwd": os.getcwd(),
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "user": getpass.getuser(),
+            "hostname": socket.gethostname(),
+        }
+
+class Git(Situation):
+    key = "git"
+
+    @staticmethod
+    def figure_out(args):
+        git_exe = shutil.which("git")
+        if not git_exe:
+            return None
+
+        p = subprocess.run([git_exe, "rev-parse", "--is-inside-work-tree"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if p.returncode != 0:
+            return None
+
+        def git(*args):
+            p = subprocess.run([git_exe] + list(args), check=True, text=True, stdout=subprocess.PIPE)
+            for l in p.stdout.splitlines():
+                yield l.rstrip()
+
+        def git1(*args):
+            return list(git(*args))[0]
+
+        dirty = len(list(git("status", "--porcelain"))) > 0
+
+        d = {
+            "ref_id": git1("rev-parse", "HEAD"),
+            "branch": git1("rev-parse", "--abbrev-ref", "HEAD"),
+            "dirty": dirty,
+        }
+
+        if dirty:
+            d["user_name"] = git1("config", "user.name")
+            d["user_email"] = git1("config", "user.email")
+            d["signing_key"] = git1("config", "user.signingkey")
+        else:
+            d["user_name"] = git1("--no-pager", "log", "--format=format:%an", "-n1")
+            d["user_email"] = git1("--no-pager", "log", "--format=format:%ae", "-n1")
+            d["author_date"] = git1("--no-pager", "log", "--format=format:%aI", "-n1")
+            d["signing_key"] = git1("--no-pager", "log", "--format=format:%GP", "-n1")
+
+        return d
+
+class LSB(Situation):
+    key = "lsb"
+
+    @staticmethod
+    def figure_out(args):
+        lsb_exe = shutil.which("lsb_release")
+        if not lsb_exe:
+            return None
+
+        p = subprocess.run(["lsb_relase", "--all"], executable=lsb_exe, check=True, text=True, stdout=subprocess.PIPE)
+        i = {}
+        for l in p.stdout.splitlines():
+            (k, v) = l.split(":")
+            i[k] = v.strip()
+        return i
+
+
+class Format:
+    @staticmethod
+    def add_arguments(parser):
+        pass
+
+    @staticmethod
+    def format(args, d, stream):
+        return None
+
+class Json(Format):
+    key = "json"
+
+    @staticmethod
+    def format(args, d, stream):
+        stream.write(json.dumps(d))
+
+class Env(Format):
+    key = "env"
+
+    @staticmethod
+    def add_arguments(parser):
+        g = parser.add_argument_group("Environment variable format")
+        g.add_argument("--env-prefix")
+
+    @staticmethod
+    def format(args, d, stream):
+        K = lambda k: k.upper()
+
+        def go(k, x):
+            if isinstance(x, bool):
+                stream.write(f"{K(k)}={'1' if x else ''}\n")
+            elif isinstance(x, str):
+                stream.write(f'{K(k)}="{x}"\n')
+            elif isinstance(x, int):
+                stream.write(f"{K(k)}={x}\n")
+            elif isinstance(x, dict):
+                for k0, v in x.items():
+                    go(f"{k}_{k0}", v)
+            else:
+                raise TypeError(f"unsupported type; {k}: {type(x)}")
+
+        for k, v in d.items():
+            go((args.env_prefix or "") + k, v)
+
+class Html(Format):
+    key = "html"
+
+    @staticmethod
+    def add_arguments(parser):
+        g = parser.add_argument_group("HTML format")
+        g.add_argument("--html-initial-header-level", metavar="INT", type=int, default=1)
+        g.add_argument("--html-lowest-header-level", metavar="INT", type=int, default=1)
+
+    @staticmethod
+    def format(args, d, stream):
+        hlevels = args.html_lowest_header_level
+        def go(level, k, x):
+            if level <= hlevels:
+                stream.write(f"<h{level}>{k}</h{level}>")
+            else:
+                stream.write(f"<tr><td>{k}:</td><td>")
+
+            if isinstance(x, bool):
+                stream.write("true" if x else "false")
+            elif isinstance(x, str):
+                stream.write(html.escape(x))
+            elif isinstance(x, int):
+                stream.write(str(x))
+            elif isinstance(x, dict):
+                stream.write("<table>")
+                for k0, v in x.items():
+                    go(level+1, k0, v)
+                stream.write("</table>")
+            else:
+                raise TypeError(f"unsupported type: {type(x)}")
+
+            if level > hlevels:
+                stream.write("</td></tr>")
+
+        for k, v in d.items():
+            go(args.html_initial_header_level, k, v)
+
+
+situations = Situation.__subclasses__()
+formats = Format.__subclasses__()
 
 def parse_args():
     parser = argparse.ArgumentParser(
             description="Where, who, and what am I?",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("-C", "--directory", metavar="DIR", default=os.getcwd(), help="change directory to DIR")
-    parser.add_argument("-o", "--output")
+    def add_output(p):
+        p.add_argument("-o", "--output")
 
+    def add_formats(p):
+        fmts = p.add_argument_group("Formats").add_mutually_exclusive_group(required=True)
+        for f in formats:
+            fmts.add_argument(f"--{f.key}", action="store_true")
+            f.add_arguments(p)
+
+    subparsers = parser.add_subparsers(dest="cmd")
+
+    current_cmd = subparsers.add_parser("current")
+    current_cmd.add_argument("-C", "--directory", metavar="DIR", default=os.getcwd(), help="change directory to DIR")
+    ss = current_cmd.add_argument_group("Situations")
     for s in situations:
-        parser.add_argument(f"--{s}", metavar="BOOL", action=argparse.BooleanOptionalAction,
-            default = True,
-            help = f"figure out the {s} situation")
+        ss.add_argument(f"--{s.key}", metavar="BOOL", action=argparse.BooleanOptionalAction, default=True)
+        s.add_arguments(current_cmd)
 
-    parser.add_argument("-s", "--style", choices=formats, default=formats[0])
-    parser.add_argument("-p", "--var-prefix", default="BUILD_")
+    add_output(current_cmd)
+    add_formats(current_cmd)
+
+    merge_cmd = subparsers.add_parser("merge")
+    add_output(merge_cmd)
+    add_formats(merge_cmd)
+
+    merge_cmd.add_argument("parts", metavar="KEY=FILE", nargs="+")
 
     return parser.parse_args()
 
-def figure_out_now(now=None):
-    now = now or datetime.datetime.now().astimezone()
-    return {
-        "iso8601": now.isoformat(timespec="seconds"),
-        "epoch": time.mktime(now.timetuple()),
-    }
-
-def figure_out_os():
-    return {
-        "pid": os.getpid(),
-        "cwd": os.getcwd(),
-        "uid": os.getuid(),
-        "gid": os.getgid(),
-        "user": getpass.getuser(),
-        "hostname": socket.gethostname(),
-    }
-
-def figure_out_lsb():
-    lsb_exe = shutil.which("lsb_release")
-    if not lsb_exe:
-        return None
-
-    p = subprocess.run(["lsb_relase", "--all"], executable=lsb_exe, check=True, text=True, stdout=subprocess.PIPE)
-    i = {}
-    for l in p.stdout.splitlines():
-        (k, v) = l.split(":")
-        i[k] = v.strip()
-    return i
-
-def figure_out_git():
-    git_exe = shutil.which("git")
-    if not git_exe:
-        return None
-
-    p = subprocess.run([git_exe, "rev-parse", "--is-inside-work-tree"], stderr=subprocess.DEVNULL)
-    if p.returncode != 0:
-        return None
-
-    def git(*args):
-        p = subprocess.run([git_exe] + list(args), check=True, text=True, stdout=subprocess.PIPE)
-        for l in p.stdout.splitlines():
-            yield l.rstrip()
-
-    def git1(*args):
-        return list(git(*args))[0]
-
-    dirty = len(list(git("status", "--porcelain"))) > 0
-
-    d = {
-        "ref_id": git1("rev-parse", "HEAD"),
-        "branch": git1("rev-parse", "--abbrev-ref", "HEAD"),
-        "dirty": dirty,
-    }
-
-    if dirty:
-        d["user_name"] = git1("config", "user.name")
-        d["user_email"] = git1("config", "user.email")
-        d["signing_key"] = git1("config", "user.signingkey")
-    else:
-        d["user_name"] = git1("--no-pager", "log", "--format=format:%an", "-n1")
-        d["user_email"] = git1("--no-pager", "log", "--format=format:%ae", "-n1")
-        d["author_date"] = git1("--no-pager", "log", "--format=format:%aI", "-n1")
-        d["signing_key"] = git1("--no-pager", "log", "--format=format:%GP", "-n1")
-
-    return d
-
-def dump_json(d, stream):
-    stream.write(json.dumps(d))
-
-def dump_env(d, stream):
-    for k, v in d.items():
-        stream.write(f"{k.upper()}=")
-        if v == True:
-            stream.write("1")
-        elif v == False:
-            pass
-        else:
-            stream.write(f'"{v}"')
-        stream.write("\n")
-
-def dump(d, fmt="json", stream=None):
-    globals()["dump_" + fmt](d, stream)
-
-if __name__ == "__main__":
+def main():
     args = parse_args()
 
-    if args.directory:
-        os.chdir(args.directory)
-
-    ls = locals()
     situation = {}
-    ss = vars(args)
-    for s in situations:
-        if s in ss and not ss[s]:
-            continue
-        i = ls[f"figure_out_{s}"]()
-        if i is not None:
-            situation[s] = i
+    if args.cmd == "current":
+        if args.directory:
+            os.chdir(args.directory)
 
-    f = open(args.output, "w") if args.output else sys.stdout
-    dump(situation, fmt=args.style, stream=f)
+        for s in situations:
+            if not vars(args)[s.key]:
+                continue
+            i = s.figure_out(args)
+            if i is not None:
+                situation[s.key] = i
+    elif args.cmd == "merge":
+        for part in args.parts:
+            k, fn = part.split("=", 1)
+            with open(fn, "r") as f:
+                situation[k] = json.load(f)
+
+    stream = open(args.output, "w") if args.output else sys.stdout
+    for fmt in formats:
+        if vars(args)[fmt.key]:
+            fmt.format(args, situation, stream=stream)
+            return
+    raise RuntimeError("unknown format")
+
+if __name__ == "__main__":
+    main()
