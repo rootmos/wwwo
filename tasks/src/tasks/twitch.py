@@ -69,9 +69,8 @@ class Crawler:
             r.raise_for_status()
             j = r.json()
             for i in j["data"]:
-                if typ is not None:
-                    if typ != i["type"]:
-                        break
+                if typ is not None and typ != i["type"]:
+                    continue
 
                 yield {
                     "video_id": i["id"],
