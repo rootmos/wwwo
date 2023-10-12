@@ -14,6 +14,8 @@ def parse_args():
 
     parser.add_argument("-n", "--dry-run", action="store_true")
 
+    parser.add_argument("-H", "--htmls")
+
     parser.add_argument("root")
     parser.add_argument("target", metavar="S3_URL")
 
@@ -29,6 +31,10 @@ def main():
 
     bucket, prefix = parse_s3_url(args.target)
 
+    htmls = None
+    if args.htmls is not None:
+        htmls = open(args.htmls, "w")
+
     s3 = boto3.resource('s3')
     for p in pathlib.Path(args.root).glob("**/*"):
         if p.is_dir():
@@ -39,6 +45,10 @@ def main():
 
         mt = magic.from_file(p, mime=True)
 
+        if htmls and mt.startswith("text/html"):
+            htmls.write(key)
+            htmls.write("\n")
+
         if args.dry_run:
             print(f"{p} -> {o} ({mt})")
         else:
@@ -47,3 +57,6 @@ def main():
                 "ACL": "public-read",
                 "ContentType": mt,
             })
+
+    if htmls:
+        htmls.close()

@@ -17,8 +17,9 @@ def main(event, context):
 
     if env("TARGET"):
         args += [ "-u", env("TARGET") ]
-        if event.get("dry_run"):
-            args += [ "-n" ]
+
+        if env("BASE_URL"):
+            args += [ "-p", env("BASE_URL") ]
 
     logger.debug(f"args: {args}")
     subprocess.run(args, executable=exe, check=True)

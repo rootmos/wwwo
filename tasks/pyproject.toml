@@ -9,6 +9,7 @@ dependencies = [
   "boto3 >= 1.28.62, < 1.29",
   "PyGithub >= 2.1.1, < 2.2",
   "python-magic >= 0.4.27, < 0.5",
+  "requests >= 2.31.0, < 2.32",
 ]
 
 [tool.setuptools.packages.find]
@@ -23,3 +24,4 @@ wwwo-projects = "tasks.projects:main"
 wwwo-sounds = "tasks.sounds:main"
 wwwo-twitch = "tasks.twitch:main"
 wwwo-upload = "tasks.upload:main"
+wwwo-purge = "tasks.purge:main"

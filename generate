@@ -19,7 +19,8 @@ WORKDIR=
 ENVIRONMENT=prod
 UPLOAD=
 DRY_RUN=
-while getopts "fm:J:w:e:u:n-" OPT; do
+PURGE=
+while getopts "fm:J:w:e:u:np:-" OPT; do
     case $OPT in
         f) FORCE=1 ;;
         m) META_SPEC=$OPTARG ;;
@@ -28,6 +29,7 @@ while getopts "fm:J:w:e:u:n-" OPT; do
         e) ENVIRONMENT=$OPTARG ;;
         u) UPLOAD=$OPTARG ;;
         n) DRY_RUN=-n ;;
+        p) PURGE=$OPTARG ;;
         -) break ;;
         ?) exit 2 ;;
     esac
@@ -157,5 +159,10 @@ h "version page: $WEBROOT/$ENVIRONMENT/version.html"
 
 if [ -n "$UPLOAD" ]; then
     h "upload: $WEBROOT/$ENVIRONMENT -> $UPLOAD"
-    ${TASKS_EXE_PREFIX-wwwo-}upload ${DRY_RUN} "$WEBROOT/$ENVIRONMENT" "$UPLOAD" 2>&1 | o
+    ${TASKS_EXE_PREFIX-wwwo-}upload --htmls="$WORKDIR/htmls" ${DRY_RUN} "$WEBROOT/$ENVIRONMENT" "$UPLOAD" 2>&1 | o
+
+    if [ -n "$PURGE" ]; then
+        h "purge: $PURGE"
+        xargs ${TASKS_EXE_PREFIX-wwwo-}purge "$PURGE" < "$WORKDIR/htmls"
+    fi
 fi

@@ -6,6 +6,7 @@ type video = {
     url: string;
     date: date;
     duration: float;
+    thumbnail: string;
 }
 
 type videos = video list
