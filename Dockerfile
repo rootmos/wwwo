@@ -69,6 +69,8 @@ RUN apk update && apk add bash \
 
 WORKDIR /workdir
 
+COPY bin/whereami bin/
+
 COPY bin/fontawesome bin/fetch.sh bin/
 RUN bin/fontawesome
 
@@ -82,5 +84,7 @@ COPY --from=generator-builder /usr/bin/wwwo-generator /usr/bin/wwwo-generator
 
 COPY generate meta.mk .
 COPY content content
+
+COPY .build.json .build.json
 
 ENTRYPOINT [ "/usr/bin/wwwo-lambda", "-C", "/workdir" ]

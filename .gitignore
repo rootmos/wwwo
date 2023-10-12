@@ -1,4 +1,6 @@
 .env
+.build.json
+.generate.json
 .*.flag
 
 build

@@ -4,6 +4,7 @@ set -o nounset -o pipefail -o errexit
 
 SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
 ROOT=${ROOT-$SCRIPT_DIR}
+BIN=${BIN-$ROOT/bin}
 
 if [ -f "$ROOT/.env" ]; then
     set -a
@@ -132,8 +133,20 @@ fi
 
 mkdir -p "$WEBROOT"
 h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
-(cd "$WORKDIR" && ENV="$ENVIRONMENT" "$GENERATOR_EXE") 2>&1 | o
+(
+    cd "$WORKDIR"
+    "$BIN/whereami" current --json --output="$WORKDIR/generate.json"
+    ENV="$ENVIRONMENT" "$GENERATOR_EXE" 2>&1 | o
+)
 
+# compile version page
+
+h "version page: $WEBROOT/$ENVIRONMENT/version.html"
+"$BIN/whereami" merge \
+    --html --html-standalone \
+    --output="$WEBROOT/$ENVIRONMENT/version.html" \
+    "Build=$ROOT/.build.json" \
+    "Generate=$WORKDIR/generate.json"
 
 # upload
 

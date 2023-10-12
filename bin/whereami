@@ -59,7 +59,9 @@ class Git(Situation):
             return None
 
         def git(*args):
-            p = subprocess.run([git_exe] + list(args), check=True, text=True, stdout=subprocess.PIPE)
+            p = subprocess.run([git_exe] + list(args), text=True, stdout=subprocess.PIPE)
+            if p.returncode != 0:
+                yield None
             for l in p.stdout.splitlines():
                 yield l.rstrip()
 
@@ -138,6 +140,8 @@ class Env(Format):
                 stream.write(f'{K(k)}="{x}"\n')
             elif isinstance(x, int):
                 stream.write(f"{K(k)}={x}\n")
+            elif x is None:
+                stream.write(f"{K(k)}=\n")
             elif isinstance(x, dict):
                 for k0, v in x.items():
                     go(f"{k}_{k0}", v)
@@ -153,11 +157,19 @@ class Html(Format):
     @staticmethod
     def add_arguments(parser):
         g = parser.add_argument_group("HTML format")
+        g.add_argument("--html-standalone", action="store_true")
+        g.add_argument("--html-title")
         g.add_argument("--html-initial-header-level", metavar="INT", type=int, default=1)
         g.add_argument("--html-lowest-header-level", metavar="INT", type=int, default=1)
 
     @staticmethod
     def format(args, d, stream):
+        if args.html_standalone:
+            stream.write("<html><head>")
+            if args.html_title:
+                stream.write(f"<title>{html.escape(x)}</title>")
+            stream.write("</head><body>")
+
         hlevels = args.html_lowest_header_level
         def go(level, k, x):
             if level <= hlevels:
@@ -171,6 +183,8 @@ class Html(Format):
                 stream.write(html.escape(x))
             elif isinstance(x, int):
                 stream.write(str(x))
+            elif x is None:
+                pass
             elif isinstance(x, dict):
                 stream.write("<table>")
                 for k0, v in x.items():
@@ -185,6 +199,8 @@ class Html(Format):
         for k, v in d.items():
             go(args.html_initial_header_level, k, v)
 
+        if args.html_standalone:
+            stream.write("</body></html>")
 
 situations = Situation.__subclasses__()
 formats = Format.__subclasses__()
@@ -247,6 +263,7 @@ def main():
     for fmt in formats:
         if vars(args)[fmt.key]:
             fmt.format(args, situation, stream=stream)
+            stream.close()
             return
     raise RuntimeError("unknown format")
 

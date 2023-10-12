@@ -42,7 +42,7 @@ def main():
         if args.dry_run:
             print(f"{p} -> {o} ({mt})")
         else:
-            eprint(f"{p} -> {o}")
+            eprint(f"{p} -> {o} ({mt})")
             o.upload_file(p, ExtraArgs = {
                 "ACL": "public-read",
                 "ContentType": mt,
