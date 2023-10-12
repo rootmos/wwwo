@@ -240,11 +240,11 @@ let twitch_snippet = let open Twitch_t in
   let s v0 v1 = Lenient_iso8601.compare v1.date v0.date in
   let vods = List.sort s vods in
   let r v = [
-    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 v.date;
+    a v.url @@ img_b64 v.thumbnail.mimetype v.thumbnail.base64;
     a v.url @@ text v.title;
   ] in seq [
     h2 @@ text "Twitch highlights";
-    vods |> take 5 >>| r |> table;
+    vods |> take 3 >>| r |> table;
   ]
 
 let projects_snippet =

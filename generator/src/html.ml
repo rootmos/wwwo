@@ -85,6 +85,14 @@ let img ?(embedd=true) ?(cls=None) ?(alt=None) fn = fun _ ->
     (Magic_mime.lookup fn) (Base64.encode_exn @@ Utils.load_file fn) a c
   else sprintf "<img src=\"%s\" %s%s/>" fn a c
 
+let img_b64 ?(cls=None) ?(alt=None) mt b64 = fun _ ->
+  let c = let open Option in
+    map (sprintf " class=\"%s\"") cls |> value ~default:"" in
+  let a = let open Option in
+    map (fun a -> sprintf " title=\"%s\" alt=\"%s\"" a a) alt
+    |> value ~default:"" in
+  sprintf "<img src=\"data:%s;base64,%s\" %s%s/>" mt b64 a c
+
 let svg ?(cls = "") fn =
   let s = Utils.load_file fn |> String.trim in
   let s = match cls with "" -> s | _ ->

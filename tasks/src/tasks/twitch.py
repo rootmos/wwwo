@@ -26,7 +26,11 @@ def parse_duration(string):
 def download_thumbnail(url_template, width, height):
     url = url_template.replace("%{width}", str(width)).replace("%{height}", str(height))
     r = requests.get(url)
-    return str(base64.b64encode(r.content), "UTF-8")
+    r.raise_for_status()
+    return {
+        "mimetype": r.headers["Content-Type"],
+        "base64": str(base64.b64encode(r.content), "UTF-8"),
+    }
 
 class Crawler:
     helix_url = "https://api.twitch.tv/helix"
