@@ -101,6 +101,7 @@ class LSB(Situation):
         i = {}
         for l in p.stdout.splitlines():
             (k, v) = l.split(":")
+            k = k.lower().replace(" ", "-")
             i[k] = v.strip()
         return i
 
@@ -131,7 +132,7 @@ class Env(Format):
 
     @staticmethod
     def format(args, d, stream):
-        K = lambda k: k.upper()
+        K = lambda k: k.upper().replace("-", "_")
 
         def go(k, x):
             if isinstance(x, bool):
@@ -223,18 +224,21 @@ def parse_args():
 
     current_cmd = subparsers.add_parser("current")
     current_cmd.add_argument("-C", "--directory", metavar="DIR", default=os.getcwd(), help="change directory to DIR")
+    add_output(current_cmd)
+    add_formats(current_cmd)
     ss = current_cmd.add_argument_group("Situations")
     for s in situations:
         ss.add_argument(f"--{s.key}", metavar="BOOL", action=argparse.BooleanOptionalAction, default=True)
         s.add_arguments(current_cmd)
 
-    add_output(current_cmd)
-    add_formats(current_cmd)
+    format_cmd = subparsers.add_parser("format")
+    add_output(format_cmd)
+    add_formats(format_cmd)
+    format_cmd.add_argument("input", metavar="INPUT")
 
     merge_cmd = subparsers.add_parser("merge")
     add_output(merge_cmd)
     add_formats(merge_cmd)
-
     merge_cmd.add_argument("parts", metavar="KEY=FILE", nargs="+")
 
     return parser.parse_args()
@@ -253,6 +257,9 @@ def main():
             i = s.figure_out(args)
             if i is not None:
                 situation[s.key] = i
+    elif args.cmd == "format":
+        with open(args.input, "r") as f:
+            situation = json.load(f)
     elif args.cmd == "merge":
         for part in args.parts:
             k, fn = part.split("=", 1)

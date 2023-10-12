@@ -89,9 +89,8 @@ let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) subtitle b
     div ~cls:(Some "content") @@ b;
     div ~cls:(Some "footer") @@ seq [
       let t = Unix.time () |> Unix.gmtime in
-      let c = Sys.getenv_opt "GIT_REV" |> Option.map (fun r ->
-        a (sprintf "https://github.com/rootmos/wwwo/commit/%s" r) @@
-        span @@ text (String.sub r 0 7)
+      let c = Sys.getenv_opt "BUILD_GIT_REF_ID" |> Option.map (fun r ->
+        a "version.html" @@ span @@ text (String.sub r 0 7)
       )
       in span ~cls:"copyleft" @@ seq @@ Option.to_list c @ [
         text @@ sprintf " %d &copy;" (1900 + t.tm_year)

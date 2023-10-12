@@ -56,7 +56,6 @@ o() {
     sed 's/^/| /'
 }
 
-
 # workdir
 
 if [ -z "$WORKDIR" ]; then
@@ -136,7 +135,13 @@ h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
 (
     cd "$WORKDIR"
     "$BIN/whereami" current --json --output="$WORKDIR/generate.json"
-    ENV="$ENVIRONMENT" "$GENERATOR_EXE" 2>&1 | o
+    "$BIN/whereami" format --env --env-prefix=BUILD_ "$ROOT/.build.json" --output="$WORKDIR/build.env"
+
+    set -a
+    . "$WORKDIR/build.env"
+    set +a
+
+    env ENV="$ENVIRONMENT" "$GENERATOR_EXE" 2>&1 | o
 )
 
 # compile version page
