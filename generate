@@ -163,6 +163,6 @@ if [ -n "$UPLOAD" ]; then
 
     if [ -n "$PURGE" ]; then
         h "purge: $PURGE"
-        xargs ${TASKS_EXE_PREFIX-wwwo-}purge "$PURGE" < "$WORKDIR/htmls"
+        xargs ${TASKS_EXE_PREFIX-wwwo-}purge "$PURGE" < "$WORKDIR/htmls" 2>&1 | o
     fi
 fi

@@ -1,13 +1,13 @@
 import argparse
+import hashlib
+import os
 import pathlib
 import urllib
-import os
 
+import boto3
 import magic
 
 from .util import eprint
-
-import boto3
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Upload directory to s3")
@@ -43,6 +43,9 @@ def main():
         key = os.path.join(prefix, rel)
         o = s3.Object(bucket, key)
 
+        with open(p, "rb") as f:
+            md5 = hashlib.file_digest(f, "md5").hexdigest()
+
         mt = magic.from_file(p, mime=True)
 
         if htmls and mt.startswith("text/html"):
@@ -50,9 +53,9 @@ def main():
             htmls.write("\n")
 
         if args.dry_run:
-            print(f"{p} -> {o} ({mt})")
+            eprint(f"{p} -> {o} ({mt}) (MD5:{md5})")
         else:
-            eprint(f"{p} -> {o} ({mt})")
+            eprint(f"{p} -> {o} ({mt}) (MD5:{md5})")
             o.upload_file(p, ExtraArgs = {
                 "ACL": "public-read",
                 "ContentType": mt,
