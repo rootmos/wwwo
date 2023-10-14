@@ -79,6 +79,7 @@ let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) subtitle b
     else [];
     css @@ Utils.load_file (Path.style "style.css") :: additional_css;
     text "<meta charset=\"UTF-8\">";
+    favicon (Path.image "favicon.png");
   ];
   body @@ seq [
     h1 @@ seq [

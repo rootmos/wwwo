@@ -93,6 +93,12 @@ let img_b64 ?(cls=None) ?(alt=None) mt b64 = fun _ ->
     |> value ~default:"" in
   sprintf "<img src=\"data:%s;base64,%s\" %s%s/>" mt b64 a c
 
+let favicon ?(embedd=true) fn = fun _ ->
+  let mt = Magic_mime.lookup fn in
+  if embedd then sprintf "<link rel=\"shortcut icon\" type=\"%s\" href=\"data:%s;base64,%s\">"
+    mt mt (Base64.encode_exn @@ Utils.load_file fn)
+  else sprintf "<link rel=\"shortcut icon\" type=\"%s\" href=\"%s\">" mt fn
+
 let svg ?(cls = "") fn =
   let s = Utils.load_file fn |> String.trim in
   let s = match cls with "" -> s | _ ->

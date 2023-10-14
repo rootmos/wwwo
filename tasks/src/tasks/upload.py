@@ -3,9 +3,9 @@ import hashlib
 import os
 import pathlib
 import urllib
+import mimetypes
 
 import boto3
-import magic
 
 from .util import eprint
 
@@ -29,6 +29,9 @@ def parse_s3_url(url):
 def main():
     args = parse_args()
 
+    mimetypes.init()
+    mimetypes.add_type("image/x-icon", ".ico") # https://en.wikipedia.org/wiki/Favicon#Standardization
+
     bucket, prefix = parse_s3_url(args.target)
 
     htmls = None
@@ -46,16 +49,17 @@ def main():
         with open(p, "rb") as f:
             md5 = hashlib.file_digest(f, "md5").hexdigest()
 
-        mt = magic.from_file(p, mime=True)
+        (mt, _) = mimetypes.guess_type(p)
 
         if htmls and mt.startswith("text/html"):
             htmls.write(key)
             htmls.write("\n")
 
+        l = f"{p} -> {o} ({mt}) (MD5:{md5})"
         if args.dry_run:
-            eprint(f"{p} -> {o} ({mt}) (MD5:{md5})")
+            eprint("DRYRUN: " + l)
         else:
-            eprint(f"{p} -> {o} ({mt}) (MD5:{md5})")
+            eprint(l)
             o.upload_file(p, ExtraArgs = {
                 "ACL": "public-read",
                 "ContentType": mt,

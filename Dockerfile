@@ -65,7 +65,7 @@ RUN buildpy -C lambda -b -T /lambda.tar.gz
 FROM alpine:3.18.4
 
 RUN apk update && apk add bash \
-    python3 wget make rsync libmagic
+    python3 wget make rsync
 
 WORKDIR /workdir
 

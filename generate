@@ -161,6 +161,11 @@ h "version page: $WEBROOT/$ENVIRONMENT/version.html"
 h "copying error pages: $ROOT/content/error -> $WEBROOT/$ENVIRONMENT/error"
 rsync -avc "$ROOT/content/error/" "$WEBROOT/$ENVIRONMENT/error" 2>&1 | o
 
+# copy favicon
+
+h "copying favicon: $ROOT/content/image/favicon.ico -> $WEBROOT/$ENVIRONMENT/favicon.ico"
+rsync -avc "$ROOT/content/image/favicon.ico" "$WEBROOT/$ENVIRONMENT/favicon.ico" 2>&1 | o
+
 
 # upload
 
