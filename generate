@@ -137,8 +137,8 @@ h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
 (
     cd "$WORKDIR"
     "$BIN/whereami" current --json --output="$WORKDIR/generate.json"
-    "$BIN/whereami" format --env --env-prefix=BUILD_ "$ROOT/.build.json" --output="$WORKDIR/build.env"
 
+    "$BIN/whereami" format --env --env-prefix=BUILD_ "$ROOT/.build.json" --output="$WORKDIR/build.env"
     set -a
     . "$WORKDIR/build.env"
     set +a
@@ -154,6 +154,13 @@ h "version page: $WEBROOT/$ENVIRONMENT/version.html"
     --output="$WEBROOT/$ENVIRONMENT/version.html" \
     "Build=$ROOT/.build.json" \
     "Generate=$WORKDIR/generate.json"
+
+
+# copy error pages
+
+h "copying error pages: $ROOT/content/error -> $WEBROOT/$ENVIRONMENT/error"
+rsync -avc "$ROOT/content/error/" "$WEBROOT/$ENVIRONMENT/error" 2>&1 | o
+
 
 # upload
 
