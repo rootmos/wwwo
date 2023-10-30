@@ -68,5 +68,7 @@
     "spl",
     "audio-journal",
     "stream",
-    "twitch-cli"
+    "twitch-cli",
+    "h",
+    "openbsd"
 ]
