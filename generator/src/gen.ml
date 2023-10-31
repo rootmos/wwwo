@@ -240,12 +240,13 @@ let twitch_snippet = let open Twitch_t in
       Utils.load_file |> Twitch_j.videos_of_string in
   let s v0 v1 = Lenient_iso8601.compare v1.date v0.date in
   let vods = List.sort s vods in
-  let r v = [
-    a v.url @@ img_b64 v.thumbnail.mimetype v.thumbnail.base64;
-    a v.url @@ text v.title;
-  ] in seq [
+  let h v = div ~cls:(Some "vod") @@ seq [
+    div ~cls:(Some "thumbnail") @@ a v.url @@ img_b64 v.thumbnail.mimetype v.thumbnail.base64;
+    div ~cls:(Some "title") @@ a v.url @@ text v.title;
+  ] in
+  seq [
     h2 @@ text "Twitch highlights";
-    vods |> take 3 >>| r |> table;
+    vods >>| h |> seq |> div ~cls:(Some "highlights");
   ]
 
 let projects_snippet =
@@ -311,7 +312,7 @@ let md_snippet s =
     | _ -> None in
   text @@ Omd.to_html md
 
-let index = page None @@ seq [
+let index = page None ~additional_css:[ Utils.load_file (Path.style "twitch.css") ] @@ seq [
   div ~cls:(Some "intro") @@ seq [
     img ~cls:(Some "avatar")
       ~alt:(Some "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness")
@@ -321,7 +322,7 @@ let index = page None @@ seq [
     social;
   ];
   div ~cls:(Some "content") @@ sounds_snippet;
-  div ~cls:(Some "content") @@ twitch_snippet;
+  div ~cls:(Some "content twitch") @@ twitch_snippet;
   div ~cls:(Some "content") @@ activity_snippet;
   div ~cls:(Some "content") @@ projects_snippet;
   div ~cls:(Some "content") @@ posts_snippet;
