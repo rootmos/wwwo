@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import sys
+import datetime
 
 from .common import fetch_secret, output
 
@@ -46,11 +47,27 @@ def main():
         if "url" not in P:
             P["url"] = r.html_url
 
-        if "last_activity" not in P:
-            P["last_activity"] = r.pushed_at.isoformat()
+        bs = {}
+        most_recent_commit_date = datetime.datetime.fromtimestamp(0).astimezone()
+        for ref in r.get_git_refs():
+            if not ref.ref.startswith("refs/heads/"):
+                continue
+            sha1 = ref.object.sha
+            h = r.get_commit(sha1)
+            name = ref.ref.removeprefix("refs/heads/")
+            last_commit_date = h.commit.author.date
+            if last_commit_date > most_recent_commit_date:
+                most_recent_commit_date = last_commit_date
+            bs[name] = {
+                "commit": sha1,
+                "date": last_commit_date.isoformat(),
+            }
+        P["branches"] = bs
+        P["last_activity"] = most_recent_commit_date.isoformat()
 
-        if "date_created" not in P:
-            P["date_created"] = r.created_at.isoformat()
+        P["date_created"] = r.created_at.isoformat()
+
+        P["stars"] = len(list(r.get_stargazers()))
 
         ps[P["name"]] = P
 
