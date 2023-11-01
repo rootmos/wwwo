@@ -12,6 +12,7 @@ type project = {
     url: string;
     date_created: date;
     last_activity: date;
+    stars: int;
     ~subprojects <ocaml default="[]">: subproject list;
 }
 
