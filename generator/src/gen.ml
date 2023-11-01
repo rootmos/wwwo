@@ -267,7 +267,7 @@ let projects_snippet =
   ]
   in seq [
     h2 @@ text "Projects";
-    projects >>| r |> ul;
+    projects >>| r |> ul ~cls:(Some "content");
   ]
 
 let resolve h = Unix.getaddrinfo h ""
