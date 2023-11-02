@@ -313,13 +313,43 @@ let md_snippet s =
     | _ -> None in
   text @@ Omd.to_html md
 
-let index = page None ~additional_css:[ Utils.load_file (Path.style "twitch.css") ] @@ seq [
+let index =
+  let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
+  page None ~additional_css:[ Utils.load_file (Path.style "twitch.css") ] @@ seq [
   div ~cls:(Some "intro") @@ seq [
-    img ~cls:(Some "avatar")
-      ~alt:(Some "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness")
+    script @@ String.concat "" [
+      "let avatar_clicks = 0;";
+      "function avatar_onclick() {";
+      "  const e1 = document.getElementById('avatar-explanation-1');";
+      "  const e2 = document.getElementById('avatar-explanation-2');";
+      "  if(avatar_clicks%4 == 0) {";
+      "    e1.style['display'] = 'block';";
+      "  } else if(avatar_clicks%4 == 1) {";
+      "    e2.style['display'] = 'block';";
+      "  } else if(avatar_clicks%4 == 2) {";
+      "    e2.style['display'] = 'none';";
+      "  } else {";
+      "    e1.style['display'] = 'none';";
+      "  }";
+      "  avatar_clicks += 1;";
+      "}";
+    ];
+    img ~cls:(Some "avatar") ~alt:(Some acronym) ~onclick:(Some "avatar_onclick()")
       (Path.image "rootmos.jpg");
-    div ~cls:(Some "slogan") @@
+    div ~cls:(Some "slogan") @@ seq [
       text "Some math, mostly programming and everything in between";
+      div ~id:(Some "avatar-explanation-1") ~style:(Some "display: none") @@ seq [
+        text acronym;
+        text " ";
+        a "https://knowyourmeme.com/memes/astronaut-sloth" @@ text "[?]";
+      ];
+      div ~id:(Some "avatar-explanation-2") ~style:(Some "display: none") @@ seq [
+        text "conflation of ";
+        a "https://en.wikipedia.org/wiki/Superuser" @@ text "root";
+        text " and ";
+        a "https://sv.wikipedia.org/wiki/Rotmos" @@ text "rotmos";
+      ];
+    ];
     social;
   ];
   div ~cls:(Some "content") @@ sounds_snippet;

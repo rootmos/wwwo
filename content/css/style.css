@@ -82,10 +82,11 @@ svg.button {
 .slogan {
   font-size: 15px;
   font-style: italic;
-  margin: 170px 40px 0 0;
+  margin: 150px 40px 0 0;
   color: #777;
   text-align: right;
   width: 660px;
+  line-height: 1.5;
 }
 
 img.avatar {
