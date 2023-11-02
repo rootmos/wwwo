@@ -1,5 +1,7 @@
 name: Build, upload and publish
-on: [ push ]
+on:
+  push:
+    branches: [ master ]
 
 jobs:
   publish:
