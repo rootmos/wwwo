@@ -293,16 +293,11 @@ let resume_snippet = seq [
 ]
 
 let social = seq @@ List.rev [
-  a "https://github.com/rootmos" @@ svg ~cls:"social"
-    "fa/svgs/brands/github.svg";
-  a "https://git.sr.ht/~rootmos" @@ svg ~cls:"social"
-    (Path.image "sourcehut.svg");
-  a "https://soundcloud.com/rootmos" @@ svg ~cls:"social"
-    "fa/svgs/brands/soundcloud.svg";
-  a "https://twitch.tv/rootmos2" @@ svg ~cls:"social"
-    "fa/svgs/brands/twitch.svg";
-  a "https://keybase.io/rootmos" @@ svg ~cls:"social"
-    "fa/svgs/brands/keybase.svg";
+  a "https://github.com/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/github.svg";
+  a "https://git.sr.ht/~rootmos" @@ svg ~cls:"social" (Path.image "sourcehut.svg");
+  a "https://keybase.io/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/keybase.svg";
+  a "https://twitch.tv/rootmos2" @@ svg ~cls:"social" "fa/svgs/brands/twitch.svg";
+  a "https://soundcloud.com/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/soundcloud.svg";
 ]
 
 let md_snippet s =
