@@ -341,7 +341,7 @@ let index =
     img ~cls:(Some "avatar") ~alt:(Some acronym) ~onclick:(Some "avatar_onclick()")
       (Path.image "rootmos.jpg");
     div ~cls:(Some "slogan") @@ seq [
-      text "Some math, mostly programming and everything in between";
+      text "Some math, music, mostly programming and everything in between";
       div ~id:(Some "avatar-hint") ~style:(Some "display: none") @@ text "click me ⇒ ";
       div ~id:(Some "avatar-explanation-1") ~style:(Some "display: none") @@ seq [
         text acronym;
