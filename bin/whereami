@@ -10,6 +10,7 @@ import socket
 import subprocess
 import sys
 import html
+import platform
 
 class Situation:
     @staticmethod
@@ -88,23 +89,12 @@ class Git(Situation):
 
         return d
 
-class LSB(Situation):
-    key = "lsb"
+class Platform(Situation):
+    key = "platform"
 
     @staticmethod
     def figure_out(args):
-        lsb_exe = shutil.which("lsb_release")
-        if not lsb_exe:
-            return None
-
-        p = subprocess.run(["lsb_relase", "--all"], executable=lsb_exe, check=True, text=True, stdout=subprocess.PIPE)
-        i = {}
-        for l in p.stdout.splitlines():
-            (k, v) = l.split(":")
-            k = k.lower().replace(" ", "-")
-            i[k] = v.strip()
-        return i
-
+        return platform.platform()
 
 class Format:
     @staticmethod
