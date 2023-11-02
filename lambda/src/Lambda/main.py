@@ -23,3 +23,4 @@ def main(event, context):
 
     logger.debug(f"args: {args}")
     subprocess.run(args, executable=exe, check=True)
+    logger.info(f"bye")

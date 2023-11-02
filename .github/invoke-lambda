@@ -2,6 +2,9 @@
 
 set -o nounset -o pipefail -o errexit
 
+SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
+BIN_DIR=${BIN_DIR-$SCRIPT_DIR/../bin}
+
 if [ -f "./.env" ]; then
     set -a
     . "./.env"
@@ -20,11 +23,36 @@ if [ -n "${AWS_PROFILE-}" ]; then
     ARGS+=("--profile=$AWS_PROFILE")
 fi
 
+if [ -n "${LAMBDA_TIMEOUT-}" ]; then
+    ARGS+=("--cli-read-timeout=$LAMBDA_TIMEOUT")
+fi
+
 TMP=$(mktemp -d)
 trap 'rm -rf $TMP' EXIT
 
-echo 1>&2 "invoking lambda: $LAMBDA_ARN"
+python3 - "$BIN_DIR/whereami" "$TMP/payload.json" <<EOF >"$TMP/trigger.id"
+import subprocess
+import json
+import uuid
+import sys
 
+tid = "T" + uuid.uuid4().hex
+j = {
+    "trigger": {
+        "id": tid,
+    },
+    "whereami": json.loads(subprocess.check_output([sys.argv[1], "current", "--json"])),
+}
+
+with open(sys.argv[2], "w") as f:
+    json.dump(j, f)
+
+print(tid)
+EOF
+
+ARGS+=("--payload=file://$TMP/payload.json")
+
+echo 1>&2 "invoking lambda: $LAMBDA_ARN ($(<"$TMP/trigger.id"))"
 aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
 
 EXIT=0

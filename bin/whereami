@@ -220,7 +220,7 @@ def parse_args():
             fmts.add_argument(f"--{f.key}", action="store_true")
             f.add_arguments(p)
 
-    subparsers = parser.add_subparsers(dest="cmd")
+    subparsers = parser.add_subparsers(dest="cmd", required=True)
 
     current_cmd = subparsers.add_parser("current")
     current_cmd.add_argument("-C", "--directory", metavar="DIR", default=os.getcwd(), help="change directory to DIR")

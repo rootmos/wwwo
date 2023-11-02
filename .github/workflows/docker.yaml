@@ -10,6 +10,7 @@ jobs:
         DOCKER_IMAGE: ${{ vars.DOCKER_IMAGE }}
         ROLE_ARN: ${{ vars.ROLE_ARN }}
         LAMBDA_ARN: ${{ vars.LAMBDA_ARN }}
+        LAMBDA_TIMEOUT: 600
         AWS_PROFILE: ecr
     steps:
     - name: Set up Docker Buildx
