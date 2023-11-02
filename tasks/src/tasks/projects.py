@@ -6,6 +6,7 @@ import datetime
 
 from .common import fetch_secret, output
 
+import requests
 from github import Github
 
 def parse_args():
@@ -18,20 +19,12 @@ def parse_args():
 
     return parser.parse_args()
 
-def main():
-    args = parse_args()
-
+def github(projects):
     g = Github(fetch_secret(os.environ["GITHUB_TOKEN_ARN"]))
-
-    user = args.user
-    if user is None:
-        user = g.get_user().login
-
-    with open(args.projects_spec, "r") as f:
-        raw = json.loads(f.read())
+    user = g.get_user().login
 
     ps = {}
-    for p in raw:
+    for p in projects:
         if isinstance(p, dict):
             P = p
         elif isinstance(p, str):
@@ -47,7 +40,7 @@ def main():
         if "url" not in P:
             P["url"] = r.html_url
 
-        bs = {}
+        bs = []
         most_recent_commit_date = datetime.datetime.fromtimestamp(0).astimezone()
         for ref in r.get_git_refs():
             if not ref.ref.startswith("refs/heads/"):
@@ -58,10 +51,11 @@ def main():
             last_commit_date = h.commit.author.date
             if last_commit_date > most_recent_commit_date:
                 most_recent_commit_date = last_commit_date
-            bs[name] = {
+            bs.append({
+                "name": name,
                 "commit": sha1,
                 "date": last_commit_date.isoformat(),
-            }
+            })
         P["branches"] = bs
         P["last_activity"] = most_recent_commit_date.isoformat()
 
@@ -71,5 +65,65 @@ def main():
 
         ps[P["name"]] = P
 
+    return ps
+
+def sourcehut(projects):
+    token = fetch_secret(os.environ["SOURCEHUT_TOKEN_ARN"])
+
+    h = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    }
+
+    ps = {}
+    cursor = "null"
+    while True:
+        query = f"""
+{{
+   repositories(cursor: {cursor}) {{
+      cursor
+      results {{
+        name, description, created, updated, visibility
+        owner {{
+          canonicalName
+        }}
+      }}
+    }}
+}}"""
+        body = { "query": query }
+        rsp = requests.post("https://git.sr.ht/query", headers=h, data=json.dumps(body))
+        j = json.loads(rsp.content)
+        rs = j["data"]["repositories"]
+
+        for r in rs["results"]:
+            name = r["name"]
+            if name not in projects:
+                continue
+            ps[name] = {
+                "name": name,
+                "description": r["description"],
+                "date_created": r["created"],
+                "last_activity": r["updated"],
+                "url": "https://git.sr.ht/" + r["owner"]["canonicalName"] + "/" + name,
+            }
+
+        cursor = rs.get("cursor")
+        if not cursor:
+            break
+        else:
+            cursor = f"\"{cursor}\""
+
+    return ps
+
+def main():
+    args = parse_args()
+
+    with open(args.projects_spec, "r") as f:
+        raw = json.loads(f.read())
+
+    ps = github(raw.get("github", {}))
+    ps |= sourcehut(raw.get("sourcehut", {}))
+
     with output(args.output) as f:
-        f.write(json.dumps(list(ps.values())))
+        json.dump(list(ps.values()), f)

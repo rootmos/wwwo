@@ -258,7 +258,7 @@ let projects_snippet =
     ps |> List.sort s in
   let r p = seq [
     a p.url @@ text p.name;
-    (match p.stars with 0 -> noop | s -> text (sprintf " ★%d" p.stars));
+    (match p.stars with None -> noop | Some 0 -> noop | Some s -> text (sprintf " ★%d" s));
     (match p.description with Some d -> text (" » " ^ d) | None -> noop);
     p.subprojects >>| (fun (s: subproject) -> seq [
       a s.url @@ text s.name;

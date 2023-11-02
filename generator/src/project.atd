@@ -6,14 +6,21 @@ type subproject = {
     url: string;
 }
 
+type branch = {
+    name: string;
+    commit: string;
+    date: date;
+}
+
 type project = {
     name: string;
     ?description: string option;
     url: string;
     date_created: date;
     last_activity: date;
-    stars: int;
+    ?stars: int option;
     ~subprojects <ocaml default="[]">: subproject list;
+    ~branches <ocaml default="[]">: branch list;
 }
 
 type projects = project list

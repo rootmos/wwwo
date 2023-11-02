@@ -1,74 +1,83 @@
-[
-    "wwwo",
-    "config",
-    "loom",
-    "arweaver",
-    {
-        "name": "apl-hack",
-        "subprojects": [
-            {
-                "name": "aoc19",
-                "url": "https://github.com/rootmos/apl-hack/tree/master/dyalog/aoc19",
-                "description": "My solutions to Advent of Code 2019"
-            },
-            {
-                "name": "aoc18",
-                "url": "https://github.com/rootmos/apl-hack/tree/master/dyalog/aoc18",
-                "description": "My solutions to Advent of Code 2018"
-            },
-            {
-                "name": "aoc17",
-                "url": "https://github.com/rootmos/apl-hack/tree/master/dyalog/aoc17",
-                "description": "My solutions to Advent of Code 2017"
-            }
-        ]
-    },
-    {
-        "name": "coq-hack",
-        "subprojects": [
-            {
-                "name": "wf",
-                "url": "https://github.com/rootmos/coq-hack/blob/master/src/Notes/wf.v",
-                "description": "Equivalence between two definitions of a well-founded relation (Coq's and Wikipedia's) using classical logic"
-            },
-            {
-                "name": "STLC",
-                "url": "https://github.com/rootmos/coq-hack/blob/master/src/Types/STLC.v",
-                "description": "Formalization of the simply typed lambda calculus"
-            }
-        ]
-    },
-    {
-        "name": "agda-hack",
-        "subprojects": [
-            {
-                "name": "bf",
-                "url": "https://github.com/rootmos/agda-hack/blob/master/bf",
-                "description": "A BrainFuck interpreter"
-            }
-        ]
-    },
-    "lambdasylum",
-    "silly-k",
-    "silly-ml",
-    "silly-joy",
-    "silly-actor",
-    "silly-church",
-    "tabs-vs-spaces",
-    "dvorak",
-    "git-audit",
-    "displayswitcheroo",
-    "libpquv",
-    "ppx_useless",
-    "fb",
-    "dont-fear-the-reaper",
-    "ppx_ski",
-    "ldapy",
-    "midi",
-    "spl",
-    "audio-journal",
-    "stream",
-    "twitch-cli",
-    "h",
-    "openbsd"
-]
+{
+    "github": [
+        "wwwo",
+        "config",
+        "loom",
+        "arweaver",
+        {
+            "name": "apl-hack",
+            "subprojects": [
+                {
+                    "name": "aoc19",
+                    "url": "https://github.com/rootmos/apl-hack/tree/master/dyalog/aoc19",
+                    "description": "My solutions to Advent of Code 2019"
+                },
+                {
+                    "name": "aoc18",
+                    "url": "https://github.com/rootmos/apl-hack/tree/master/dyalog/aoc18",
+                    "description": "My solutions to Advent of Code 2018"
+                },
+                {
+                    "name": "aoc17",
+                    "url": "https://github.com/rootmos/apl-hack/tree/master/dyalog/aoc17",
+                    "description": "My solutions to Advent of Code 2017"
+                }
+            ]
+        },
+        {
+            "name": "coq-hack",
+            "subprojects": [
+                {
+                    "name": "wf",
+                    "url": "https://github.com/rootmos/coq-hack/blob/master/src/Notes/wf.v",
+                    "description": "Equivalence between two definitions of a well-founded relation (Coq's and Wikipedia's) using classical logic"
+                },
+                {
+                    "name": "STLC",
+                    "url": "https://github.com/rootmos/coq-hack/blob/master/src/Types/STLC.v",
+                    "description": "Formalization of the simply typed lambda calculus"
+                }
+            ]
+        },
+        {
+            "name": "agda-hack",
+            "subprojects": [
+                {
+                    "name": "bf",
+                    "url": "https://github.com/rootmos/agda-hack/blob/master/bf",
+                    "description": "A BrainFuck interpreter"
+                }
+            ]
+        },
+        "lambdasylum",
+        "silly-k",
+        "silly-ml",
+        "silly-joy",
+        "silly-actor",
+        "silly-church",
+        "tabs-vs-spaces",
+        "dvorak",
+        "git-audit",
+        "displayswitcheroo",
+        "libpquv",
+        "ppx_useless",
+        "fb",
+        "dont-fear-the-reaper",
+        "ppx_ski",
+        "ldapy",
+        "midi",
+        "spl",
+        "audio-journal",
+        "stream",
+        "twitch-cli",
+        "h",
+        "openbsd",
+        "libr"
+    ],
+    "sourcehut": [
+        "AoC",
+        "lua-hack",
+        "xpanel",
+        "fetch"
+    ]
+}
