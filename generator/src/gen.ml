@@ -318,8 +318,16 @@ let index =
   page None ~additional_css:[ Utils.load_file (Path.style "twitch.css") ] @@ seq [
   div ~cls:(Some "intro") @@ seq [
     script @@ String.concat "" [
+      "let avatar_revealed = 0;";
+      "function avatar_show_hint() {";
+      "  if(!avatar_revealed) {";
+      "    document.getElementById('avatar-hint').style['display'] = 'block';";
+      "  }";
+      "}";
+      "setTimeout(avatar_show_hint, 5000);";
       "let avatar_clicks = 0;";
       "function avatar_onclick() {";
+      "  document.getElementById('avatar-hint').style['display'] = 'none';";
       "  const e1 = document.getElementById('avatar-explanation-1');";
       "  const e2 = document.getElementById('avatar-explanation-2');";
       "  if(avatar_clicks%4 == 0) {";
@@ -332,12 +340,14 @@ let index =
       "    e1.style['display'] = 'none';";
       "  }";
       "  avatar_clicks += 1;";
+      "  avatar_revealed = 1;";
       "}";
     ];
     img ~cls:(Some "avatar") ~alt:(Some acronym) ~onclick:(Some "avatar_onclick()")
       (Path.image "rootmos.jpg");
     div ~cls:(Some "slogan") @@ seq [
       text "Some math, mostly programming and everything in between";
+      div ~id:(Some "avatar-hint") ~style:(Some "display: none") @@ text "click me ⇒ ";
       div ~id:(Some "avatar-explanation-1") ~style:(Some "display: none") @@ seq [
         text acronym;
         text " ";
