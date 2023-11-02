@@ -35,6 +35,7 @@ import subprocess
 import json
 import uuid
 import sys
+import base64
 
 tid = "T" + uuid.uuid4().hex
 j = {
@@ -44,8 +45,8 @@ j = {
     "whereami": json.loads(subprocess.check_output([sys.argv[1], "current", "--json"])),
 }
 
-with open(sys.argv[2], "w") as f:
-    json.dump(j, f)
+with open(sys.argv[2], "wb") as f:
+    f.write(base64.b64encode(json.dumps(j).encode("UTF-8")))
 
 print(tid)
 EOF
