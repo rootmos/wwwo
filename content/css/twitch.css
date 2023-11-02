@@ -1,0 +1,23 @@
+.twitch > .highlights {
+    margin: 15px 60px;
+    display: flex;
+    overflow-x: scroll;
+}
+
+.highlights > .vod {
+    display: grid;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.vod > .thumbnail {
+    grid-row: 1;
+    grid-column: 1;
+    text-align: center;
+}
+
+.vod > .title {
+    grid-row: 2;
+    grid-column: 1;
+    text-align: center;
+}

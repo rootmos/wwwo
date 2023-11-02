@@ -1,0 +1,7 @@
+*.exe
+*.cmi
+*.cmo
+*_j.ml
+*_j.mli
+*_t.ml
+*_t.mli

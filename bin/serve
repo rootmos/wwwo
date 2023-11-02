@@ -1,0 +1,7 @@
+#!/bin/sh
+
+WEBROOT="${1-${WEBROOT-$(pwd)}}"
+PORT="${PORT-8000}"
+
+echo 1>&2 "webroot: $WEBROOT"
+exec ${PYTHON-python3} -m http.server --directory="$WEBROOT"

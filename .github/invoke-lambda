@@ -1,0 +1,78 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
+BIN_DIR=${BIN_DIR-$SCRIPT_DIR/../bin}
+
+if [ -f "./.env" ]; then
+    set -a
+    . "./.env"
+    set +a
+fi
+
+LAMBDA_ARN=${LAMBDA_ARN-$1}
+REGION=$(cut -d':' -f 4 <<< "$LAMBDA_ARN")
+
+ARGS=("--function-name="$LAMBDA_ARN"")
+ARGS+=("--region=$REGION")
+ARGS+=("--invocation-type=RequestResponse")
+ARGS+=("--log-type=Tail")
+
+if [ -n "${AWS_PROFILE-}" ]; then
+    ARGS+=("--profile=$AWS_PROFILE")
+fi
+
+if [ -n "${LAMBDA_TIMEOUT-}" ]; then
+    ARGS+=("--cli-read-timeout=$LAMBDA_TIMEOUT")
+fi
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+python3 - "$BIN_DIR/whereami" "$TMP/payload.json" <<EOF >"$TMP/trigger.id"
+import subprocess
+import json
+import uuid
+import sys
+import base64
+
+tid = "T" + uuid.uuid4().hex
+j = {
+    "trigger": {
+        "id": tid,
+    },
+    "whereami": json.loads(subprocess.check_output([sys.argv[1], "current", "--json"])),
+}
+
+with open(sys.argv[2], "wb") as f:
+    f.write(base64.b64encode(json.dumps(j).encode("UTF-8")))
+
+print(tid)
+EOF
+
+ARGS+=("--payload=file://$TMP/payload.json")
+
+echo 1>&2 "invoking lambda: $LAMBDA_ARN ($(<"$TMP/trigger.id"))"
+aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
+
+EXIT=0
+
+STATUS_CODE=$(jq -r .StatusCode "$TMP/result.json")
+if [ "$STATUS_CODE" != 200 ]; then
+    echo 1>&2 "invocation status code: $STATUS_CODE != 200"
+    jq -r . "$TMP/result.json" | sed 's/^/  /' 1>&2
+    EXIT=1
+fi
+
+FUNCTION_ERROR=$(jq -r .FunctionError "$TMP/result.json")
+if [ "$FUNCTION_ERROR" != "null" ]; then
+    echo 1>&2 "invocation errored! ($FUNCTION_ERROR)"
+    jq -r . "$TMP/result.json" | sed 's/^/  /' 1>&2
+    EXIT=2
+fi
+
+echo 1>&2 "log:"
+jq -r .LogResult "$TMP/result.json" | base64 -d | sed 's/^/  /' 1>&2
+
+exit "$EXIT"

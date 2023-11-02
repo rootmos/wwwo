@@ -1,0 +1,180 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
+ROOT=${ROOT-$SCRIPT_DIR}
+BIN=${BIN-$ROOT/bin}
+
+if [ -f "$ROOT/.env" ]; then
+    set -a
+    . "$ROOT/.env"
+    set +a
+fi
+
+FORCE=
+META_SPEC=$SCRIPT_DIR/meta.mk
+META_JOBS=1
+WORKDIR=
+ENVIRONMENT=prod
+UPLOAD=
+DRY_RUN=
+PURGE=
+while getopts "fm:J:w:e:u:np:-" OPT; do
+    case $OPT in
+        f) FORCE=1 ;;
+        m) META_SPEC=$OPTARG ;;
+        J) META_JOBS=$OPTARG ;;
+        w) WORKDIR=$OPTARG ;;
+        e) ENVIRONMENT=$OPTARG ;;
+        u) UPLOAD=$OPTARG ;;
+        n) DRY_RUN=-n ;;
+        p) PURGE=$OPTARG ;;
+        -) break ;;
+        ?) exit 2 ;;
+    esac
+done
+shift $((OPTIND-1))
+
+
+h() {
+    echo 1>&2 "+ $*"
+}
+
+q() {
+    echo 1>&2 "? $*"
+}
+
+w() {
+    echo 1>&2 "! $*"
+}
+
+e() {
+    echo 1>&2 "!!$*"
+    exit 1
+}
+
+o() {
+    sed 's/^/| /'
+}
+
+# workdir
+
+if [ -z "$WORKDIR" ]; then
+    WORKDIR="$ROOT/.workdirs/$(date --utc +%FT%H%M%SZ)"
+fi
+
+WORKDIR=$(readlink -f "$WORKDIR")
+h "workdir: $WORKDIR"
+mkdir -pv "$WORKDIR" 2>&1 | o
+
+
+# content
+
+if [ -n "${FORCE-}" ]; then
+    h "removing previous content: $WORKDIR/content"
+    rm -rfv "$WORKDIR/content" 2>&1 | o
+fi
+
+h "copying content: $ROOT/content -> $WORKDIR/content"
+rsync -avc "$ROOT/content/" "$WORKDIR/content" 2>&1 | o
+
+
+# meta
+
+if [ -n "${FORCE-}" ]; then
+    h "removing previous meta: $WORKDIR/meta"
+    rm -rfv "$WORKDIR/meta" 2>&1 | o
+fi
+
+h "fetching meta: $META_SPEC -> $WORKDIR/meta"
+mkdir -pv "$WORKDIR/meta" 2>&1 | o
+make -f "$META_SPEC" -j"$META_JOBS" -C "$WORKDIR/meta" PROJECTS_SPEC="$WORKDIR/content/projects.json" 2>&1 | o
+
+
+# fontawesome
+
+if [ -n "${FORCE-}" ]; then
+    h "removing previous fontawesome: $WORKDIR/fa"
+    rm -rfv "$WORKDIR/fa" 2>&1 | o
+fi
+
+h "preparing fontawesome"
+"$SCRIPT_DIR/bin/fontawesome" "$WORKDIR/fa" 2>&1 | o
+
+
+# figure out generator
+
+GENERATOR_EXE=${GENERATOR_EXE-}
+if [ -n "$GENERATOR_EXE" ]; then
+    GENERATOR_EXE=$(which "$GENERATOR_EXE")
+    h "using generator (\$GENERATOR_EXE): $GENERATOR_EXE"
+else
+    GENERATOR_EXE="${GENERATOR_EXE_PREFIX-wwwo-}generator"
+    q "trying generator: $GENERATOR_EXE"
+    if ! command -v "$GENERATOR_EXE" &>/dev/null; then
+        GENERATOR_EXE="$ROOT/generator/src/gen.exe"
+        q "trying generator: $GENERATOR_EXE"
+        if [ ! -f "$GENERATOR_EXE" ]; then
+            e "unable to figure out generator"
+        fi
+    fi
+    GENERATOR_EXE=$(which "$GENERATOR_EXE")
+    h "using generator: $GENERATOR_EXE"
+fi
+
+
+# webroot
+
+export WEBROOT="$WORKDIR/webroot"
+if [ -n "${FORCE-}" ]; then
+    h "removing previous webroot: $WORKDIR/webroot"
+    rm -rfv "$WORKDIR/webroot" 2>&1 | o
+fi
+
+mkdir -p "$WEBROOT"
+h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
+(
+    cd "$WORKDIR"
+    "$BIN/whereami" current --json --output="$WORKDIR/generate.json"
+
+    "$BIN/whereami" format --env --env-prefix=BUILD_ "$ROOT/.build.json" --output="$WORKDIR/build.env"
+    set -a
+    . "$WORKDIR/build.env"
+    set +a
+
+    env ENV="$ENVIRONMENT" "$GENERATOR_EXE" 2>&1 | o
+)
+
+# compile version page
+
+h "version page: $WEBROOT/$ENVIRONMENT/version.html"
+"$BIN/whereami" merge \
+    --html --html-standalone \
+    --output="$WEBROOT/$ENVIRONMENT/version.html" \
+    "Build=$ROOT/.build.json" \
+    "Generate=$WORKDIR/generate.json"
+
+
+# copy error pages
+
+h "copying error pages: $ROOT/content/error -> $WEBROOT/$ENVIRONMENT/error"
+rsync -avc "$ROOT/content/error/" "$WEBROOT/$ENVIRONMENT/error" 2>&1 | o
+
+# copy favicon
+
+h "copying favicon: $ROOT/content/image/favicon.ico -> $WEBROOT/$ENVIRONMENT/favicon.ico"
+rsync -avc "$ROOT/content/image/favicon.ico" "$WEBROOT/$ENVIRONMENT/favicon.ico" 2>&1 | o
+
+
+# upload
+
+if [ -n "$UPLOAD" ]; then
+    h "upload: $WEBROOT/$ENVIRONMENT -> $UPLOAD"
+    ${TASKS_EXE_PREFIX-wwwo-}upload --htmls="$WORKDIR/htmls" ${DRY_RUN} "$WEBROOT/$ENVIRONMENT" "$UPLOAD" 2>&1 | o
+
+    if [ -n "$PURGE" ]; then
+        h "purge: $PURGE"
+        xargs ${TASKS_EXE_PREFIX-wwwo-}purge "$PURGE" < "$WORKDIR/htmls" 2>&1 | o
+    fi
+fi

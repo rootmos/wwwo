@@ -30,6 +30,14 @@ li {
   padding: 2px 15px;
 }
 
+ul > li {
+  padding: 0 0;
+}
+
+ul > li > ul {
+  padding: 0.2em 1em;
+}
+
 table {
   width: 100%;
   padding: 15px 60px;
@@ -74,10 +82,11 @@ svg.button {
 .slogan {
   font-size: 15px;
   font-style: italic;
-  margin: 170px 40px 0 0;
+  margin: 150px 40px 0 0;
   color: #777;
   text-align: right;
   width: 660px;
+  line-height: 1.5;
 }
 
 img.avatar {

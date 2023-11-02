@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tasks"
+version = "0.0.1"
+dependencies = [
+  "boto3 >= 1.28.62, < 1.29",
+  "PyGithub >= 2.1.1, < 2.2",
+  "python-magic >= 0.4.27, < 0.5",
+  "requests >= 2.31.0, < 2.32",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[project.scripts]
+wwwo-github = "tasks.github:main"
+wwwo-list = "tasks.list:main"
+wwwo-project = "tasks.project:main"
+wwwo-projects = "tasks.projects:main"
+wwwo-sounds = "tasks.sounds:main"
+wwwo-twitch = "tasks.twitch:main"
+wwwo-upload = "tasks.upload:main"
+wwwo-purge = "tasks.purge:main"
