@@ -159,6 +159,13 @@ class Html(Format):
             stream.write("<html><head>")
             if args.html_title:
                 stream.write(f"<title>{html.escape(x)}</title>")
+
+            stream.write("<style>")
+            stream.write("td { vertical-align: baseline; border: 1px solid }")
+            stream.write("table { background-color: white }")
+            stream.write("td > table { width: 100% }")
+            stream.write("tbody tr:nth-child(odd) { background-color: #f8f8ff }")
+            stream.write("</style>")
             stream.write("</head><body>")
 
         hlevels = args.html_lowest_header_level
