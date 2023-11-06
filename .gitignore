@@ -1,7 +1,8 @@
 .env
-.build.json
-.generate.json
+.*.json
 .*.flag
+
+.docker.image
 
 build
 dist
