@@ -115,6 +115,26 @@ class CI(Situation):
             "workflow_url": f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
         }
 
+class AWS(Situation):
+    key = "aws"
+
+    @staticmethod
+    def figure_out(args):
+        d = {}
+        if os.environ.get("AWS_REGION"):
+            d["region"] = os.environ.get("AWS_REGION")
+
+        if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+            d["lambda"] = {
+                "function_name": os.environ.get("AWS_LAMBDA_FUNCTION_NAME"),
+                "function_version": os.environ.get("AWS_LAMBDA_FUNCTION_VERSION"),
+                "log_group_name": os.environ.get("AWS_LAMBDA_LOG_GROUP_NAME"),
+                "log_stream_name": os.environ.get("AWS_LAMBDA_LOG_STREAM_NAME"),
+            }
+
+        if d != {}:
+            return d
+
 class Format:
     @staticmethod
     def add_arguments(parser):
