@@ -24,6 +24,9 @@ jobs:
     - name: Expose GitHub Runtime
       uses: crazy-max/ghaction-github-runtime@v3
 
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install --yes gpg
+
     - name: Check out repository code
       uses: actions/checkout@v3
       with:
@@ -38,17 +41,17 @@ jobs:
       run: .github/ecr-login
 
     - name: Build Docker image
-      run: .github/docker-build > docker.image
+      run: .github/docker-build > .docker.image
 
     - name: Tag and push images
       run: |
           for t in "$DOCKER_IMAGE:$GITHUB_REF_NAME" "$DOCKER_IMAGE:$GITHUB_SHA"; do
-              docker tag "$(cat docker.image)" "$t"
+              docker tag "$(cat .docker.image)" "$t"
               docker push "$t"
           done
 
     - name: Reconfigure the Lambda function's image
-      run: .github/reconfigure-lambda "$(cat docker.image)"
+      run: .github/reconfigure-lambda "$(cat .docker.image)"
 
     - name: Invoke the Lambda function
       run: .github/invoke-lambda
