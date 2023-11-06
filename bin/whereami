@@ -67,7 +67,7 @@ class Git(Situation):
                 yield l.rstrip()
 
         def git1(*args):
-            return list(git(*args))[0]
+            return next(git(*args), None)
 
         dirty = len(list(git("status", "--porcelain"))) > 0
 
@@ -80,12 +80,23 @@ class Git(Situation):
         if dirty:
             d["user_name"] = git1("config", "user.name")
             d["user_email"] = git1("config", "user.email")
-            d["signing_key"] = git1("config", "user.signingkey")
+            signing_key = git1("config", "user.signingkey")
+            if signing_key:
+                d["signing_key"] = signing_key
         else:
-            d["user_name"] = git1("--no-pager", "log", "--format=format:%an", "-n1")
-            d["user_email"] = git1("--no-pager", "log", "--format=format:%ae", "-n1")
-            d["author_date"] = git1("--no-pager", "log", "--format=format:%aI", "-n1")
-            d["signing_key"] = git1("--no-pager", "log", "--format=format:%GP", "-n1")
+            def extract(fmt):
+                return git1("--no-pager", "log", "-n1", "--format=format:" + fmt)
+            d["author_name"] = extract("%an")
+            d["author_email"] = extract("%ae")
+            d["author_date"] = extract("%aI")
+            d["comitter_name"] = extract("%cn")
+            d["comitter_email"] = extract("%ce")
+            d["commiter_date"] = extract("%cI")
+            signer = extract("%GS")
+            if signer:
+                d["signer"] = signer
+                d["signing_key"] = extract("%GF")
+                d["primary_key"] = extract("%GP")
 
         return d
 

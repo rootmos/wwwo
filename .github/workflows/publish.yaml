@@ -24,13 +24,21 @@ jobs:
     - name: Expose GitHub Runtime
       uses: crazy-max/ghaction-github-runtime@v3
 
-    - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install --yes gpg
-
     - name: Check out repository code
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
+
+    - name: Configure GnuPG
+      run: |
+        gpgconf --list-components | cut -f1 -d':' | xargs -I{} gpgconf --kill {}
+        export GNUPGHOME="$HOME/.gnupg"
+        rm -rf "$GNUPGHOME"
+        mkdir "$GNUPGHOME"
+        chmod 700 "$GNUPGHOME"
+        echo "auto-key-retrieve" > "$GNUPGHOME/gpg.conf"
+        echo "keyserver hkp://keyserver.ubuntu.com:80" > "$GNUPGHOME/dirmngr.conf"
+        echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
 
     - name: Configure AWS CLI profiles
       run: |
