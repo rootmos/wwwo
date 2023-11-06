@@ -1,6 +1,7 @@
+import json
+import os
 import subprocess
 import tempfile
-import os
 
 from .util import env
 
@@ -11,6 +12,9 @@ def main(event, context):
     logger.info(f"event: {event}")
 
     workdir = tempfile.TemporaryDirectory(prefix="wwwo-")
+
+    with open(os.path.join(workdir.name, ".invoke.json"), "w") as f:
+        json.dump(event, f)
 
     exe = os.path.abspath("generate")
     args = [ "generate", "-w", workdir.name, "-J16" ]

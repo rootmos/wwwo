@@ -146,14 +146,19 @@ h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
     env ENV="$ENVIRONMENT" "$GENERATOR_EXE" 2>&1 | o
 )
 
+
 # compile version page
 
 h "version page: $WEBROOT/$ENVIRONMENT/version.html"
+
+PARTS=("Build=$ROOT/.build.json" "Generate=$WORKDIR/generate.json")
+if [ -f "$WORKDIR/.invoke.json" ]; then
+    PARTS+=("Invoke=$WORKDIR/.invoke.json")
+fi
 "$BIN/whereami" merge \
     --html --html-standalone \
     --output="$WEBROOT/$ENVIRONMENT/version.html" \
-    "Build=$ROOT/.build.json" \
-    "Generate=$WORKDIR/generate.json"
+    "${PARTS[@]}"
 
 
 # copy error pages

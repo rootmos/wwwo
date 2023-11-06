@@ -30,7 +30,7 @@ fi
 TMP=$(mktemp -d)
 trap 'rm -rf $TMP' EXIT
 
-python3 - "$BIN_DIR/whereami" "$TMP/payload.json" <<EOF >"$TMP/trigger.id"
+python3 - "$BIN_DIR/whereami" "$TMP/payload.json.b64" <<EOF >"$TMP/trigger.id"
 import subprocess
 import json
 import uuid
@@ -42,7 +42,7 @@ j = {
     "trigger": {
         "id": tid,
     },
-    "whereami": json.loads(subprocess.check_output([sys.argv[1], "current", "--json"])),
+    **json.loads(subprocess.check_output([sys.argv[1], "current", "--json"]))
 }
 
 with open(sys.argv[2], "wb") as f:
@@ -51,7 +51,7 @@ with open(sys.argv[2], "wb") as f:
 print(tid)
 EOF
 
-ARGS+=("--payload=file://$TMP/payload.json")
+ARGS+=("--payload=file://$TMP/payload.json.b64")
 
 echo 1>&2 "invoking lambda: $LAMBDA_ARN ($(<"$TMP/trigger.id"))"
 aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
