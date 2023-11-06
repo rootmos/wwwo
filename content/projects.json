@@ -78,6 +78,8 @@
         "AoC",
         "lua-hack",
         "xpanel",
-        "fetch"
+        "fetch",
+        "action",
+        "turn"
     ]
 }
