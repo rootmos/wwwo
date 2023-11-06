@@ -96,6 +96,25 @@ class Platform(Situation):
     def figure_out(args):
         return platform.platform()
 
+class CI(Situation):
+    key = "ci"
+
+    @staticmethod
+    def figure_out(args):
+        if os.environ.get("CI") is None:
+            return None
+
+        if os.environ.get("GITHUB_ACTIONS"):
+            return CI.github_actions(args)
+        else:
+            return true
+
+    @staticmethod
+    def github_actions(args):
+        return {
+            "workflow_url": f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+        }
+
 class Format:
     @staticmethod
     def add_arguments(parser):
