@@ -1,7 +1,7 @@
 name: Build, upload and publish
 on:
   push:
-    branches: [ master ]
+    branches: [ master, whereami ]
 
 jobs:
   publish:
