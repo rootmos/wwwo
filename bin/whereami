@@ -3,14 +3,15 @@
 import argparse
 import datetime
 import getpass
+import html
 import json
 import os
+import platform
 import shutil
 import socket
 import subprocess
 import sys
-import html
-import platform
+import urllib.parse
 
 class Situation:
     @staticmethod
@@ -116,14 +117,20 @@ class CI(Situation):
             return None
 
         if os.environ.get("GITHUB_ACTIONS"):
-            return CI.github_actions(args)
+            return {
+                "github": CI.github_actions(args),
+            }
         else:
             return true
 
     @staticmethod
     def github_actions(args):
+        base_url = os.environ['GITHUB_SERVER_URL']
+        repo = os.environ['GITHUB_REPOSITORY']
         return {
-            "workflow_url": f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+            "repo": repo,
+            "repo_url": f"{base_url}/{repo}",
+            "workflow_url": f"{base_url}/{repo}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
         }
 
 class AWS(Situation):
@@ -133,14 +140,22 @@ class AWS(Situation):
     def figure_out(args):
         d = {}
         if os.environ.get("AWS_REGION"):
-            d["region"] = os.environ.get("AWS_REGION")
+            region = os.environ.get("AWS_REGION")
+            d["region"] = region
+            d["request_id"] = os.environ.get("AWS_REQUEST_ID")
 
         if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+            log_group_name = os.environ.get("AWS_LAMBDA_LOG_GROUP_NAME")
+            log_stream_name = os.environ.get("AWS_LAMBDA_LOG_STREAM_NAME")
+            q = urllib.parse.quote_plus
+            cloudwatch_url =  f"https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logsV2:log-groups/log-group/{q(log_group_name)}/log-events/{q(log_stream_name)}"
             d["lambda"] = {
+                "arn": os.environ.get("AWS_LAMBDA_FUNCTION_ARN"),
                 "function_name": os.environ.get("AWS_LAMBDA_FUNCTION_NAME"),
                 "function_version": os.environ.get("AWS_LAMBDA_FUNCTION_VERSION"),
-                "log_group_name": os.environ.get("AWS_LAMBDA_LOG_GROUP_NAME"),
-                "log_stream_name": os.environ.get("AWS_LAMBDA_LOG_STREAM_NAME"),
+                "log_group_name": log_group_name,
+                "log_stream_name": log_stream_name,
+                "cloudwatch_url": cloudwatch_url,
             }
 
         if d != {}:
@@ -228,7 +243,10 @@ class Html(Format):
             if isinstance(x, bool):
                 stream.write("true" if x else "false")
             elif isinstance(x, str):
-                stream.write(html.escape(x))
+                if x.startswith("https://"):
+                    stream.write(f"<a href=\"{x}\">{html.escape(x)}</a>")
+                else:
+                    stream.write(html.escape(x))
             elif isinstance(x, int):
                 stream.write(str(x))
             elif x is None:
