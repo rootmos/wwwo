@@ -25,6 +25,12 @@ def main(event, context):
         if env("BASE_URL"):
             args += [ "-p", env("BASE_URL") ]
 
+    env_ext = { **os.environ,
+        "AWS_REQUEST_ID": context.aws_request_id,
+        "AWS_LAMBDA_FUNCTION_ARN": context.invoked_function_arn,
+    }
+
     logger.debug(f"args: {args}")
-    subprocess.run(args, executable=exe, check=True)
+    logger.debug(f"env: {env_ext}")
+    subprocess.run(args, executable=exe, check=True, env=env_ext)
     logger.info(f"bye")
