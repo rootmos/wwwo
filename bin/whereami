@@ -244,7 +244,11 @@ class Html(Format):
                 stream.write("true" if x else "false")
             elif isinstance(x, str):
                 if x.startswith("https://"):
-                    stream.write(f"<a href=\"{x}\">{html.escape(x)}</a>")
+                    stream.write(f"<a href=\"{x}\">")
+                    if len(x) > 80:
+                        x = x[:80] + "..."
+                    stream.write(html.escape(x))
+                    stream.write(f"</a>")
                 else:
                     stream.write(html.escape(x))
             elif isinstance(x, int):
