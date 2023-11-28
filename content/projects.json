@@ -72,7 +72,8 @@
         "twitch-cli",
         "h",
         "openbsd",
-        "libr"
+        "libr",
+        "texhelp"
     ],
     "sourcehut": [
         "AoC",
@@ -80,6 +81,7 @@
         "xpanel",
         "fetch",
         "action",
-        "turn"
+        "turn",
+        "fetch"
     ]
 }
