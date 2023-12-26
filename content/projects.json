@@ -82,6 +82,7 @@
         "fetch",
         "action",
         "turn",
-        "fetch"
+        "fetch",
+        "go-pkg-proxy"
     ]
 }
