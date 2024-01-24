@@ -69,7 +69,7 @@ let posts_snippet = seq [
   ) |> ul
 ]
 
-let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) subtitle b =
+let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) ?(back="/index.html") subtitle b =
   let t = "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
   () |> html @@ seq [
   head @@ seq [
@@ -85,7 +85,7 @@ let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) subtitle b
     h1 @@ seq [
       text @@ if only_subtitle then Option.get subtitle else t;
       if Option.is_some subtitle then
-        span ~cls:"subtitle" @@ a "/index.html" @@ text "back" else noop
+        span ~cls:"subtitle" @@ a back @@ text "back" else noop
     ];
     div ~cls:(Some "content") @@ b;
     div ~cls:(Some "footer") @@ seq [
@@ -407,21 +407,30 @@ let gallery t ?(preamble=None) fn =
   let s (g0: Gallery_j.entry) (g1: Gallery_j.entry) =
     Lenient_iso8601.compare g1.last_modified g0.last_modified in
   let es = Utils.load_file fn |> Gallery_j.entries_of_string |> List.sort s in
+
   let g (e: Gallery_j.entry) =
     if ContentType.is_video e.content_type then video ~id:(e.id) e.url
     else if ContentType.is_image e.content_type then
       img ~id:e.id ~cls:(Some "gallery") ~embedd:false e.url
-    else failwith "content type not supported"
-  in List.append
+    else failwith "content type not supported" in
+
+  let index = List.append
     (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)
     (List.map g es)
     |> seq |> div ~cls:(Some "gallery")
     |> page ~only_subtitle:true (Some t)
-      ~additional_css:[ Utils.load_file (Path.style "gallery.css") ]
+      ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
+
+  let p (e: Gallery_j.entry) =
+    g e |> div ~cls:(Some "gallery")
+    |> page ~only_subtitle:true (Some t) ~back:"index.html"
+      ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
+
+  [ ("index.html", index ) ] @ List.map (fun (e: Gallery_j.entry) -> (sprintf "%s.html" e.id), p e) es
 
 let glenn = gallery "Glenn, Glenn, Glenn" (Path.meta "glenn.json")
 let silly = gallery "Silly things" (Path.meta "silly.json")
-let clips = gallery "Silly clips" (Path.meta "clips.json")
+let clips = gallery "Clips" (Path.meta "clips.json")
 
 let project human_title p =
   let preamble =
@@ -444,11 +453,13 @@ let () =
   Utils.write_file (in_root "practice.html") practice_page;
   Utils.write_file (in_root "activity.html") activity_page;
   Utils.write_file (in_root "bor19/index.html") bor19;
-  Utils.write_file (in_root "glenn/index.html") glenn;
-  Utils.write_file (in_root "silly/index.html") silly;
-  Utils.write_file (in_root "clips/index.html") clips;
-  Utils.write_file (in_root "stellar-drift/index.html")
-    @@ project "Stellar Drift project page" "stellar-drift";
   posts |> List.iter @@ fun { url; html; title } ->
     Utils.write_file (in_root url) @@
-      page ~only_subtitle:true (Some title) (text html)
+      page ~only_subtitle:true (Some title) (text html);
+
+  let write_gallery key =
+    List.iter (fun (fn, p) -> Utils.write_file (in_root @@ sprintf "%s/%s" key fn) p) in
+  write_gallery "glenn" glenn;
+  write_gallery "silly" silly;
+  write_gallery "clips" clips;
+  write_gallery "stellar-drift" @@ project "Stellar Drift project page" "stellar-drift"
