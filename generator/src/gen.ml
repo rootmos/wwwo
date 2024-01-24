@@ -408,9 +408,9 @@ let gallery t ?(preamble=None) fn =
     Lenient_iso8601.compare g1.last_modified g0.last_modified in
   let es = Utils.load_file fn |> Gallery_j.entries_of_string |> List.sort s in
   let g (e: Gallery_j.entry) =
-    if ContentType.is_video e.content_type then video e.url
+    if ContentType.is_video e.content_type then video ~id:(e.id) e.url
     else if ContentType.is_image e.content_type then
-      img ~cls:(Some "gallery") ~embedd:false e.url
+      img ~id:e.id ~cls:(Some "gallery") ~embedd:false e.url
     else failwith "content type not supported"
   in List.append
     (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)

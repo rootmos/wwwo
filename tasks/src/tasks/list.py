@@ -1,5 +1,7 @@
 import json
 import argparse
+import hashlib
+
 from urllib.parse import quote as urlencode
 
 from .common import output
@@ -10,9 +12,19 @@ def url(o):
     return f"https://{o.bucket_name}.s3.eu-central-1.amazonaws.com/{urlencode(o.key)}"
 
 def render(o):
+    obj = o.Object()
+
+    if obj.checksum_sha256 is not None:
+        id_ = obj.checksum_sha256[:7]
+    elif obj.checksum_sha1 is not None:
+        id_ = obj.checksum_sha1[:7]
+    else:
+        id_ = hashlib.sha1(url(o).encode("UTF-8")).hexdigest()[:7]
+
     return {
+        "id": id_,
         "url": url(o),
-        "content_type": o.Object().content_type,
+        "content_type": obj.content_type,
         "last_modified": o.last_modified.isoformat(),
     }
 

@@ -1,6 +1,7 @@
 type date = string wrap <ocaml module="Lenient_iso8601">
 
 type entry = {
+    id: string;
     url: string;
     content_type: string;
     last_modified: date;
