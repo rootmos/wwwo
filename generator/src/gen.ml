@@ -425,7 +425,7 @@ let gallery t ?(preamble=None) fn =
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
   let p (e: Gallery_j.entry) =
-    let og =
+    let og = [ text @@ sprintf "<meta property=\"og:url\" content=\"%s\" />" e.url ] @
       if ContentType.is_video e.content_type
       then [ text @@ sprintf "<meta property=\"og:video\" content=\"%s\" />" e.url ]
       else if ContentType.is_image e.content_type
