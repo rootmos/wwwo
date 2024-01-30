@@ -31,6 +31,10 @@ let local = match Sys.getenv "ENV" with
 | "dev" -> true
 | _ -> false
 
+let base_url = match Sys.getenv_opt "BASE_URL" with
+| Some url -> url
+| None -> failwith "set BASE_URL"
+
 type post = { url: string; lines: string list; title: string; html: string; date: string }
 
 let mk_post p =
@@ -69,7 +73,14 @@ let posts_snippet = seq [
   ) |> ul
 ]
 
-let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) ?(back="/index.html") ?(meta=[]) subtitle b =
+let page
+  ?(only_subtitle=false)
+  ?(chartjs=false)
+  ?(additional_css=[])
+  ?(back="/index.html")
+  ?(meta=[])
+  ?(og_type="website")
+  subtitle b path =
   let t = "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
   () |> html @@ seq [
   head @@ seq @@ List.concat [
@@ -81,6 +92,9 @@ let page ?(only_subtitle=false) ?(chartjs=false) ?(additional_css=[]) ?(back="/i
       css @@ Utils.load_file (Path.style "style.css") :: additional_css;
       text "<meta charset=\"UTF-8\">";
       favicon (Path.image "favicon.png");
+      text @@ sprintf "<meta property=\"og:title\" content=\"%s\" />" t;
+      text @@ sprintf "<meta property=\"og:url\" content=\"%s/%s\" />" base_url path;
+      text @@ sprintf "<meta property=\"og:type\" content=\"%s\" />" og_type;
     ];
     meta;
   ];
@@ -425,7 +439,7 @@ let gallery t ?(preamble=None) fn =
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
   let p (e: Gallery_j.entry) =
-    let og = [ text @@ sprintf "<meta property=\"og:url\" content=\"%s\" />" e.url ] @
+    let og =
       if ContentType.is_video e.content_type
       then [ text @@ sprintf "<meta property=\"og:video\" content=\"%s\" />" e.url ]
       else if ContentType.is_image e.content_type
@@ -455,19 +469,19 @@ let project human_title p =
 let () =
   let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
   let in_root = Filename.concat webroot in
-  Utils.write_file (in_root "index.html") index;
-  Utils.write_file (in_root "sounds.html") sounds_page;
-  Utils.write_file (in_root "jam.html") sounds_jam_page;
-  Utils.write_file (in_root "demo.html") demo_page;
-  Utils.write_file (in_root "practice.html") practice_page;
-  Utils.write_file (in_root "activity.html") activity_page;
-  Utils.write_file (in_root "bor19/index.html") bor19;
+  let write_page path p = Utils.write_file (in_root path) (p path) in
+  write_page "index.html" index;
+  write_page "sounds.html" sounds_page;
+  write_page "jam.html" sounds_jam_page;
+  write_page "demo.html" demo_page;
+  write_page "practice.html" practice_page;
+  write_page "activity.html" activity_page;
+  write_page "bor19/index.html" bor19;
   posts |> List.iter @@ fun { url; html; title } ->
-    Utils.write_file (in_root url) @@
-      page ~only_subtitle:true (Some title) (text html);
+    write_page url @@ page ~only_subtitle:true (Some title) (text html);
 
   let write_gallery key =
-    List.iter (fun (fn, p) -> Utils.write_file (in_root @@ sprintf "%s/%s" key fn) p) in
+    List.iter (fun (fn, p) -> write_page (sprintf "%s/%s" key fn) p) in
   write_gallery "glenn" glenn;
   write_gallery "silly" silly;
   write_gallery "clips" clips;
