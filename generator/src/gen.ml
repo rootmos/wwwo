@@ -35,6 +35,8 @@ let base_url = match Sys.getenv_opt "BASE_URL" with
 | Some url -> url
 | None -> failwith "set BASE_URL"
 
+let static = (^) "https://rootmos-static.s3.eu-central-1.amazonaws.com/"
+
 type post = { url: string; lines: string list; title: string; html: string; date: string }
 
 let mk_post p =
@@ -80,6 +82,7 @@ let page
   ?(back="/index.html")
   ?(meta=[])
   ?(og_type="website")
+  ?(og_image=None)
   subtitle b path =
   let t = if only_subtitle then Option.get subtitle else "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
   () |> html @@ seq [
@@ -95,6 +98,8 @@ let page
       text @@ sprintf "<meta property=\"og:title\" content=\"%s\" />" t;
       text @@ sprintf "<meta property=\"og:url\" content=\"%s/%s\" />" base_url path;
       text @@ sprintf "<meta property=\"og:type\" content=\"%s\" />" og_type;
+      text @@ sprintf "<meta property=\"og:image\" content=\"%s\" />" @@
+        Option.value og_image ~default:(static "rootmos.jpg")
     ];
     meta;
   ];
@@ -303,8 +308,7 @@ let services_snippet = seq [
 let resume_snippet = seq [
   h2 @@ text "Resume";
   p @@ seq [
-    (let url = "https://rootmos-static.s3.eu-central-1.amazonaws.com/resume-gustav-behm.pdf"
-    in a url @@ text "PDF");
+    a (static "resume-gustav-behm.pdf") @@ text "PDF";
     text " (updated 30 Nov 2018)";
   ]
 ]
