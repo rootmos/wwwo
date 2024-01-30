@@ -81,7 +81,7 @@ let page
   ?(meta=[])
   ?(og_type="website")
   subtitle b path =
-  let t = "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
+  let t = if only_subtitle then Option.get subtitle else "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
   () |> html @@ seq [
   head @@ seq @@ List.concat [
     [
@@ -100,7 +100,7 @@ let page
   ];
   body @@ seq [
     h1 @@ seq [
-      text @@ if only_subtitle then Option.get subtitle else t;
+      text @@ t;
       if Option.is_some subtitle then
         span ~cls:"subtitle" @@ a back @@ text "back" else noop
     ];
@@ -420,7 +420,7 @@ module ContentType = struct
   let is_image ct = Str.string_match (Str.regexp "^image/") ct 0
 end
 
-let gallery t ?(preamble=None) fn =
+let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
   let s (g0: Gallery_j.entry) (g1: Gallery_j.entry) =
     Lenient_iso8601.compare g1.last_modified g0.last_modified in
   let es = Utils.load_file fn |> Gallery_j.entries_of_string |> List.sort s in
@@ -435,7 +435,7 @@ let gallery t ?(preamble=None) fn =
     (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)
     (List.map g es)
     |> seq |> div ~cls:(Some "gallery")
-    |> page ~only_subtitle:true (Some t)
+    |> page ~only_subtitle:only_subtitle (Some t)
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
   let p (e: Gallery_j.entry) =
@@ -446,14 +446,14 @@ let gallery t ?(preamble=None) fn =
       then [ text @@ sprintf "<meta property=\"og:image\" content=\"%s\" />" e.url ]
       else [] in
     g e |> div ~cls:(Some "gallery")
-    |> page ~only_subtitle:true (Some t) ~back:"index.html" ~meta:og
+    |> page ~only_subtitle:only_subtitle (Some t) ~back:"index.html" ~meta:og
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
   [ ("index.html", index ) ] @ List.map (fun (e: Gallery_j.entry) -> (sprintf "%s.html" e.id), p e) es
 
 let glenn = gallery "Glenn, Glenn, Glenn" (Path.meta "glenn.json")
 let silly = gallery "Silly things" (Path.meta "silly.json")
-let clips = gallery "Clips" (Path.meta "clips.json")
+let clips = gallery ~only_subtitle:false "clips" (Path.meta "clips.json")
 
 let project human_title p =
   let preamble =
