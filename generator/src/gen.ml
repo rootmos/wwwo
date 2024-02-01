@@ -37,6 +37,8 @@ let base_url = match Sys.getenv_opt "BASE_URL" with
 
 let static = (^) "https://rootmos-static.s3.eu-central-1.amazonaws.com/"
 
+let avatar_url = static "rootmos.jpg"
+
 type post = { url: string; lines: string list; title: string; html: string; date: string }
 
 let mk_post p =
@@ -99,7 +101,7 @@ let page
       text @@ sprintf "<meta property=\"og:url\" content=\"%s/%s\" />" base_url path;
       text @@ sprintf "<meta property=\"og:type\" content=\"%s\" />" og_type;
       text @@ sprintf "<meta property=\"og:image\" content=\"%s\" />" @@
-        Option.value og_image ~default:(static "rootmos.jpg")
+        Option.value og_image ~default:avatar_url
     ];
     meta;
   ];
@@ -443,14 +445,21 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
   let p (e: Gallery_j.entry) =
-    let og =
+    let og_image =
+      match e.thumbnail with
+        Some url -> Some url
+      | None -> if ContentType.is_image e.content_type then Some e.url else None in
+    let og_video =
       if ContentType.is_video e.content_type
-      then [ text @@ sprintf "<meta property=\"og:video\" content=\"%s\" />" e.url ]
-      else if ContentType.is_image e.content_type
-      then [ text @@ sprintf "<meta property=\"og:image\" content=\"%s\" />" e.url ]
-      else [] in
-    g e |> div ~cls:(Some "gallery")
-    |> page ~only_subtitle:only_subtitle (Some t) ~back:"index.html" ~meta:og
+      then text @@ sprintf "<meta property=\"og:video\" content=\"%s\" />" e.url
+      else noop in
+    let og_type =
+      if ContentType.is_video e.content_type then "video.movie"
+      else "webpage" (* TODO what's the proper type for an image? *) in
+    g e
+      |> div ~cls:(Some "gallery")
+      |> page ~only_subtitle:only_subtitle (Some t) ~back:"index.html" ~meta:[ og_video ]
+      ~og_image:og_image ~og_type:og_type
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
   [ ("index.html", index ) ] @ List.map (fun (e: Gallery_j.entry) -> (sprintf "%s.html" e.id), p e) es

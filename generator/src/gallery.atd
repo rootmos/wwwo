@@ -5,6 +5,7 @@ type entry = {
     url: string;
     content_type: string;
     last_modified: date;
+    ?thumbnail: string option;
 }
 
 type entries = entry list
