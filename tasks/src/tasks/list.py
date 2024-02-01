@@ -1,6 +1,7 @@
-import json
 import argparse
 import hashlib
+import json
+import subprocess
 
 from urllib.parse import quote as urlencode
 
@@ -40,16 +41,46 @@ def objects(bucket, prefix=None):
 def parse_args():
     parser = argparse.ArgumentParser(description="Grab metadata about files stored on s3")
 
-    parser.add_argument("-o", "--output")
+    subparsers = parser.add_subparsers(dest="cmd", required=True)
 
-    parser.add_argument("--prefix")
-    parser.add_argument("bucket")
+    list_cmd = subparsers.add_parser("list")
+    list_cmd.add_argument("-o", "--output")
+    list_cmd.add_argument("bucket")
+    list_cmd.add_argument("prefix", nargs="?")
+
+    upload_cmd = subparsers.add_parser("upload")
+
+    fix_cmd = subparsers.add_parser("fix")
+
+    thumbnail_cmd = subparsers.add_parser("thumbnail")
+    thumbnail_cmd.add_argument("source", metavar="SOURCE")
+    thumbnail_cmd.add_argument("output", metavar="OUTPUT")
 
     return parser.parse_args()
+
+def do_list(args):
+    os = list(objects(args.bucket, prefix=args.prefix))
+    with output(args.output) as f:
+        f.write(json.dumps(os, indent=2))
+
+def do_thumbnail(args):
+    source = args.source
+    output = args.output
+
+    cmdline = [ "ffmpeg" ]
+    cmdline += [ "-i", source ]
+    cmdline += [ "-vf", "select=eq(n\\,0)" ]
+    cmdline += [ "-frames:v", "1", "-update", "1" ]
+    cmdline += [ "-y", output ]
+    cmdline += [ "-loglevel", "quiet" ]
+    subprocess.check_call(cmdline)
 
 def main():
     args = parse_args()
 
-    os = list(objects(args.bucket, prefix=args.prefix))
-    with output(args.output) as f:
-        f.write(json.dumps(os))
+    if args.cmd == "list":
+        return do_list(args)
+    elif args.cmd == "thumbnail":
+        return do_thumbnail(args)
+    else:
+        raise NotImplementedError(args.cmd)
