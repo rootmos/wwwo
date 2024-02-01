@@ -28,9 +28,11 @@ def main():
     args = parse_args()
 
     if args.cmd == "gallery":
-        gs = list(tasks.list.objects(args.bucket, prefix=f"projects/{args.project}/"))
+        os = []
+        for o in tasks.list.objects(args.bucket, prefix=f"projects/{args.project}/"):
+            os.append(tasks.list.render(o))
         with output(args.output) as f:
-            f.write(json.dumps(gs))
+            f.write(json.dumps(os))
     elif args.cmd == "preamble":
         s3 = boto3.resource("s3")
         o = s3.Bucket(args.bucket).Object(f"{args.project}/latest/www/preamble.md")

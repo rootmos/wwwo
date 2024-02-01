@@ -119,7 +119,7 @@ def do_list(args):
         os.append(render(o, generate_thumbnails=args.generate_thumbnails))
 
     with output(args.output) as f:
-        f.write(json.dumps(os, indent=2))
+        f.write(json.dumps(os))
 
 def do_thumbnail(args):
     Thumbnail.generate(source=args.source, output=args.output)
