@@ -6,6 +6,8 @@ type entry = {
     content_type: string;
     last_modified: date;
     ?thumbnail: string option;
+    ?title: string option;
+    ?description: string option;
 }
 
 type entries = entry list

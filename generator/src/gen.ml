@@ -453,12 +453,16 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
       if ContentType.is_video e.content_type
       then text @@ sprintf "<meta property=\"og:video\" content=\"%s\" />" e.url
       else noop in
+    let os, t =
+      match e.title with
+        Some t -> true, t
+      | None -> only_subtitle, t in
     let og_type =
       if ContentType.is_video e.content_type then "video.movie"
       else "webpage" (* TODO what's the proper type for an image? *) in
     g e
       |> div ~cls:(Some "gallery")
-      |> page ~only_subtitle:only_subtitle (Some t) ~back:"index.html" ~meta:[ og_video ]
+      |> page ~only_subtitle:os (Some t) ~back:"index.html" ~meta:[ og_video ]
       ~og_image:og_image ~og_type:og_type
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
