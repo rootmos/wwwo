@@ -7,19 +7,33 @@ import os
 
 from urllib.parse import quote as urlencode
 
+from . import util
 from .common import output
 
 import boto3
 import botocore
 
 s3 = boto3.resource("s3")
+default_region = "eu-central-1"
 
 def s3url(bucket, region, path):
     return f"https://{bucket}.s3.{region}.amazonaws.com/{path}"
 
+def url(o):
+    return s3url(bucket=o.bucket_name, region=default_region, path=urlencode(o.key))
+
+def s3exists(obj):
+    try:
+        obj.load()
+        return True
+    except botocore.exceptions.ClientError as e:
+        if e.response["Error"]["Code"] != "404":
+            raise
+    return False
+
 class Thumbnail:
     bucket = s3.Bucket("rootmos-static")
-    bucket_region = "eu-central-1"
+    bucket_region = default_region
 
     def __init__(self, id):
         self.id = id
@@ -28,13 +42,7 @@ class Thumbnail:
 
     @property
     def exists(self):
-        try:
-            self._obj.load()
-            return True
-        except botocore.exceptions.ClientError as e:
-            if e.response["Error"]["Code"] != "404":
-                raise
-            return False
+        return s3exists(self._obj)
 
     @staticmethod
     def generate(source, output):
@@ -52,18 +60,39 @@ class Thumbnail:
             self.__class__.generate(source, output)
             self._obj.upload_file(output, ExtraArgs={"ACL": "public-read"})
 
-def ensure_thumbnail(obj):
-    t = Thumbnail(id_from_obj(obj))
-    if not t.exists:
-        with tempfile.TemporaryDirectory() as tmp:
-            _, ext = os.path.splitext(obj.key)
-            src = os.path.join(tmp, f"source.{ext}")
-            obj.download_file(src)
-            t.upload(src)
-    return t.url
+    def ensure(self):
+        if not self.exists:
+            with tempfile.TemporaryDirectory() as tmp:
+                _, ext = os.path.splitext(obj.key)
+                src = os.path.join(tmp, f"source.{ext}")
+                obj.download_file(src)
+                self.upload(src)
+        return self
 
-def url(o):
-    return s3url(bucket=o.bucket_name, region="eu-central-1", path=urlencode(o.key))
+class Meta:
+    bucket = s3.Bucket("rootmos-static")
+    bucket_region = default_region
+
+    TEMPLATE = { "title": None, "description": None }
+
+    def __init__(self, id):
+        self.id = id
+        self._obj = self.bucket.Object(f"meta/{self.id}.json")
+
+    @property
+    def exists(self):
+        return s3exists(self._obj)
+
+    def load(self):
+        if self.exists:
+            return json.loads(self._obj.get()["Body"].read())
+        else:
+            return Meta.TEMPLATE
+
+    def edit(self):
+        m = util.edit(self.load())
+        self._obj.put(Body=json.dumps(m).encode("UTF-8"), ACL="private")
+        return m
 
 def id_from_obj(obj):
     if obj.checksum_sha256 is not None:
@@ -76,12 +105,20 @@ def id_from_obj(obj):
 def render(o, generate_thumbnails=None):
     obj = o.Object()
     id_ = id_from_obj(obj)
+
+    thumbnail = Thumbnail(id_)
+    if generate_thumbnails:
+        thumbnail = thumbnail.ensure()
+
+    m = Meta(id_).load()
+
     return {
         "id": id_,
         "url": url(o),
         "content_type": obj.content_type,
         "last_modified": o.last_modified.isoformat(),
-        "thumbnail": ensure_thumbnail(obj) if generate_thumbnails else Thumbnail(id_).url,
+        "thumbnail": thumbnail.url,
+        **m
     }
 
 def objects(bucket, prefix=None):
@@ -111,6 +148,9 @@ def parse_args():
     thumbnail_cmd.add_argument("source", metavar="SOURCE")
     thumbnail_cmd.add_argument("output", metavar="OUTPUT")
 
+    meta_cmd = subparsers.add_parser("meta")
+    meta_cmd.add_argument("id", metavar="ID")
+
     return parser.parse_args()
 
 def do_list(args):
@@ -124,6 +164,9 @@ def do_list(args):
 def do_thumbnail(args):
     Thumbnail.generate(source=args.source, output=args.output)
 
+def do_meta(args):
+    Meta(args.id).edit()
+
 def main():
     args = parse_args()
 
@@ -131,5 +174,7 @@ def main():
         return do_list(args)
     elif args.cmd == "thumbnail":
         return do_thumbnail(args)
+    elif args.cmd == "meta":
+        return do_meta(args)
     else:
         raise NotImplementedError(args.cmd)
