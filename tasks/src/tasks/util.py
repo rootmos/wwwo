@@ -56,19 +56,34 @@ def run_with_tty(*cmdline, check=None):
         p = subprocess.run(cmdline, check=check, stdin=i, stdout=o)
     return p.returncode == 0
 
-def edit(x, editor=None, basename="edit"):
+def edit(x, editor=None, basename="edit", fmt=None):
     editor = editor or find_editor()
     if not isinstance(x, dict):
         return run_with_tty(editor, x)
 
-    import json
-    fmt = {
-        "dump": lambda x, f: json.dump(x, f, indent=2),
-        "load": lambda f: json.load(f),
-        "suffix": "json",
-    }
+    if fmt is None:
+        try:
+            import yaml
+            def load(f):
+                ys = list(yaml.load_all(f, Loader=yaml.Loader))
+                match len(ys):
+                    case 0: return None
+                    case 1: return ys[0]
+                    case _: return ys
+            fmt = {
+                "dump": lambda x, f: f.write(yaml.dump(x, sort_keys=False)),
+                "load": load,
+                "suffix": "yaml",
+            }
+        except ImportError:
+            import json
+            fmt = {
+                "dump": lambda x, f: json.dump(x, f, indent=2),
+                "load": lambda f: json.load(f),
+                "suffix": "json",
+            }
 
-    with tempfile.TemporaryDirectory() as tmp:
+    with tempfile.TemporaryDirectory(prefix=f"{package_name}-") as tmp:
         fn = os.path.join(tmp, f"{basename}.{fmt['suffix']}")
         with open(fn, "x") as f:
             fmt["dump"](x, f)
