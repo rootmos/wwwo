@@ -17,6 +17,10 @@ let url_escape_string s: string =
 let html_escape_string s =
   let f = function
     | '&' -> "&amp;"
+    | '"' -> "&quot;"
+    | '\'' -> "&apos;"
+    | '<' -> "&lt;"
+    | '>' -> "&gt;"
     | c -> String.make 1 c
   in String.to_seq s |> Seq.map f |> Seq.fold_left (^) ""
 

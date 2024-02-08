@@ -432,7 +432,14 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
   let es = Utils.load_file fn |> Gallery_j.entries_of_string |> List.sort s in
 
   let m (e: Gallery_j.entry) =
-    if ContentType.is_video e.content_type then video ~id:(e.id) ~poster:e.thumbnail e.url
+    let poster = match e.thumbnail with
+      Some t -> begin
+        match t.base64 with
+          Some b64 -> Some (sprintf "data:%s;base64,%s" t.content_type b64)
+        | None -> Some t.url
+      end
+      | None -> None in
+    if ContentType.is_video e.content_type then video ~id:(e.id) ~poster e.url
     else if ContentType.is_image e.content_type then
       img ~id:e.id ~embedd:false e.url
     else failwith "content type not supported" in
@@ -459,7 +466,7 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
   let p (e: Gallery_j.entry) =
     let og_image =
       match e.thumbnail with
-        Some url -> Some url
+        Some t -> Some t.url
       | None -> if ContentType.is_image e.content_type then Some e.url else None in
     let og_video =
       if ContentType.is_video e.content_type

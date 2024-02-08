@@ -4,6 +4,7 @@ import json
 import subprocess
 import tempfile
 import os
+import base64
 
 from urllib.parse import quote as urlencode
 
@@ -54,6 +55,14 @@ class Thumbnail:
         cmdline += [ "-loglevel", "quiet" ]
         subprocess.check_call(cmdline)
 
+    @property
+    def base64(self):
+        return str(base64.b64encode(self._obj.get()["Body"].read()), "UTF-8")
+
+    @property
+    def content_type(self):
+        return "image/jpeg"
+
     def upload(self, source):
         with tempfile.TemporaryDirectory() as tmp:
             output = os.path.join(tmp, "thumb.jpg")
@@ -102,7 +111,7 @@ def id_from_obj(obj):
     else:
         return hashlib.sha1(url(obj).encode("UTF-8")).hexdigest()[:7]
 
-def render(o, generate_thumbnails=None):
+def render(o, generate_thumbnails=None, embed_thumbnails=False):
     obj = o.Object()
     id_ = id_from_obj(obj)
 
@@ -117,7 +126,11 @@ def render(o, generate_thumbnails=None):
         "url": url(o),
         "content_type": obj.content_type,
         "last_modified": o.last_modified.isoformat(),
-        "thumbnail": thumbnail.url,
+        "thumbnail": {
+            "url": thumbnail.url,
+            "base64": thumbnail.base64 if embed_thumbnails else None,
+            "content_type": thumbnail.content_type,
+        },
         **m
     }
 
@@ -137,6 +150,7 @@ def parse_args():
     list_cmd = subparsers.add_parser("list")
     list_cmd.add_argument("-o", "--output", metavar="OUTPUT")
     list_cmd.add_argument("-G", "--generate-thumbnails", action="store_true")
+    list_cmd.add_argument("-e", "--embed-thumbnails", action="store_true")
     list_cmd.add_argument("bucket", metavar="BUCKET")
     list_cmd.add_argument("prefix", metavar="PREFIX", nargs="?")
 
@@ -156,7 +170,10 @@ def parse_args():
 def do_list(args):
     os = []
     for o in objects(args.bucket, prefix=args.prefix):
-        os.append(render(o, generate_thumbnails=args.generate_thumbnails))
+        os.append(render(o,
+            generate_thumbnails=args.generate_thumbnails,
+            embed_thumbnails=args.embed_thumbnails,
+        ))
 
     with output(args.output) as f:
         f.write(json.dumps(os))
