@@ -49,9 +49,10 @@ let audio ?(id="") src = text @@
   sprintf "<audio%s controls class=\"sound\"><source src=\"%s\"/></audio>"
   (if id <> "" then sprintf " id=\"%s\"" id else "")
   (url_escape_string src |> html_escape_string)
-let video ?(id="") src = text @@
-  sprintf "<video%s controls class=\"video\"><source src=\"%s\"/></video>"
+let video ?(id="") ?(poster=None) src = text @@
+  sprintf "<video%s%s controls class=\"video\"><source src=\"%s\"/></video>"
   (if id <> "" then sprintf " id=\"%s\"" id else "")
+  (match poster with Some p -> sprintf " poster=\"%s\"" p | None -> "")
   (url_escape_string src |> html_escape_string)
 let canvas id width height = text @@
   sprintf "<canvas id=\"%s\" width=\"%d\" height=\"%d\" />" id width height

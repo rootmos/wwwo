@@ -431,11 +431,19 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
     Lenient_iso8601.compare g1.last_modified g0.last_modified in
   let es = Utils.load_file fn |> Gallery_j.entries_of_string |> List.sort s in
 
-  let g (e: Gallery_j.entry) =
-    if ContentType.is_video e.content_type then video ~id:(e.id) e.url
+  let m (e: Gallery_j.entry) =
+    if ContentType.is_video e.content_type then video ~id:(e.id) ~poster:e.thumbnail e.url
     else if ContentType.is_image e.content_type then
-      img ~id:e.id ~cls:(Some "gallery") ~embedd:false e.url
+      img ~id:e.id ~embedd:false e.url
     else failwith "content type not supported" in
+
+  let g (e: Gallery_j.entry) = div ~cls:(Some "entry") @@ seq @@ [
+    m e;
+    div ~cls:(Some "share") @@ a (e.id ^ ".html") @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
+  ] @ match e.title with
+        Some t -> [ p ~cls:(Some "title") @@ text t ]
+      | None -> []
+  in
 
   let index = List.append
     (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)
@@ -460,7 +468,7 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
     let og_type =
       if ContentType.is_video e.content_type then "video.movie"
       else "webpage" (* TODO what's the proper type for an image? *) in
-    g e
+    m e
       |> div ~cls:(Some "gallery")
       |> page ~only_subtitle:os (Some t) ~back:"index.html" ~meta:[ og_video ]
       ~og_image:og_image ~og_type:og_type
