@@ -3,13 +3,14 @@
 }
 
 .gallery p {
-  padding: 10px;
+  padding: 5px;
+  margin: unset;
 }
 
 .gallery .entry {
+  padding: 20px;
   width: fit-content;
   margin: auto;
-  padding-bottom: 20px;
 }
 
 .gallery .title {
@@ -21,19 +22,13 @@
 
 .gallery .share {
   float: right;
-  margin-top: 20px;
-  margin-left: -20px;
 }
 
 .gallery img {
-  margin: 20px;
-  margin-bottom: 0px;
   max-width: 700px;
 }
 
 .gallery video {
-  margin: 20px;
-  margin-bottom: 0px;
   width: 700px;
 }
 

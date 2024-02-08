@@ -477,7 +477,7 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
       match e.description with
         Some t -> p ~cls:(Some "description") @@ text t
       | None -> noop;
-    ] |> div ~cls:(Some "gallery")
+    ] |> div ~cls:(Some "entry") |> div ~cls:(Some "gallery")
       |> page ~only_subtitle:os (Some t) ~back:"index.html" ~meta:[ og_video ]
       ~og_image:og_image ~og_type:og_type
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
