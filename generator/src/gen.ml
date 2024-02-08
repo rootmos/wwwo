@@ -431,11 +431,30 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
     Lenient_iso8601.compare g1.last_modified g0.last_modified in
   let es = Utils.load_file fn |> Gallery_j.entries_of_string |> List.sort s in
 
-  let g (e: Gallery_j.entry) =
-    if ContentType.is_video e.content_type then video ~id:(e.id) e.url
+  let m (e: Gallery_j.entry) =
+    let poster = match e.thumbnail with
+      Some t -> begin
+        match t.base64 with
+          Some b64 -> Some (sprintf "data:%s;base64,%s" t.content_type b64)
+        | None -> Some t.url
+      end
+      | None -> None in
+    if ContentType.is_video e.content_type then video ~id:(e.id) ~poster e.url
     else if ContentType.is_image e.content_type then
-      img ~id:e.id ~cls:(Some "gallery") ~embedd:false e.url
+      img ~id:e.id ~embedd:false e.url
     else failwith "content type not supported" in
+
+  let g (e: Gallery_j.entry) = div ~cls:(Some "entry") @@ seq [
+    m e;
+    div ~cls:(Some "share") @@ a (e.id ^ ".html") @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
+    begin match e.title with
+      Some t -> p ~cls:(Some "title") @@ text t
+    | None -> noop
+    end;
+    match e.description with
+      Some t -> p ~cls:(Some "description") @@ text t
+    | None -> noop;
+  ] in
 
   let index = List.append
     (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)
@@ -447,18 +466,26 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
   let p (e: Gallery_j.entry) =
     let og_image =
       match e.thumbnail with
-        Some url -> Some url
+        Some t -> Some t.url
       | None -> if ContentType.is_image e.content_type then Some e.url else None in
     let og_video =
       if ContentType.is_video e.content_type
       then text @@ sprintf "<meta property=\"og:video\" content=\"%s\" />" e.url
       else noop in
+    let os, t =
+      match e.title with
+        Some t -> true, t
+      | None -> only_subtitle, t in
     let og_type =
       if ContentType.is_video e.content_type then "video.movie"
       else "webpage" (* TODO what's the proper type for an image? *) in
-    g e
-      |> div ~cls:(Some "gallery")
-      |> page ~only_subtitle:only_subtitle (Some t) ~back:"index.html" ~meta:[ og_video ]
+    seq [
+      m e;
+      match e.description with
+        Some t -> p ~cls:(Some "description") @@ text t
+      | None -> noop;
+    ] |> div ~cls:(Some "entry") |> div ~cls:(Some "gallery")
+      |> page ~only_subtitle:os (Some t) ~back:"index.html" ~meta:[ og_video ]
       ~og_image:og_image ~og_type:og_type
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 

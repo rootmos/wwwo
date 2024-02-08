@@ -1,11 +1,19 @@
 type date = string wrap <ocaml module="Lenient_iso8601">
 
+type thumbnail = {
+    url: string;
+    content_type: string;
+    ?base64: string option;
+}
+
 type entry = {
     id: string;
     url: string;
     content_type: string;
     last_modified: date;
-    ?thumbnail: string option;
+    ?thumbnail: thumbnail option;
+    ?title: string option;
+    ?description: string option;
 }
 
 type entries = entry list

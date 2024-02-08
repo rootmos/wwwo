@@ -1,18 +1,38 @@
-div.gallery {
+.gallery {
   text-align: center;
 }
 
-img.gallery {
-  margin: 20px;
+.gallery p {
+  padding: 5px;
+  margin: unset;
+}
+
+.gallery .entry {
+  padding: 20px;
+  width: fit-content;
+  margin: auto;
+}
+
+.gallery .title {
+  font-size: large;
+}
+
+.gallery .description {
+}
+
+.gallery .share {
+  float: right;
+}
+
+.gallery img {
   max-width: 700px;
 }
 
-.video {
-  margin: 20px;
+.gallery video {
   width: 700px;
 }
 
-div.preamble {
+.preamble {
   text-align: left;
   padding: 10px;
 }
