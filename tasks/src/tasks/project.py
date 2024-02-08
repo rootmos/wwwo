@@ -30,7 +30,7 @@ def main():
     if args.cmd == "gallery":
         os = []
         for o in tasks.list.objects(args.bucket, prefix=f"projects/{args.project}/"):
-            os.append(tasks.list.render(o))
+            os.append(tasks.list.render(o, generate_thumbnails=True, embed_thumbnails=True))
         with output(args.output) as f:
             f.write(json.dumps(os))
     elif args.cmd == "preamble":

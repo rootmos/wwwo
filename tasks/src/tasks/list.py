@@ -69,7 +69,7 @@ class Thumbnail:
             self.__class__.generate(source, output)
             self._obj.upload_file(output, ExtraArgs={"ACL": "public-read"})
 
-    def ensure(self):
+    def ensure(self, obj):
         if not self.exists:
             with tempfile.TemporaryDirectory() as tmp:
                 _, ext = os.path.splitext(obj.key)
@@ -117,7 +117,7 @@ def render(o, generate_thumbnails=None, embed_thumbnails=False):
 
     thumbnail = Thumbnail(id_)
     if generate_thumbnails:
-        thumbnail = thumbnail.ensure()
+        thumbnail = thumbnail.ensure(obj)
 
     m = Meta(id_).load()
 
