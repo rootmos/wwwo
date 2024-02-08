@@ -437,13 +437,17 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
       img ~id:e.id ~embedd:false e.url
     else failwith "content type not supported" in
 
-  let g (e: Gallery_j.entry) = div ~cls:(Some "entry") @@ seq @@ [
+  let g (e: Gallery_j.entry) = div ~cls:(Some "entry") @@ seq [
     m e;
     div ~cls:(Some "share") @@ a (e.id ^ ".html") @@ svg ~cls:"button" "fa/svgs/solid/share-alt.svg";
-  ] @ match e.title with
-        Some t -> [ p ~cls:(Some "title") @@ text t ]
-      | None -> []
-  in
+    begin match e.title with
+      Some t -> p ~cls:(Some "title") @@ text t
+    | None -> noop
+    end;
+    match e.description with
+      Some t -> p ~cls:(Some "description") @@ text t
+    | None -> noop;
+  ] in
 
   let index = List.append
     (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)
@@ -468,8 +472,12 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
     let og_type =
       if ContentType.is_video e.content_type then "video.movie"
       else "webpage" (* TODO what's the proper type for an image? *) in
-    m e
-      |> div ~cls:(Some "gallery")
+    seq [
+      m e;
+      match e.description with
+        Some t -> p ~cls:(Some "description") @@ text t
+      | None -> noop;
+    ] |> div ~cls:(Some "gallery")
       |> page ~only_subtitle:os (Some t) ~back:"index.html" ~meta:[ og_video ]
       ~og_image:og_image ~og_type:og_type
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in

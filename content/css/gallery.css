@@ -2,14 +2,21 @@
   text-align: center;
 }
 
+.gallery p {
+  padding: 10px;
+}
+
 .gallery .entry {
   width: fit-content;
   margin: auto;
-  padding-bottom: 30px;
+  padding-bottom: 20px;
 }
 
 .gallery .title {
-  padding: 0px;
+  font-size: large;
+}
+
+.gallery .description {
 }
 
 .gallery .share {
@@ -20,11 +27,13 @@
 
 .gallery img {
   margin: 20px;
+  margin-bottom: 0px;
   max-width: 700px;
 }
 
 .gallery video {
   margin: 20px;
+  margin-bottom: 0px;
   width: 700px;
 }
 
