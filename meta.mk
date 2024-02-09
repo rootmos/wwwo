@@ -35,7 +35,7 @@ projects.json: $(PROJECTS_SPEC)
 	$(TASKS_EXE_PREFIX)projects "$<" --output="$@"
 
 %.json:
-	$(TASKS_EXE_PREFIX)list list --generate-thumbnails --embed-thumbnails rootmos-static "$*" --output="$@"
+	$(TASKS_EXE_PREFIX)gallery list --generate-thumbnails --embed-thumbnails rootmos-static "$*" --output="$@"
 
 projects/%/gallery.json:
 	@mkdir -p "projects/$*"

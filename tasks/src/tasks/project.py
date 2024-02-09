@@ -5,7 +5,7 @@ import sys
 import boto3
 from .common import output
 
-import tasks.list
+import tasks.gallery
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Grab project metadata")
@@ -29,8 +29,8 @@ def main():
 
     if args.cmd == "gallery":
         os = []
-        for o in tasks.list.objects(args.bucket, prefix=f"projects/{args.project}/"):
-            os.append(tasks.list.render(o, generate_thumbnails=True, embed_thumbnails=True))
+        for o in tasks.gallery.objects(args.bucket, prefix=f"projects/{args.project}/"):
+            os.append(tasks.gallery.render(o, generate_thumbnails=True, embed_thumbnails=True))
         with output(args.output) as f:
             f.write(json.dumps(os))
     elif args.cmd == "preamble":
