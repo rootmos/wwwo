@@ -108,11 +108,15 @@ class Meta:
         self._obj.put(Body=json.dumps(m).encode("UTF-8"), ACL="private")
         return m
 
+def b64_to_hex(s):
+    return str(base64.b16encode(base64.b64decode(s)), "UTF-8").lower()
+
 def id_from_obj(obj):
-    if obj.checksum_sha256 is not None:
-        return obj.checksum_sha256[:7]
-    elif obj.checksum_sha1 is not None:
-        return obj.checksum_sha1[:7]
+    rsp = s3c.head_object(Bucket=obj.bucket_name, Key=obj.key, ChecksumMode="ENABLED")
+    if "ChecksumSHA256" in rsp:
+        return b64_to_hex(rsp["ChecksumSHA256"])[:7]
+    elif "ChecksumSHA1" in rsp:
+        return b64_to_hex(rsp["ChecksumSHA1"])[:7]
     else:
         return hashlib.sha1(url(obj).encode("UTF-8")).hexdigest()[:7]
 
@@ -207,7 +211,7 @@ def do_upload(args):
     skip_upload = False
     if not args.force:
         try:
-            obj = s3c.head_object(Bucket=args.bucket, Key=key + "a", ChecksumMode="ENABLED")
+            obj = s3c.head_object(Bucket=args.bucket, Key=key, ChecksumMode="ENABLED")
             if obj.get("ChecksumSHA256") == sha256_b64:
                 skip_upload = True
         except botocore.exceptions.ClientError as e:
