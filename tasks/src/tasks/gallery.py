@@ -69,7 +69,10 @@ class Thumbnail:
         with tempfile.TemporaryDirectory() as tmp:
             output = os.path.join(tmp, "thumb.jpg")
             self.__class__.generate(source, output)
-            self._obj.upload_file(output, ExtraArgs={"ACL": "public-read"})
+            self._obj.upload_file(output, ExtraArgs={
+                "ACL": "public-read",
+                "ContentType": self.content_type
+            })
 
     def ensure(self, obj):
         if not self.exists:
