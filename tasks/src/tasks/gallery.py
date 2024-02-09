@@ -48,10 +48,10 @@ class Thumbnail:
         return s3exists(self._obj)
 
     @staticmethod
-    def generate(source, output):
+    def generate(source, output, frame=1):
         cmdline = [ "ffmpeg" ]
         cmdline += [ "-i", source ]
-        cmdline += [ "-vf", "select=eq(n\\,0)" ]
+        cmdline += [ "-vf", f"select=eq(n\\,{frame})" ]
         cmdline += [ "-frames:v", "1", "-update", "1" ]
         cmdline += [ "-y", output ]
         cmdline += [ "-loglevel", "quiet" ]
@@ -162,8 +162,6 @@ def parse_args():
     list_cmd.add_argument("-e", "--embed-thumbnails", action="store_true")
     list_cmd.add_argument("bucket", metavar="BUCKET")
     list_cmd.add_argument("prefix", metavar="PREFIX", nargs="?")
-
-    fix_cmd = subparsers.add_parser("fix")
 
     thumbnail_cmd = subparsers.add_parser("thumbnail")
     thumbnail_cmd.add_argument("source", metavar="SOURCE")
