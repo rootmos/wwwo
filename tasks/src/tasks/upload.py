@@ -16,7 +16,7 @@ def parse_args():
 
     parser.add_argument("-H", "--htmls")
 
-    parser.add_argument("root")
+    parser.add_argument("root", metavar="ROOT")
     parser.add_argument("target", metavar="S3_URL")
 
     return parser.parse_args()

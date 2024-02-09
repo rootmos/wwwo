@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import os
 import base64
+import mimetypes
 
 from urllib.parse import quote as urlencode
 
@@ -15,6 +16,7 @@ import boto3
 import botocore
 
 s3 = boto3.resource("s3")
+s3c = boto3.client("s3")
 default_region = "eu-central-1"
 
 def s3url(bucket, region, path):
@@ -154,8 +156,6 @@ def parse_args():
     list_cmd.add_argument("bucket", metavar="BUCKET")
     list_cmd.add_argument("prefix", metavar="PREFIX", nargs="?")
 
-    upload_cmd = subparsers.add_parser("upload")
-
     fix_cmd = subparsers.add_parser("fix")
 
     thumbnail_cmd = subparsers.add_parser("thumbnail")
@@ -164,6 +164,13 @@ def parse_args():
 
     meta_cmd = subparsers.add_parser("meta")
     meta_cmd.add_argument("id", metavar="ID")
+
+    upload_cmd = subparsers.add_parser("upload")
+    upload_cmd.add_argument("-e", "--edit", action="store_true")
+    upload_cmd.add_argument("-f", "--force", action="store_true")
+    upload_cmd.add_argument("-p", "--prefix", metavar="PREFIX")
+    upload_cmd.add_argument("bucket", metavar="BUCKET")
+    upload_cmd.add_argument("file", metavar="FILE")
 
     return parser.parse_args()
 
@@ -184,6 +191,46 @@ def do_thumbnail(args):
 def do_meta(args):
     Meta(args.id).edit()
 
+def do_upload(args):
+    with open(args.file, "rb") as f:
+        sha256 = hashlib.file_digest(f, "SHA256")
+        sha256_b64 = str(base64.b64encode(sha256.digest()), "UTF-8")
+
+    if args.prefix is None:
+        key = os.path.basename(args.file)
+    else:
+        key = f"{args.prefix}/{os.path.basename(args.file)}"
+
+    skip_upload = False
+    if not args.force:
+        try:
+            obj = s3c.head_object(Bucket=args.bucket, Key=key + "a", ChecksumMode="ENABLED")
+            if obj.get("ChecksumSHA256") == sha256_b64:
+                skip_upload = True
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] != "404":
+                raise
+
+    if not skip_upload:
+        mt, _ = mimetypes.guess_type(args.file)
+
+        with open(args.file, "rb") as f:
+            s3c.put_object(Bucket=args.bucket, Key=key,
+                Body = f,
+                ContentType = mt,
+                ChecksumSHA256 = sha256_b64,
+                ACL = "public-read",
+            )
+
+    obj = s3.Object(args.bucket, key)
+    id_ = id_from_obj(obj)
+    Thumbnail(id_).ensure(obj)
+
+    print(id_)
+
+    if args.edit:
+        Meta(id_).edit()
+
 def main():
     args = parse_args()
 
@@ -193,5 +240,7 @@ def main():
         return do_thumbnail(args)
     elif args.cmd == "meta":
         return do_meta(args)
+    elif args.cmd == "upload":
+        return do_upload(args)
     else:
         raise NotImplementedError(args.cmd)
