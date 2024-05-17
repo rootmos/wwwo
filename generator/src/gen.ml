@@ -307,13 +307,15 @@ let services_snippet = seq [
   ]
 ]
 
-let resume_snippet = seq [
-  h2 @@ text "Resume";
-  p @@ seq [
-    a (static "resume-gustav-behm.pdf") @@ text "PDF";
-    text " (updated 30 Nov 2018)";
+let resume_snippet =
+  let r = Path.meta "resume.json" |> Utils.load_file |> Resume_j.resume_of_string in
+  seq [
+    h2 @@ text "Resume";
+    p @@ seq [
+      a (static "resume-gustav-behm.pdf") @@ text "PDF";
+      text @@ sprintf" (updated %s)" r.updated;
+    ]
   ]
-]
 
 let social = seq @@ List.rev [
   a "https://github.com/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/github.svg";

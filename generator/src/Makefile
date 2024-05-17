@@ -12,6 +12,7 @@ ATDs = \
 	$(call atd, sounds) $(call atd, twitch) \
 	$(call atd, github) $(call atd, practice) \
 	$(call atd, gallery) $(call atd, project) \
+	$(call atd, resume)
 
 gen.exe: $(COMMON) $(ATDs) gen.ml
 	$(BUILDML_OCAMLC) -o $@ $^

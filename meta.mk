@@ -6,6 +6,7 @@ META =
 META += sounds.json sounds.sessions.json sounds.demo.json sounds.practice.json
 META += github-activity.rootmos.commits.json
 META += twitch.rootmos2.json
+META += resume.json
 
 META += glenn.json silly.json clips.json
 
@@ -33,6 +34,9 @@ github-activity.%.commits.json:
 
 projects.json: $(PROJECTS_SPEC)
 	$(TASKS_EXE_PREFIX)projects "$<" --output="$@"
+
+resume.json:
+	$(TASKS_EXE_PREFIX)resume --output="$@"
 
 %.json:
 	$(TASKS_EXE_PREFIX)gallery list --generate-thumbnails --embed-thumbnails rootmos-static "$*" --output="$@"
