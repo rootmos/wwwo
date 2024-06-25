@@ -30,7 +30,16 @@ fi
 TMP=$(mktemp -d)
 trap 'rm -rf $TMP' EXIT
 
-python3 - "$BIN_DIR/whereami" "$TMP/payload.json.b64" <<EOF >"$TMP/trigger.id"
+
+BASE64_AFTER_VERSION="2"
+AWS_CLI_VERSION=$(aws --version | sed 's,[^/]\+/\(\S\+\).*,\1,')
+if [ "$BASE64_AFTER_VERSION" = "$(head -n1 <(sort --version-sort <(echo "$BASE64_AFTER_VERSION"; echo "$AWS_CLI_VERSION")))" ]; then
+    PAYLOAD="$TMP/payload.json.b64"
+else
+    PAYLOAD="$TMP/payload.json"
+fi
+
+python3 - "$BIN_DIR/whereami" "$PAYLOAD" <<EOF >"$TMP/trigger.id"
 import subprocess
 import json
 import uuid
@@ -45,13 +54,18 @@ j = {
     **json.loads(subprocess.check_output([sys.argv[1], "current", "--json"]))
 }
 
-with open(sys.argv[2], "wb") as f:
-    f.write(base64.b64encode(json.dumps(j).encode("UTF-8")))
+out = sys.argv[2]
+if out.endswith(".b64"):
+    with open(out, "wb") as f:
+        f.write(base64.b64encode(json.dumps(j).encode("UTF-8")))
+else:
+    with open(out, "w") as f:
+        json.dump(j, f)
 
 print(tid)
 EOF
 
-ARGS+=("--payload=file://$TMP/payload.json.b64")
+ARGS+=("--payload=file://$PAYLOAD")
 
 echo 1>&2 "invoking lambda: $LAMBDA_ARN ($(<"$TMP/trigger.id"))"
 aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
