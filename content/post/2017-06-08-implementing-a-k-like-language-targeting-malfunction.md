@@ -8,7 +8,7 @@ categories: main
 {{< toc >}}
 
 This post is all about my silly-k project:
-a small experimental [K-like](http://kparc.com/k.txt), [APL inspired](http://www.eecg.toronto.edu/~jzhu/csc326/readings/iverson.pdf), [nanopass compiled](https://github.com/nanopass/nanopass-framework-scheme),
+a small experimental [K-like](https://web.archive.org/web/20230411111549/https://kparc.com/k.txt), [APL inspired](http://www.eecg.toronto.edu/~jzhu/csc326/readings/iverson.pdf), [nanopass compiled](https://github.com/nanopass/nanopass-framework-scheme),
 language targeting [Malfunction](https://github.com/stedolan/malfunction).
 The [code lives on GitHub](https://github.com/rootmos/silly-k) and the [tests are run by Travis](https://travis-ci.org/rootmos/silly-k).
 
@@ -28,7 +28,7 @@ I wanted to implement a language with:
 * simply typed lambda calculus
 * [Malfunction](https://github.com/stedolan/malfunction)
 * type-inference (in particular I wanted to use the Hindley-Milner style type reconstruction I read about in [TaPL](https://www.cis.upenn.edu/~bcpierce/tapl/) §22.4)
-* [APL](http://www.eecg.toronto.edu/~jzhu/csc326/readings/iverson.pdf)/[J](https://code.jsoftware.com/wiki/NuVoc)/[K](http://kparc.com/k.txt) inspired syntax
+* [APL](http://www.eecg.toronto.edu/~jzhu/csc326/readings/iverson.pdf)/[J](https://code.jsoftware.com/wiki/NuVoc)/[K](https://web.archive.org/web/20230411111549/https://kparc.com/k.txt) inspired syntax
 
 The harmony between these chosen goals was not taken into account a priori,
 that was part of the adventure!
@@ -81,7 +81,7 @@ and the speed with which one can translate an idea into code is amazing.
 
 Clearly Iverson was on to something.
 
-Enter the [K language](http://kparc.com/k.txt), which is a spiritual successor to APL,
+Enter the [K language](https://web.archive.org/web/20230411111549/https://kparc.com/k.txt), which is a spiritual successor to APL,
 featuring (among many many things) heavily overloaded operators.
 [My idea was to use](https://en.wikipedia.org/wiki/Shoehorn) the type-inference to resolve the overloading,
 so that the runtime code does not have to do any type-checks.
