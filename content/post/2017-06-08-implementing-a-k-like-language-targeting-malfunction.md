@@ -296,98 +296,105 @@ These examples are taken directly from the [tests](https://github.com/rootmos/si
 
 ### Numbers and comparisons
 
-Code | Result
------|-------
-`]7` | `7`
-`]1 2 3` | `1 2 3`
-`]1=2` | `0`
-`]2=2` | `1`
-`]1 2 3=3` | `0 0 1`
-`]1=1 2 3` | `1 0 0`
-`]~1=2` | `1`
-`]~2=2` | `0`
-`]2<3` | `1`
-`]2<2` | `0`
-`]3<2` | `0`
-`]1<1 2 3` | `0 1 1`
-`]1 2 3>2` | `0 0 1`
+<table>
+<tr><th>Code</th><th>Result</th></tr>
+<tr><td><code>]7</code></td><td><code>7</code></td></tr>
+<tr><td><code>]1 2 3</code></td><td><code>1 2 3</code></td></tr>
+<tr><td><code>]1=2</code></td><td><code>0</code></td></tr>
+<tr><td><code>]2=2</code></td><td><code>1</code></td></tr>
+<tr><td><code>]1 2 3=3</code></td><td><code>0 0 1</code></td></tr>
+<tr><td><code>]1=1 2 3</code></td><td><code>1 0 0</code></td></tr>
+<tr><td><code>]~1=2</code></td><td><code>1</code></td></tr>
+<tr><td><code>]~2=2</code></td><td><code>0</code></td></tr>
+<tr><td><code>]2<3</code></td><td><code>1</code></td></tr>
+<tr><td><code>]2<2</code></td><td><code>0</code></td></tr>
+<tr><td><code>]3<2</code></td><td><code>0</code></td></tr>
+<tr><td><code>]1<1 2 3</code></td><td><code>0 1 1</code></td></tr>
+<tr><td><code>]1 2 3>2</code></td><td><code>0 0 1</code></td></tr>
+</table>
 
 ### Arithmetic operators
 
-Code | Result
------|-------
-`]1+2 3` | `3 4`
-`]1 2+3 4` | `4 6`
-`]1 2+3` | `4 5`
-`]2-3` | `-1`
-`]1-(-2)` | `3`
-`]1 2-3 4` | `-2 -2`
-`]-7` | `-7`
-`]-(-2)` | `2`
-`]1-2 3` | `-1 -2`
-`]1 2-3` | `-2 -1`
-`]2*3` | `6`
-`]1 2*3` | `3 6`
-`]4*2 3` | `8 12`
-`]1 2*3 4` | `3 8`
+<table>
+<tr><th>Code</th><th>Result</th></tr>
+<tr><td><code>]1+2 3</code></td><td><code>3 4</code></td></tr>
+<tr><td><code>]1 2+3 4</code></td><td><code>4 6</code></td></tr>
+<tr><td><code>]1 2+3</code></td><td><code>4 5</code></td></tr>
+<tr><td><code>]2-3</code></td><td><code>-1</code></td></tr>
+<tr><td><code>]1-(-2)</code></td><td><code>3</code></td></tr>
+<tr><td><code>]1 2-3 4</code></td><td><code>-2 -2</code></td></tr>
+<tr><td><code>]-7</code></td><td><code>-7</code></td></tr>
+<tr><td><code>]-(-2)</code></td><td><code>2</code></td></tr>
+<tr><td><code>]1-2 3</code></td><td><code>-1 -2</code></td></tr>
+<tr><td><code>]1 2-3</code></td><td><code>-2 -1</code></td></tr>
+<tr><td><code>]2*3</code></td><td><code>6</code></td></tr>
+<tr><td><code>]1 2*3</code></td><td><code>3 6</code></td></tr>
+<tr><td><code>]4*2 3</code></td><td><code>8 12</code></td></tr>
+<tr><td><code>]1 2*3 4</code></td><td><code>3 8</code></td></tr>
+</table>
 
 ### Array operators
 
-Code | Result
------|-------
-`]!4` | `0 1 2 3`
-`]*1 2 3` | `1`
-`]#1 2 3 4` | `4`
-`]4#1 2` | `1 2 1 2`
-`]3#1` | `1 1 1`
-`]1 2 3@1` | `2`
-`]1 2 3@0 2` | `1 3`
-`]&1 2 3` | `0 1 1 2 2 2`
-`]7 8@&2 3` | `7 7 8 8 8`
+<table>
+<tr><th>Code</th><th>Result</th></tr>
+<tr><td><code>]!4</code></td><td><code>0 1 2 3</code></td></tr>
+<tr><td><code>]*1 2 3</code></td><td><code>1</code></td></tr>
+<tr><td><code>]#1 2 3 4</code></td><td><code>4</code></td></tr>
+<tr><td><code>]4#1 2</code></td><td><code>1 2 1 2</code></td></tr>
+<tr><td><code>]3#1</code></td><td><code>1 1 1</code></td></tr>
+<tr><td><code>]1 2 3@1</code></td><td><code>2</code></td></tr>
+<tr><td><code>]1 2 3@0 2</code></td><td><code>1 3</code></td></tr>
+<tr><td><code>]&1 2 3</code></td><td><code>0 1 1 2 2 2</code></td></tr>
+<tr><td><code>]7 8@&2 3</code></td><td><code>7 7 8 8 8</code></td></tr>
+</table>
 
 ### Each and reduce adverbs
 
-Code | Result
------|-------
-`]{w+1}'1 2 3` | `2 3 4`
-`]{1-w}'3 4 5` | `-2 -3 -4`
-`]2+'3 4 5` | `5 6 7`
-`]2-'3 4 5` | `-1 -2 -3`
-`]2{a+w}'3 4 5` | `5 6 7`
-`]2{w-a}'3 4 5` | `1 2 3`
-`]{w@1}'{+w}'1 2 3` | `2 3 4`
-`]{w@1}'{-w}'1 2 3` | `0 -1 -2`
-`]+/1 2 3` | `6`
-`]-/1 2 3` | `2`
-`]{w-a}/1 2 3` | `0`
-`]+/2<!5` | `2`
-`]&/0<1 2 3` | `1`
-`]&/0<1 0 3` | `0`
+<table>
+<tr><th>Code</th><th>Result</th></tr>
+<tr><td><code>]{w+1}'1 2 3</code></td><td><code>2 3 4</code></td></tr>
+<tr><td><code>]{1-w}'3 4 5</code></td><td><code>-2 -3 -4</code></td></tr>
+<tr><td><code>]2+'3 4 5</code></td><td><code>5 6 7</code></td></tr>
+<tr><td><code>]2-'3 4 5</code></td><td><code>-1 -2 -3</code></td></tr>
+<tr><td><code>]2{a+w}'3 4 5</code></td><td><code>5 6 7</code></td></tr>
+<tr><td><code>]2{w-a}'3 4 5</code></td><td><code>1 2 3</code></td></tr>
+<tr><td><code>]{w@1}'{+w}'1 2 3</code></td><td><code>2 3 4</code></td></tr>
+<tr><td><code>]{w@1}'{-w}'1 2 3</code></td><td><code>0 -1 -2</code></td></tr>
+<tr><td><code>]+/1 2 3</code></td><td><code>6</code></td></tr>
+<tr><td><code>]-/1 2 3</code></td><td><code>2</code></td></tr>
+<tr><td><code>]{w-a}/1 2 3</code></td><td><code>0</code></td></tr>
+<tr><td><code>]+/2<!5</code></td><td><code>2</code></td></tr>
+<tr><td><code>]&/0<1 2 3</code></td><td><code>1</code></td></tr>
+<tr><td><code>]&/0<1 0 3</code></td><td><code>0</code></td></tr>
+</table>
 
 ### Conditionals
 
-Code | Result
------|-------
-`](1=1;2;3)` | `2`
-`](1=2;1 2;3 4)` | `3 4`
-`]7{w=1;w;a}1` | `1`
-`]7{w=1;w;a}8` | `7`
+<table>
+<tr><th>Code</th><th>Result</th></tr>
+<tr><td><code>](1=1;2;3)</code></td><td><code>2</code></td></tr>
+<tr><td><code>](1=2;1 2;3 4)</code></td><td><code>3 4</code></td></tr>
+<tr><td><code>]7{w=1;w;a}1</code></td><td><code>1</code></td></tr>
+<tr><td><code>]7{w=1;w;a}8</code></td><td><code>7</code></td></tr>
+</table>
 
 ### Recursion
 
-Code | Result
------|-------
-`]{w=0;0;w+_f(w-1)}6` | `21`
-`]{w=1;1;w=2;1;(_f(w-2))+_f(w-1)}1:` | `13`
+<table>
+<tr><th>Code</th><th>Result</th></tr>
+<tr><td><code>]{w=0;0;w+_f(w-1)}6</code></td><td><code>21</code></td></tr>
+<tr><td><code>]{w=1;1;w=2;1;(_f(w-2))+_f(w-1)}1:</code></td><td><code>13</code></td></tr>
+</table>
 
 ### Bindings
 
-Code | Result
------|-------
-`]x+x:7` | `14`
-`](x:1)+x:2` | `3`
-`]x+(x:1)+x:2` | `4`
-`]x+x{x:1+a-w}x:2` | `3`
+<table>
+<tr><th>Code</th><th>Result</th></tr>
+<tr><td><code>]x+x:7</code></td><td><code>14</code></td></tr>
+<tr><td><code>](x:1)+x:2</code></td><td><code>3</code></td></tr>
+<tr><td><code>]x+(x:1)+x:2</code></td><td><code>4</code></td></tr>
+<tr><td><code>]x+x{x:1+a-w}x:2</code></td><td><code>3</code></td></tr>
+</table>
 
 ### Note about `]`
 The `]` operator is the output operator (taken from [J](http://code.jsoftware.com/wiki/Vocabulary/squarert#monadic)).

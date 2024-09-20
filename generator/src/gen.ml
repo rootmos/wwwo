@@ -520,7 +520,9 @@ let () =
   write_page "activity.html" activity_page;
   write_page "bor19/index.html" bor19;
   posts |> List.iter @@ fun { url; html; title } ->
-    write_page url @@ page ~only_subtitle:true (Some title) (text html);
+    write_page url @@ page
+      ~additional_css:[ Utils.load_file (Path.style "post.css") ]
+      ~only_subtitle:true (Some title) (div ~cls:(Some "post") @@ text html);
 
   let write_gallery key =
     List.iter (fun (fn, p) -> write_page (sprintf "%s/%s" key fn) p) in
