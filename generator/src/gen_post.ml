@@ -1,4 +1,5 @@
 open Post
+open Html
 
 let () =
   let usage_msg = Filename.basename @@ Sys.argv.(0) in
@@ -14,5 +15,11 @@ let () =
 
   Path.set_content_root !content;
 
-  let post = Post.from_file !source in
-  print_endline post.html
+  let { title; html } = Post.from_file !source in
+  let str = Page.make
+    ~additional_css:[ Utils.load_file (Path.style "post.css") ]
+    ~only_subtitle:true (Some title) (div ~cls:(Some "post") @@ text html)
+    "foo.html" (* TODO *)
+  in match !output with
+    "-" -> print_string str
+  | path -> Utils.write_file path str

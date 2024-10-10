@@ -9,7 +9,7 @@ all: gen.exe top.exe
 
 COMMON = common.ml
 COMMON += lenient_iso8601.ml utils.ml env.ml
-COMMON += html.ml path.ml post.ml
+COMMON += html.ml path.ml page.ml post.ml
 ATDs = \
 	$(call atd, sounds) $(call atd, twitch) \
 	$(call atd, github) $(call atd, practice) \

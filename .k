@@ -1,4 +1,4 @@
-export BASE_URL=http://localhost:8000
+export WWWO_BASE_URL=http://localhost:8000
 
 export BUILDML_OCAMLC_OPTS=-g
 export OCAMLRUNPARAM=b
@@ -6,7 +6,8 @@ export OCAMLRUNPARAM=b
 post() {
     go \
         -src "$K_DIR/content/post/2017-06-08-implementing-a-k-like-language-targeting-malfunction.md" \
-        -content "$K_DIR/content"
+        -content "$K_DIR/content" \
+        -output "$K_DIR/post.html"
 }
 
 go() {
