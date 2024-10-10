@@ -13,4 +13,6 @@ let () =
   Arg.parse speclist (fun _ -> raise @@ Arg.Bad "unexpected argument") usage_msg;
 
   Path.set_content_root !content;
-  print_endline @@ Path.image "foo.png"
+
+  let post = Post.from_file !source in
+  print_endline post.html
