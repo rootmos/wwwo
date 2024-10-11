@@ -2,12 +2,14 @@
 include buildml.mk
 
 .PHONY: build
-build: gen.exe
+build: gen.exe gen_post.exe
 
 .PHONY: all
 all: gen.exe top.exe
 
-COMMON = lenient_iso8601.ml common.ml utils.ml html.ml
+COMMON = common.ml
+COMMON += lenient_iso8601.ml utils.ml env.ml
+COMMON += html.ml path.ml page.ml post.ml
 ATDs = \
 	$(call atd, sounds) $(call atd, twitch) \
 	$(call atd, github) $(call atd, practice) \
@@ -19,3 +21,6 @@ gen.exe: $(COMMON) $(ATDs) gen.ml
 
 top.exe: $(COMMON)
 	$(BUILDML_OCAMLMKTOP) -o $@ $^
+
+gen_post.exe: $(COMMON) gen_post.ml
+	$(BUILDML_OCAMLC) -o $@ $^

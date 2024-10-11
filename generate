@@ -126,7 +126,7 @@ fi
 
 # webroot
 
-export WEBROOT="$WORKDIR/webroot"
+WEBROOT="$WORKDIR/webroot"
 if [ -n "${FORCE-}" ]; then
     h "removing previous webroot: $WORKDIR/webroot"
     rm -rfv "$WORKDIR/webroot" 2>&1 | o
@@ -143,7 +143,12 @@ h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
     . "$WORKDIR/build.env"
     set +a
 
-    env ENV="$ENVIRONMENT" "$GENERATOR_EXE" 2>&1 | o
+    env \
+        WWWO_CONTENT="$WORKDIR/content" \
+        WWWO_META="$WORKDIR/meta" \
+        WWWO_WEBROOT="$WEBROOT" \
+        WWWO_ENV="$ENVIRONMENT" \
+        "$GENERATOR_EXE" 2>&1 | o
 )
 
 
