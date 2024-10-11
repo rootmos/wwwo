@@ -17,6 +17,7 @@ let () =
 
   let { title; html } = Post.from_file !source in
   let str = Page.make
+    ~config:(Page.Config.from_env ())
     ~additional_css:[ Utils.load_file (Path.style "post.css") ]
     (Title title) (div ~cls:(Some "post") @@ text html)
   in match !output with

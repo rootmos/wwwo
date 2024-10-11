@@ -298,7 +298,7 @@ let bor19 = seq [
       ]
     ]
   ]
-] |> pagemaker (Title "Best of rootmos 2019") ~back:(Some "/index.html")
+] |> pagemaker (Title "Best of rootmos 2019") ~back:(Some "../index.html")
     ~additional_css:[ Utils.load_file (Path.style "bor19.css") ]
 
 module ContentType = struct
