@@ -11,8 +11,16 @@ let mkdir p =
   | exception Unix.Unix_error(Unix.ENOENT, _, _) ->
       let _ = Unix.umask 0o000 in Unix.mkdir p 0o775
 
+let mkdirs p =
+  let rec go q =
+    match mkdir q with
+    | () -> ()
+    | exception Unix.Unix_error(Unix.ENOENT, _, _) ->
+        go (Filename.dirname q); go q in
+  go p
+
 let write_file filename s =
-  mkdir (Filename.dirname filename);
+  mkdirs (Filename.dirname filename);
   let oc = open_out filename in
   output_string oc s;
   close_out oc
