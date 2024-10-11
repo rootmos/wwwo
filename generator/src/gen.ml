@@ -9,18 +9,6 @@ let pagemaker ~path =
   let canonical_url = Some (base_url ^ path) in
   Page.make ~config:config ~canonical_url
 
-(*
-let posts = Path.posts () >>| Post.from_file |>
-  List.sort (fun { Post.date = d } { date = d' } -> String.compare d d')
-
-let posts_snippet = seq [
-  h2 @@ text "Posts";
-  posts >>| (fun { title; url; date } ->
-    a url @@ text @@ sprintf "%s (%s)" title date
-  ) |> ul
-]
-*)
-
 let sounds fn =
   let open Sounds_t in
   let js = Path.meta fn |>
@@ -223,7 +211,7 @@ let md_snippet s =
     | _ -> None in
   text @@ Omd.to_html md
 
-let index =
+let index posts_snippet =
   let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
   pagemaker Default ~additional_css:[ Utils.load_file (Path.style "twitch.css") ] @@ seq [
   div ~cls:(Some "intro") @@ seq [
@@ -276,7 +264,7 @@ let index =
   div ~cls:(Some "content twitch") @@ twitch_snippet;
   div ~cls:(Some "content") @@ activity_snippet;
   div ~cls:(Some "content") @@ projects_snippet;
-  (*div ~cls:(Some "content") @@ posts_snippet;*)
+  div ~cls:(Some "content") @@ posts_snippet;
   div ~cls:(Some "content") @@ services_snippet;
   div ~cls:(Some "content") @@ md_snippet (Path.snippet "academic.md");
   div ~cls:(Some "content") @@ resume_snippet;
@@ -395,25 +383,35 @@ let project human_title p =
     | true -> Some (md_snippet path) in
   let path = Path.meta (sprintf "projects/%s/gallery.json" p) in
   match Utils.file_exists path with
-    true -> gallery human_title ~preamble path
+    true -> gallery (Title human_title) ~preamble path
   | false -> failwith "not implemented"
 
 let () =
-  let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
-  let in_root = Filename.concat webroot in
-  let write_page path p = Utils.write_file (in_root path) (p ~path) in
-  write_page "index.html" index;
+  let webroot = Env.require "WEBROOT" ^ "/" ^ Env.require "ENV" in
+  let write_page path p = Utils.write_file (Filename.concat webroot path) (p ~path) in
+
+  let posts = Path.posts () >>| (fun path ->
+    let rel = "post/" ^ Filename.chop_suffix (Filename.basename path) ".md" ^ ".html" in
+    let post = Post.from_file path in
+    let page = pagemaker (Title post.title) (div ~cls:(Some "post") @@ text post.html) in
+    write_page rel page;
+    (rel, post)
+  ) |> List.sort (fun (_, { Post.date = d }) (_, { date = d' }) -> String.compare d d') in
+
+  let posts_snippet = seq [
+    h2 @@ text "Posts";
+    posts >>| (fun (rel, { title; date }) ->
+      a rel @@ text @@ sprintf "%s (%s)" title date
+    ) |> ul
+  ] in
+
+  write_page "index.html" (index posts_snippet);
   write_page "sounds.html" sounds_page;
   write_page "jam.html" sounds_jam_page;
   write_page "demo.html" demo_page;
   write_page "practice.html" practice_page;
   write_page "activity.html" activity_page;
   write_page "bor19/index.html" bor19;
-
-  posts |> List.iter @@ fun { url; html; title } ->
-    write_page url @@ page
-      ~additional_css:[ Utils.load_file (Path.style "post.css") ]
-      ~only_subtitle:true (Some title) (div ~cls:(Some "post") @@ text html);
 
   let write_gallery key =
     List.iter (fun (fn, p) -> write_page (sprintf "%s/%s" key fn) p) in
