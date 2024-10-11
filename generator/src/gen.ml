@@ -31,7 +31,7 @@ let sounds_page = let open Sounds_t in
     p ~cls:(Some "c") @@ a "/bor19" @@ text "Best of rootmos 2019 mix";
     sounds "sounds.json" >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
-  ] |> pagemaker (Subtitle "sounds")
+  ] |> pagemaker (Subtitle "sounds") ~back:(Some "index.html")
     ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
 
 let sounds_jam_page = let open Sounds_t in
@@ -44,7 +44,7 @@ let sounds_jam_page = let open Sounds_t in
       (Path.image "spät.jpg");
     sounds "sounds.sessions.json" >>| r |> table ~widths:(Some [80;5;5]);
     audio_player_script;
-  ] |> pagemaker (Subtitle "jam sessions")
+  ] |> pagemaker (Subtitle "jam sessions") ~back:(Some "index.html")
     ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
 
 and sounds_snippet = let open Sounds_t in
@@ -98,7 +98,7 @@ let practice_page =
     ];
     ss >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
-  ] |> pagemaker ~chartjs:true (Subtitle "practice")
+  ] |> pagemaker ~chartjs:true (Subtitle "practice") ~back:(Some "index.html")
     ~additional_css:[ Utils.load_file (Path.style "practice.css") ]
 
 let demo_page = let open Sounds_t in
@@ -118,7 +118,7 @@ let demo_page = let open Sounds_t in
     ss >>| r |> table ~widths:(Some [80;10;5;5]);
     div ~cls:(Some "c") @@ text @@ sprintf "Length: %.2d:%.2d:%.2d" h m s;
     audio_player_script;
-  ] |> pagemaker (Subtitle "demo")
+  ] |> pagemaker (Subtitle "demo") ~back:(Some "index.html")
     ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
 
 let activity = let open Github_t in
@@ -132,7 +132,7 @@ let activity_page = let open Github_t in
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
-  ] in activity >>| r |> table |> pagemaker (Subtitle "activity")
+  ] in activity >>| r |> table |> pagemaker (Subtitle "activity") ~back:(Some "index.html")
 and activity_snippet = let open Github_t in
   let r c = [
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
@@ -298,7 +298,7 @@ let bor19 = seq [
       ]
     ]
   ]
-] |> pagemaker (Title "Best of rootmos 2019")
+] |> pagemaker (Title "Best of rootmos 2019") ~back:(Some "/index.html")
     ~additional_css:[ Utils.load_file (Path.style "bor19.css") ]
 
 module ContentType = struct
@@ -388,12 +388,14 @@ let project human_title p =
 
 let () =
   let webroot = Env.require "WEBROOT" ^ "/" ^ Env.require "ENV" in
+  Utils.mkdir webroot;
+
   let write_page path p = Utils.write_file (Filename.concat webroot path) (p ~path) in
 
   let posts = Path.posts () >>| (fun path ->
-    let rel = "post/" ^ Filename.chop_suffix (Filename.basename path) ".md" ^ ".html" in
+    let rel = Filename.chop_suffix (Filename.basename path) ".md" ^ ".html" in
     let post = Post.from_file path in
-    let page = pagemaker (Title post.title) (div ~cls:(Some "post") @@ text post.html) in
+    let page = pagemaker (Title post.title) ~back:(Some "index.html") (div ~cls:(Some "post") @@ text post.html) in
     write_page rel page;
     (rel, post)
   ) |> List.sort (fun (_, { Post.date = d }) (_, { date = d' }) -> String.compare d d') in

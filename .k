@@ -1,7 +1,8 @@
-export WWWO_BASE_URL=http://localhost:8000
+export PORT=8000
+export WWWO_BASE_URL=http://localhost:$PORT
 
-export BUILDML_OCAMLC_OPTS=-g
-export OCAMLRUNPARAM=b
+#export BUILDML_OCAMLC_OPTS=-g
+#export OCAMLRUNPARAM=b
 
 post() {
     go \
@@ -37,4 +38,8 @@ configure() {
 
 invoke() {
     LAMBDA_TIMEOUT=300 .github/invoke-lambda
+}
+
+serve() {
+    bin/serve workdir/webroot/dev
 }
