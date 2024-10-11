@@ -127,8 +127,6 @@ eval "$(opam env --set-switch)"
 if [ "$ACTION" = "switch" ]; then
     opam switch show
     exit 0
-elif [ "$ACTION" = "execute" ]; then
-    exec "$@"
 fi
 
 DEPS_SPEC="$BUILDML_PROJECT_ROOT/deps.$BUILDML_TARGET"
@@ -140,16 +138,19 @@ mapfile -t PKGs < "$DEPS_SPEC"
 
 OCAMLFIND_PKG=${OCAMLFIND_PKG-ocamlfind>=1.9.6}
 
-if ! [ "$BUILDML_PROJECT_ROOT/.deps$SUFFIX" -nt "$DEPS_SPEC" ]; then
+DEPS_FLAG=$BUILDML_PROJECT_ROOT/.deps$SUFFIX
+if ! [ "$DEPS_FLAG" -nt "$DEPS_SPEC" ]; then
     echo 1>&2 "installing dependencies:"
     for p in "$OCAMLFIND_PKG" "${PKGs[@]}"; do
         echo 1>&2 "  $p"
     done
     opam install --yes "$OCAMLFIND_PKG" "${PKGs[@]}"
-    touch "$BUILDML_PROJECT_ROOT/.deps$SUFFIX"
+    touch "$DEPS_FLAG"
 fi
 
-if [ "$ACTION" = "deps" ]; then
+if [ "$ACTION" = "execute" ]; then
+    exec "$@"
+elif [ "$ACTION" = "deps" ]; then
     exit 0
 fi
 
