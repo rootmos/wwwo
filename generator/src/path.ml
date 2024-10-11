@@ -12,4 +12,4 @@ let js file = Filename.concat (Filename.concat !content_root "js") file
 let meta_root = ref @@ Env.get2 "META" "./meta"
 let set_meta_root = (:=) meta_root
 
-let meta file= Filename.concat !meta_root file
+let meta file = Filename.concat !meta_root file

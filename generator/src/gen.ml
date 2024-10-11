@@ -2,73 +2,16 @@ open Common
 open Html
 open Printf
 
-module Path = struct
-  let root = "content"
-  let posts () = Sys.readdir (Filename.concat root "post") |> Array.to_list
-  let post = Filename.concat @@ Filename.concat root "post"
-  let snippet = Filename.concat @@ Filename.concat root "snippet"
-  let image = Filename.concat @@ Filename.concat root "image"
-  let style = Filename.concat @@ Filename.concat root "css"
-  let meta = Filename.concat "meta"
-  let src = Filename.concat "src"
-  let js = Filename.concat @@ Filename.concat root "js"
-end
+let base_url = Env.require "BASE_URL"
 
-let livejs_src = "http://livejs.com/live.js"
-let chartjs_src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
-let momentjs_src = "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js"
-let tracking_id = "UA-124878438-2"
-let tracking = seq [
-  js_src (sprintf "https://www.googletagmanager.com/gtag/js?id=%s" tracking_id);
-  String.concat "" [
-    "window.dataLayer = window.dataLayer || [];";
-    "function gtag(){dataLayer.push(arguments);} gtag('js', new Date());";
-    sprintf "gtag('config', '%s')" tracking_id;
-  ] |> script
-]
+let config = Page.Config.from_env ()
+let pagemaker ~path =
+  let canonical_url = Some (base_url ^ path) in
+  Page.make ~config:config ~canonical_url
 
-let local = match Sys.getenv "ENV" with
-| "dev" -> true
-| _ -> false
-
-let base_url = match Sys.getenv_opt "BASE_URL" with
-| Some url -> url
-| None -> failwith "set BASE_URL"
-
-let static = (^) "https://rootmos-static.s3.eu-central-1.amazonaws.com/"
-
-let avatar_url = static "rootmos.jpg"
-
-type post = { url: string; lines: string list; title: string; html: string; date: string }
-
-let mk_post p =
-  let lines = Path.post p |> Utils.load_file
-    |> String.split_on_char '\n' in
-  let hs = String.concat "\n" @@ take_while ((<>) "---")
-    @@ List.tl @@ drop_while ((<>) "---") lines in
-  let bs = String.concat "\n" @@ List.tl @@ drop_while ((<>) "---")
-    @@ List.tl @@ drop_while ((<>) "---") lines in
-
-  let props = match Yaml.of_string_exn hs with `O pp -> pp | _ -> failwith "expected object" in
-  let prop p = match List.find (fun (k, _) -> k = p) props with
-  (_, `String s) -> s | _ -> failwith (p ^ " wrong type") in
-
-  let md = Omd.of_string bs in
-  let md = md |> Omd_representation.visit @@ function
-    | Omd_representation.Img (alt, src, _) ->
-        let src = Path.image src in
-        Omd_representation.Raw (img ~alt:(Some alt) src ()) :: [] |> Option.some
-    | Omd_representation.Text "{{< toc >}}" -> Omd.toc md |> Option.some
-    | _ -> None
-
-  in {
-    url = (Filename.chop_suffix p ".md") ^ ".html";
-    lines; html = Omd.to_html md;
-    title = prop "title"; date = prop "date";
-  }
-
-let posts = Path.posts () >>| mk_post |>
-  List.sort (fun { date = d } { date = d' } -> String.compare d d')
+(*
+let posts = Path.posts () >>| Post.from_file |>
+  List.sort (fun { Post.date = d } { date = d' } -> String.compare d d')
 
 let posts_snippet = seq [
   h2 @@ text "Posts";
@@ -76,53 +19,7 @@ let posts_snippet = seq [
     a url @@ text @@ sprintf "%s (%s)" title date
   ) |> ul
 ]
-
-let page
-  ?(only_subtitle=false)
-  ?(chartjs=false)
-  ?(additional_css=[])
-  ?(back="/index.html")
-  ?(meta=[])
-  ?(og_type="website")
-  ?(og_image=None)
-  subtitle b path =
-  let t = if only_subtitle then Option.get subtitle else "rootmos' " ^ Option.fold ~some:Fun.id ~none:"what-nots" subtitle in
-  () |> html @@ seq [
-  head @@ seq @@ List.concat [
-    [
-      title @@ t;
-      if local then js_src livejs_src else tracking;
-      seq @@ if chartjs then [js_src momentjs_src; js_src chartjs_src]
-      else [];
-      css @@ Utils.load_file (Path.style "style.css") :: additional_css;
-      text "<meta charset=\"UTF-8\">";
-      favicon (Path.image "favicon.png");
-      text @@ sprintf "<meta property=\"og:title\" content=\"%s\" />" t;
-      text @@ sprintf "<meta property=\"og:url\" content=\"%s/%s\" />" base_url path;
-      text @@ sprintf "<meta property=\"og:type\" content=\"%s\" />" og_type;
-      text @@ sprintf "<meta property=\"og:image\" content=\"%s\" />" @@
-        Option.value og_image ~default:avatar_url
-    ];
-    meta;
-  ];
-  body @@ seq [
-    h1 @@ seq [
-      text @@ t;
-      if Option.is_some subtitle then
-        span ~cls:"subtitle" @@ a back @@ text "back" else noop
-    ];
-    div ~cls:(Some "content") @@ b;
-    div ~cls:(Some "footer") @@ seq [
-      let t = Unix.time () |> Unix.gmtime in
-      let c = Sys.getenv_opt "BUILD_GIT_REF_ID" |> Option.map (fun r ->
-        a "/version.html" @@ span @@ text (String.sub r 0 7)
-      )
-      in span ~cls:"copyleft" @@ seq @@ Option.to_list c @ [
-        text @@ sprintf " %d &copy;" (1900 + t.tm_year)
-      ]
-    ]
-  ]
-]
+*)
 
 let sounds fn =
   let open Sounds_t in
@@ -146,7 +43,7 @@ let sounds_page = let open Sounds_t in
     p ~cls:(Some "c") @@ a "/bor19" @@ text "Best of rootmos 2019 mix";
     sounds "sounds.json" >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
-  ] |> page (Some "sounds")
+  ] |> pagemaker (Subtitle "sounds")
     ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
 
 let sounds_jam_page = let open Sounds_t in
@@ -159,7 +56,7 @@ let sounds_jam_page = let open Sounds_t in
       (Path.image "spät.jpg");
     sounds "sounds.sessions.json" >>| r |> table ~widths:(Some [80;5;5]);
     audio_player_script;
-  ] |> page (Some "jam sessions")
+  ] |> pagemaker (Subtitle "jam sessions")
     ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
 
 and sounds_snippet = let open Sounds_t in
@@ -213,9 +110,8 @@ let practice_page =
     ];
     ss >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
-  ] |> page ~chartjs:true
+  ] |> pagemaker ~chartjs:true (Subtitle "practice")
     ~additional_css:[ Utils.load_file (Path.style "practice.css") ]
-    (Some "practice")
 
 let demo_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [
@@ -234,7 +130,7 @@ let demo_page = let open Sounds_t in
     ss >>| r |> table ~widths:(Some [80;10;5;5]);
     div ~cls:(Some "c") @@ text @@ sprintf "Length: %.2d:%.2d:%.2d" h m s;
     audio_player_script;
-  ] |> page (Some "demo")
+  ] |> pagemaker (Subtitle "demo")
     ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
 
 let activity = let open Github_t in
@@ -248,7 +144,7 @@ let activity_page = let open Github_t in
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
-  ] in activity >>| r |> table |> page (Some "activity")
+  ] in activity >>| r |> table |> pagemaker (Subtitle "activity")
 and activity_snippet = let open Github_t in
   let r c = [
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
@@ -294,12 +190,6 @@ let projects_snippet =
     projects >>| r |> ul ~cls:(Some "content");
   ]
 
-let resolve h = Unix.getaddrinfo h ""
-  [Unix.AI_FAMILY Unix.PF_INET; Unix.AI_SOCKTYPE Unix.SOCK_STREAM]
-  |> function
-  | { ai_addr = Unix.ADDR_INET (a, _) } :: _ -> Unix.string_of_inet_addr a |> Option.some
-  | _ -> Option.none
-
 let services_snippet = seq [
   h2 @@ text "Services";
   ul @@ [
@@ -312,7 +202,7 @@ let resume_snippet =
   seq [
     h2 @@ text "Resume";
     p @@ seq [
-      a (static "resume-gustav-behm.pdf") @@ text "PDF";
+      a (Page.static "resume-gustav-behm.pdf" (* TODO should be part of the resume.json *)) @@ text "PDF";
       text @@ sprintf" (updated %s)" r.updated;
     ]
   ]
@@ -335,7 +225,7 @@ let md_snippet s =
 
 let index =
   let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
-  page None ~additional_css:[ Utils.load_file (Path.style "twitch.css") ] @@ seq [
+  pagemaker Default ~additional_css:[ Utils.load_file (Path.style "twitch.css") ] @@ seq [
   div ~cls:(Some "intro") @@ seq [
     script @@ String.concat "" [
       "let avatar_revealed = 0;";
@@ -386,7 +276,7 @@ let index =
   div ~cls:(Some "content twitch") @@ twitch_snippet;
   div ~cls:(Some "content") @@ activity_snippet;
   div ~cls:(Some "content") @@ projects_snippet;
-  div ~cls:(Some "content") @@ posts_snippet;
+  (*div ~cls:(Some "content") @@ posts_snippet;*)
   div ~cls:(Some "content") @@ services_snippet;
   div ~cls:(Some "content") @@ md_snippet (Path.snippet "academic.md");
   div ~cls:(Some "content") @@ resume_snippet;
@@ -420,7 +310,7 @@ let bor19 = seq [
       ]
     ]
   ]
-] |> page ~only_subtitle:true (Some "Best of rootmos 2019")
+] |> pagemaker (Title "Best of rootmos 2019")
     ~additional_css:[ Utils.load_file (Path.style "bor19.css") ]
 
 module ContentType = struct
@@ -428,7 +318,7 @@ module ContentType = struct
   let is_image ct = Str.string_match (Str.regexp "^image/") ct 0
 end
 
-let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
+let gallery title ?(preamble=None) ?(only_subtitle=true) fn =
   let s (g0: Gallery_j.entry) (g1: Gallery_j.entry) =
     Lenient_iso8601.compare g1.last_modified g0.last_modified in
   let es = Utils.load_file fn |> Gallery_j.entries_of_string |> List.sort s in
@@ -462,7 +352,7 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
     (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)
     (List.map g es)
     |> seq |> div ~cls:(Some "gallery")
-    |> page ~only_subtitle:only_subtitle (Some t)
+    |> pagemaker title
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
   let p (e: Gallery_j.entry) =
@@ -474,10 +364,10 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
       if ContentType.is_video e.content_type
       then text @@ sprintf "<meta property=\"og:video\" content=\"%s\" />" e.url
       else noop in
-    let os, t =
+    let title =
       match e.title with
-        Some t -> true, t
-      | None -> only_subtitle, t in
+        Some t -> Page.Title t
+      | None -> title in
     let og_type =
       if ContentType.is_video e.content_type then "video.movie"
       else "webpage" (* TODO what's the proper type for an image? *) in
@@ -487,15 +377,15 @@ let gallery t ?(preamble=None) ?(only_subtitle=true) fn =
         Some t -> p ~cls:(Some "description") @@ text t
       | None -> noop;
     ] |> div ~cls:(Some "entry") |> div ~cls:(Some "gallery")
-      |> page ~only_subtitle:os (Some t) ~back:"index.html" ~meta:[ og_video ]
+      |> pagemaker title ~back:(Some "index.html") ~meta:[ og_video ]
       ~og_image:og_image ~og_type:og_type
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
   [ ("index.html", index ) ] @ List.map (fun (e: Gallery_j.entry) -> (sprintf "%s.html" e.id), p e) es
 
-let glenn = gallery "Glenn, Glenn, Glenn" (Path.meta "glenn.json")
-let silly = gallery "Silly things" (Path.meta "silly.json")
-let clips = gallery ~only_subtitle:false "clips" (Path.meta "clips.json")
+let glenn = gallery (Page.Title "Glenn, Glenn, Glenn") (Path.meta "glenn.json")
+let silly = gallery (Title "Silly things") (Path.meta "silly.json")
+let clips = gallery (Subtitle "clips") (Path.meta "clips.json")
 
 let project human_title p =
   let preamble =
@@ -511,7 +401,7 @@ let project human_title p =
 let () =
   let webroot = Sys.getenv "WEBROOT" ^ "/" ^ Sys.getenv "ENV" in
   let in_root = Filename.concat webroot in
-  let write_page path p = Utils.write_file (in_root path) (p path) in
+  let write_page path p = Utils.write_file (in_root path) (p ~path) in
   write_page "index.html" index;
   write_page "sounds.html" sounds_page;
   write_page "jam.html" sounds_jam_page;
@@ -519,6 +409,7 @@ let () =
   write_page "practice.html" practice_page;
   write_page "activity.html" activity_page;
   write_page "bor19/index.html" bor19;
+
   posts |> List.iter @@ fun { url; html; title } ->
     write_page url @@ page
       ~additional_css:[ Utils.load_file (Path.style "post.css") ]

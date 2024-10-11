@@ -18,8 +18,7 @@ let () =
   let { title; html } = Post.from_file !source in
   let str = Page.make
     ~additional_css:[ Utils.load_file (Path.style "post.css") ]
-    ~only_subtitle:true (Some title) (div ~cls:(Some "post") @@ text html)
-    "foo.html" (* TODO *)
+    (Title title) (div ~cls:(Some "post") @@ text html)
   in match !output with
     "-" -> print_string str
   | path -> Utils.write_file path str
