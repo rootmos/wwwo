@@ -340,7 +340,7 @@ let gallery title ?(preamble=None) ?(only_subtitle=true) fn =
     (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)
     (List.map g es)
     |> seq |> div ~cls:(Some "gallery")
-    |> pagemaker title
+    |> pagemaker title ~back:(Some "../index.html")
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
   let p (e: Gallery_j.entry) =
