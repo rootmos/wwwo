@@ -4,7 +4,7 @@ export BASE_URL=http://localhost:$PORT
 #export BUILDML_OCAMLC_OPTS=-g
 #export OCAMLRUNPARAM=b
 
-POST=${POST-"the-journey"}
+POST=${POST-"guarded-memory-calculations-using-coq"}
 
 post() {
     export WWWO_ENV=dev
