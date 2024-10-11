@@ -148,6 +148,7 @@ h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
         WWWO_META="$WORKDIR/meta" \
         WWWO_WEBROOT="$WEBROOT" \
         WWWO_ENV="$ENVIRONMENT" \
+        WWWO_BASE_URL="$BASE_URL" \
         "$GENERATOR_EXE" 2>&1 | o
 )
 
