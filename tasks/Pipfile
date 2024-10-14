@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-meta = {file = "."}
 tasks = {file = ".", editable = true}
 
 [dev-packages]
