@@ -57,8 +57,8 @@ let from_file path =
 let make pagemaker (config: Page.Config.t) post =
   let config' = { config with
     additional_css = List.append
-      (List.map (fun fn -> Utils.load_file @@ Path.style fn) ("post.css"::post.additional_css))
-      config.additional_css;
+      config.additional_css
+      (List.map (fun fn -> Utils.load_file @@ Path.style fn) ("post.css"::post.additional_css));
   } in
   pagemaker config'
     (Page.Title post.title)

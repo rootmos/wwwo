@@ -14,7 +14,9 @@ let pagemaker
   ~back ~path (config: Page.Config.t) = let config' = { config with
     canonical_url = Some (base_url ^ path);
     back = back;
-    additional_css = List.map (fun fn -> Utils.load_file @@ Path.style fn) additional_css;
+    additional_css = List.append
+      config.additional_css
+      (List.map (fun fn -> Utils.load_file @@ Path.style fn) additional_css);
     chartjs = chartjs;
     meta = meta;
     og_type = og_type;
@@ -379,7 +381,7 @@ let gallery title ?(preamble=None) ?(only_subtitle=true) fn =
     ] |> div ~cls:(Some "entry") |> div ~cls:(Some "gallery")
       |> pagemaker config title ~back:(Some "index.html") ~meta:[ og_video ]
       ~og_image:og_image ~og_type:og_type
-      ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
+      ~additional_css:[ "gallery.css" ] in
 
   [ ("index.html", index ) ] @ List.map (fun (e: Gallery_j.entry) -> (sprintf "%s.html" e.id), p e) es
 
