@@ -138,10 +138,12 @@ h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
     cd "$WORKDIR"
     "$BIN/whereami" current --json --output="$WORKDIR/generate.json"
 
-    "$BIN/whereami" format --env --env-prefix=BUILD_ "$ROOT/.build.json" --output="$WORKDIR/build.env"
-    set -a
-    . "$WORKDIR/build.env"
-    set +a
+    if [ -e "$ROOT/.build.json" ]; then
+        "$BIN/whereami" format --env --env-prefix=BUILD_ "$ROOT/.build.json" --output="$WORKDIR/build.env"
+        set -a
+        . "$WORKDIR/build.env"
+        set +a
+    fi
 
     env \
         WWWO_CONTENT="$WORKDIR/content" \
@@ -157,7 +159,11 @@ h "generating $ENVIRONMENT: $WEBROOT/$ENVIRONMENT"
 
 h "version page: $WEBROOT/$ENVIRONMENT/version.html"
 
-PARTS=("Build=$ROOT/.build.json" "Generate=$WORKDIR/generate.json")
+PARTS=()
+if [ -f "$ROOT/.build.json" ]; then
+    PARTS+=("Build=$ROOT/.build.json")
+fi
+PARTS+=("Generate=$WORKDIR/generate.json")
 if [ -f "$WORKDIR/.invoke.json" ]; then
     PARTS+=("Invoke=$WORKDIR/.invoke.json")
 fi
