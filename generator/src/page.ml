@@ -34,36 +34,49 @@ module Config = struct
   type t = {
     livejs: bool;
     tracking: string option;
+
+    additional_css: string list;
+    meta: unit Html.t list;
+
+    chartjs: bool;
+
+    og_type: string;
+    og_image: string option;
+
+    canonical_url: string option;
+    back: string option;
   }
 
   let default = {
     livejs = false;
     tracking = None;
+
+    additional_css = [];
+    meta = [];
+
+    chartjs = false;
+
+    og_type = "website";
+    og_image = None;
+
+    canonical_url = None;
+    back = None;
   }
 
   let from_env () =
     match Env.opt "ENV" with
-    | Some "dev" -> {
+    | Some "dev" -> { default with
       livejs = true;
       tracking = None;
     }
-    | Some "prod" -> {
+    | Some "prod" -> { default with
       livejs = false;
       tracking = Some tracking_id;
     }
     | _ -> default
 end
 
-let make
-  ?(config=Config.default)
-  ?(chartjs=false)
-  ?(additional_css=[])
-  ?(back=None)
-  ?(meta=[])
-  ?(og_type="website")
-  ?(og_image=None)
-  ?(canonical_url=None)
-  title content =
+let make (config: Config.t) title content =
   let title = render_title title in
   () |> html @@ seq [
   head @@ seq @@ List.concat [
@@ -74,25 +87,25 @@ let make
       | Some id -> tracking_snippet id
       | None -> noop
       end;
-      if chartjs then seq [js_src momentjs_src; js_src chartjs_src] else noop;
-      css @@ Utils.load_file (Path.style "style.css") :: additional_css;
+      if config.chartjs then seq [js_src momentjs_src; js_src chartjs_src] else noop;
+      css @@ Utils.load_file (Path.style "style.css") :: config.additional_css;
       text "<meta charset=\"UTF-8\">";
       favicon (Path.image "favicon.png");
       text @@ sprintf "<meta property=\"og:title\" content=\"%s\" />" title;
-      begin match canonical_url with
+      begin match config.canonical_url with
       | Some url -> text @@ sprintf "<meta property=\"og:url\" content=\"%s\" />" url
       | None -> noop
       end;
-      text @@ sprintf "<meta property=\"og:type\" content=\"%s\" />" og_type;
+      text @@ sprintf "<meta property=\"og:type\" content=\"%s\" />" config.og_type;
       text @@ sprintf "<meta property=\"og:image\" content=\"%s\" />" @@
-        Option.value og_image ~default:avatar_url;
+        Option.value config.og_image ~default:avatar_url;
     ];
-    meta;
+    config.meta;
   ];
   body @@ seq [
     h1 @@ seq [
       text title;
-      match back with
+      match config.back with
       | Some url -> span ~cls:"subtitle" (* TODO "navigation"? *) @@ a url @@ text "back"
       | None -> noop;
     ];

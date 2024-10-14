@@ -15,11 +15,8 @@ let () =
 
   Path.set_content_root !content;
 
-  let { title; html } = Post.from_file !source in
-  let str = Page.make
-    ~config:(Page.Config.from_env ())
-    ~additional_css:[ Utils.load_file (Path.style "post.css") ]
-    (Title title) (div ~cls:(Some "post") @@ text html)
-  in match !output with
-    "-" -> print_string str
+  let post = Post.from_file !source in
+  let str = Post.make Page.make (Page.Config.from_env ()) post in
+  match !output with
+  | "-" -> print_string str
   | path -> Utils.write_file path str

@@ -3,11 +3,23 @@ open Html
 open Printf
 
 let base_url = Env.require "BASE_URL"
-
 let config = Page.Config.from_env ()
-let pagemaker ~path =
-  let canonical_url = Some (base_url ^ path) in
-  Page.make ~config:config ~canonical_url
+
+let pagemaker
+  ?(chartjs=false)
+  ?(additional_css=[])
+  ?(meta=[])
+  ?(og_type="website")
+  ?(og_image=None)
+  ~back ~path (config: Page.Config.t) = let config' = { config with
+    canonical_url = Some (base_url ^ path);
+    back = back;
+    additional_css = List.map (fun fn -> Utils.load_file @@ Path.style fn) additional_css;
+    chartjs = chartjs;
+    meta = meta;
+    og_type = og_type;
+    og_image = og_image;
+  } in Page.make config'
 
 let sounds fn =
   let open Sounds_t in
@@ -31,8 +43,8 @@ let sounds_page = let open Sounds_t in
     p ~cls:(Some "c") @@ a "/bor19" @@ text "Best of rootmos 2019 mix";
     sounds "sounds.json" >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
-  ] |> pagemaker (Subtitle "sounds") ~back:(Some "index.html")
-    ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
+  ] |> pagemaker config (Subtitle "sounds") ~back:(Some "index.html")
+    ~additional_css:[ "sounds.css" ]
 
 let sounds_jam_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [
@@ -44,8 +56,8 @@ let sounds_jam_page = let open Sounds_t in
       (Path.image "spät.jpg");
     sounds "sounds.sessions.json" >>| r |> table ~widths:(Some [80;5;5]);
     audio_player_script;
-  ] |> pagemaker (Subtitle "jam sessions") ~back:(Some "index.html")
-    ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
+  ] |> pagemaker config (Subtitle "jam sessions") ~back:(Some "index.html")
+    ~additional_css:[ "sounds.css" ]
 
 and sounds_snippet = let open Sounds_t in
   let r s = [
@@ -98,8 +110,8 @@ let practice_page =
     ];
     ss >>| r |> table ~widths:(Some [80;10;5;5]);
     audio_player_script;
-  ] |> pagemaker ~chartjs:true (Subtitle "practice") ~back:(Some "index.html")
-    ~additional_css:[ Utils.load_file (Path.style "practice.css") ]
+  ] |> pagemaker config ~chartjs:true (Subtitle "practice") ~back:(Some "index.html")
+    ~additional_css:[ "practice.css" ]
 
 let demo_page = let open Sounds_t in
   let r s = let id = String.sub s.sha1 0 7 in [
@@ -118,8 +130,8 @@ let demo_page = let open Sounds_t in
     ss >>| r |> table ~widths:(Some [80;10;5;5]);
     div ~cls:(Some "c") @@ text @@ sprintf "Length: %.2d:%.2d:%.2d" h m s;
     audio_player_script;
-  ] |> pagemaker (Subtitle "demo") ~back:(Some "index.html")
-    ~additional_css:[ Utils.load_file (Path.style "sounds.css") ]
+  ] |> pagemaker config (Subtitle "demo") ~back:(Some "index.html")
+    ~additional_css:[ "sounds.css" ]
 
 let activity = let open Github_t in
   let cs = Path.meta "github-activity.rootmos.commits.json" |>
@@ -132,7 +144,7 @@ let activity_page = let open Github_t in
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
     a c.repo_url @@ text c.repo;
     a c.url @@ text c.message;
-  ] in activity >>| r |> table |> pagemaker (Subtitle "activity") ~back:(Some "index.html")
+  ] in activity >>| r |> table |> pagemaker config (Subtitle "activity") ~back:(Some "index.html")
 and activity_snippet = let open Github_t in
   let r c = [
     div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
@@ -213,7 +225,7 @@ let md_snippet s =
 
 let index posts_snippet =
   let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
-  pagemaker Default ~additional_css:[ Utils.load_file (Path.style "twitch.css") ] @@ seq [
+  pagemaker config Default ~back:None ~additional_css:[ "twitch.css" ] @@ seq [
   div ~cls:(Some "intro") @@ seq [
     script @@ String.concat "" [
       "let avatar_revealed = 0;";
@@ -298,8 +310,8 @@ let bor19 = seq [
       ]
     ]
   ]
-] |> pagemaker (Title "Best of rootmos 2019") ~back:(Some "../index.html")
-    ~additional_css:[ Utils.load_file (Path.style "bor19.css") ]
+] |> pagemaker config (Title "Best of rootmos 2019") ~back:(Some "../index.html")
+    ~additional_css:[ "bor19.css" ]
 
 module ContentType = struct
   let is_video ct = Str.string_match (Str.regexp "^video/") ct 0
@@ -340,8 +352,8 @@ let gallery title ?(preamble=None) ?(only_subtitle=true) fn =
     (Option.map (div ~cls:(Some "preamble")) preamble |> Option.to_list)
     (List.map g es)
     |> seq |> div ~cls:(Some "gallery")
-    |> pagemaker title ~back:(Some "../index.html")
-      ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
+    |> pagemaker config title ~back:(Some "../index.html")
+      ~additional_css:[ "gallery.css" ] in
 
   let p (e: Gallery_j.entry) =
     let og_image =
@@ -365,7 +377,7 @@ let gallery title ?(preamble=None) ?(only_subtitle=true) fn =
         Some t -> p ~cls:(Some "description") @@ text t
       | None -> noop;
     ] |> div ~cls:(Some "entry") |> div ~cls:(Some "gallery")
-      |> pagemaker title ~back:(Some "index.html") ~meta:[ og_video ]
+      |> pagemaker config title ~back:(Some "index.html") ~meta:[ og_video ]
       ~og_image:og_image ~og_type:og_type
       ~additional_css:[ Utils.load_file (Path.style "gallery.css") ] in
 
@@ -395,7 +407,7 @@ let () =
   let posts = Path.posts () >>| (fun path ->
     let rel = Filename.chop_suffix (Filename.basename path) ".md" ^ ".html" in
     let post = Post.from_file path in
-    let page = pagemaker (Title post.title) ~back:(Some "index.html") (div ~cls:(Some "post") @@ text post.html) in
+    let page ~path = Post.make (fun config -> pagemaker config ~path ~back:(Some "index.html")) config post in
     write_page rel page;
     (rel, post)
   ) |> List.sort (fun (_, { Post.date = d }) (_, { date = d' }) -> String.compare d d') in
