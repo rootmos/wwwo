@@ -1,0 +1,93 @@
+.code { 
+    display: block;
+/*  padding-left: 15px; */
+    font-size: 110%; 
+    font-family: monospace;
+ } 
+
+table.infrule {
+  border: 0px;
+  margin-left: 50px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+td.infrule {
+    font-family: monospace;
+    text-align: center;
+/*    color: rgb(35%,35%,70%);  */
+    padding: 0px;
+    line-height: 100%;
+}
+
+tr.infrulemiddle hr {
+    margin: 1px 0 1px 0;
+}
+
+.infrulenamecol {
+    color: rgb(60%,60%,60%); 
+    font-size: 80%;
+    padding-left: 1em;
+    padding-bottom: 0.1em
+}
+
+/* Identifiers: <span class="id" title="...">) */
+
+.id { display: inline; }
+
+.id[title="constructor"] {
+    color: rgb(60%,0%,0%);
+}
+
+.id[title="var"] {
+    color: rgb(40%,0%,40%);
+}
+
+.id[title="variable"] {
+    color: rgb(40%,0%,40%);
+}
+
+.id[title="definition"] {
+    color: rgb(0%,40%,0%);
+}
+
+.id[title="abbreviation"] {
+    color: rgb(0%,40%,0%);
+}
+
+.id[title="lemma"] {
+    color: rgb(0%,40%,0%);
+}
+
+.id[title="instance"] {
+    color: rgb(0%,40%,0%);
+}
+
+.id[title="projection"] {
+    color: rgb(0%,40%,0%);
+}
+
+.id[title="method"] {
+    color: rgb(0%,40%,0%);
+}
+
+.id[title="inductive"] {
+    color: rgb(0%,0%,80%);
+}
+
+.id[title="record"] {
+    color: rgb(0%,0%,80%);
+}
+
+.id[title="class"] {
+    color: rgb(0%,0%,80%);
+}
+
+.id[title="keyword"] {
+ color : #cf1d1d;
+/*     color: black; */
+}
+
+.inlinecode .id {
+    color: rgb(0%,0%,0%);
+}
