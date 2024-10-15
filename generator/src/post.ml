@@ -6,6 +6,7 @@ type t = {
     date: string;
     html: string;
     additional_css: string list;
+    listed: bool;
 }
 
 let from_file path =
@@ -25,21 +26,30 @@ let from_file path =
   | `String s -> s
   | _ -> failwith (p ^ " unexpected non-string") in
 
+  let expect_bool p = function
+  | `Bool b -> b
+  | _ -> failwith (p ^ " unexpected non-boolean") in
+
   let prop p = match List.find_opt (fun (k, _) -> k = p) props with
     Some (_, v) -> Some v
   | None -> None in
 
   let prop_string p = Option.map (expect_string p) @@ prop p in
+  let prop_bool p = Option.map (expect_bool p) @@ prop p in
 
   let prop_list p = match List.find_opt (fun (k, _) -> k = p) props with
     Some (_, `A vs) -> Some (List.filter_map value_to_string vs)
   | _ -> None in
 
+  let embed_images = Option.value ~default:true @@ prop_bool "embed_images" in
+
   let md = Omd.of_string bs in
   let md = md |> Omd_representation.visit @@ function
     | Omd_representation.Img (alt, src, _) ->
-        let src = Path.image src in
-        Omd_representation.Raw (img ~alt:(Some alt) src ()) :: [] |> Option.some
+        let src = if embed_images then Path.image src else src in
+        let lazy_loading = not embed_images in
+        let i = img ~alt:(Some alt) ~embed:embed_images ~lazy_loading src () in
+        Omd_representation.Raw i :: [] |> Option.some
     | Omd_representation.Text "{{< toc >}}" -> Omd.toc md |> Option.some
     | _ -> None in
 
@@ -52,6 +62,7 @@ let from_file path =
     date = Option.value ~default:today @@ prop_string "date";
     title = Option.get @@ prop_string "title";
     additional_css = Option.value ~default:[] @@ prop_list "additional_css";
+    listed = Option.value ~default:true @@ prop_bool "listed";
   }
 
 let make pagemaker (config: Page.Config.t) post =

@@ -5,6 +5,10 @@ open Printf
 let base_url = Env.require "BASE_URL"
 let config = Page.Config.from_env ()
 
+let local = match Env.opt "ENV" with
+| Some "dev" -> true
+| _ -> false
+
 let pagemaker
   ?(chartjs=false)
   ?(additional_css=[])
@@ -335,7 +339,7 @@ let gallery title ?(preamble=None) ?(only_subtitle=true) fn =
       | None -> None in
     if ContentType.is_video e.content_type then video ~id:(e.id) ~poster e.url
     else if ContentType.is_image e.content_type then
-      img ~id:e.id ~embedd:false e.url
+      img ~id:e.id ~embed:false e.url
     else failwith "content type not supported" in
 
   let g (e: Gallery_j.entry) = div ~cls:(Some "entry") @@ seq [
@@ -411,8 +415,8 @@ let () =
     let post = Post.from_file path in
     let page ~path = Post.make (fun config -> pagemaker config ~path ~back:(Some "index.html")) config post in
     write_page rel page;
-    (rel, post)
-  ) |> List.sort (fun (_, { Post.date = d }) (_, { date = d' }) -> String.compare d d') in
+    if post.listed || local then (rel, post)::[] else []
+  ) |> List.flatten |> List.sort (fun (_, { Post.date = d }) (_, { date = d' }) -> String.compare d' d) in
 
   let posts_snippet = seq [
     h2 @@ text "Posts";

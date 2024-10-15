@@ -81,15 +81,16 @@ let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>"
 let button s = fun k x ->
   sprintf "<a href=\"#\" onclick=\"%s\">%s</a>" s (k x)
 
-let img ?(id="") ?(embedd=true) ?(cls=None) ?(alt=None) ?(onclick=None) fn = fun _ ->
+let img ?(id="") ?(embed=true) ?(lazy_loading=false) ?(cls=None) ?(alt=None) ?(onclick=None) fn = fun _ ->
   let open Option in
   let i = if id <> "" then sprintf " id=\"%s\"" id else "" in
+  let l = if lazy_loading then " loading=\"lazy\"" else "" in
   let c = map (sprintf " class=\"%s\"") cls |> value ~default:"" in
   let a = map (fun a -> sprintf " title=\"%s\" alt=\"%s\"" a a) alt |> value ~default:"" in
   let oc = map (sprintf " onclick=\"%s\"") onclick |> value ~default:"" in
-  if embedd then sprintf "<img src=\"data:%s;base64,%s\" %s%s%s/>"
+  if embed then sprintf "<img src=\"data:%s;base64,%s\" %s%s%s/>"
     (Magic_mime.lookup fn) (Base64.encode_exn @@ Utils.load_file fn) a c oc
-  else sprintf "<img%s src=\"%s\" %s%s%s/>" i fn a c oc
+  else sprintf "<img%s%s src=\"%s\" %s%s%s/>" i l fn a c oc
 
 let img_b64 ?(cls=None) ?(alt=None) mt b64 = fun _ ->
   let c = let open Option in
