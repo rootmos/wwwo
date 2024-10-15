@@ -18,19 +18,22 @@ And the only guarantee we get regarding the alignment is that its a power of 2.
 &nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">x</span> <span class="id" title="var">mod</span> <span class="id" title="var">N</span> <span class="id" title="keyword">with</span> 0 =&gt; 0 | <span class="id" title="var">r</span> =&gt; <span class="id" title="var">N</span> - <span class="id" title="var">r</span> <span class="id" title="keyword">end</span>.<br/>
 
 <br/>
-<span class="id" title="keyword">Definition</span> <span class="id" title="var">pad_minimizer</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> <span class="id" title="var">c</span> :=<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">b</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> =? 0 <span class="id" title="keyword">then</span> 0 <span class="id" title="keyword">else</span><br/>
-&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">b</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> <span class="id" title="var">mod</span> <span class="id" title="var">a</span> =? 0<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">c</span> / <span class="id" title="var">a</span> - <span class="id" title="var">b</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> / <span class="id" title="var">a</span><br/>
-&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">c</span> / <span class="id" title="var">a</span> - 1 - <span class="id" title="var">b</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> / <span class="id" title="var">a</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <span class="id" title="var">pad_min</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> <span class="id" title="var">c</span>: <span class="id" title="var">c</span> <span class="id" title="var">mod</span> <span class="id" title="var">a</span> = 0 -&gt;<br/>
-&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">i</span> := <span class="id" title="var">pad_minimizer</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> <span class="id" title="var">c</span> <span class="id" title="tactic">in</span><br/>
-&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">j</span>, <span class="id" title="var">pad</span> (<span class="id" title="var">a</span> * <span class="id" title="var">i</span> + <span class="id" title="var">b</span>) <span class="id" title="var">c</span> &lt;= <span class="id" title="var">pad</span> (<span class="id" title="var">a</span> * <span class="id" title="var">j</span> + <span class="id" title="var">b</span>) <span class="id" title="var">c</span>.<br/>
-
-<br/>
 <span class="id" title="keyword">Definition</span> <span class="id" title="var">aligned</span> <span class="id" title="var">x</span> <span class="id" title="var">N</span> := <span class="id" title="var">N</span> &lt;&gt; 0 /\ <span class="id" title="var">pad</span> <span class="id" title="var">x</span> <span class="id" title="var">N</span> = 0.<br/>
+
+<br/>
+<span class="id" title="keyword">Proposition</span> <span class="id" title="var">aligned_alt_def</span> {<span class="id" title="var">x</span> <span class="id" title="var">N</span>}: <span class="id" title="var">aligned</span> <span class="id" title="var">x</span> <span class="id" title="var">N</span> &lt;-&gt; <span class="id" title="var">N</span> &lt;&gt; 0 /\ <span class="id" title="var">x</span> <span class="id" title="var">mod</span> <span class="id" title="var">N</span> = 0.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">pad_minimizer</span> <span class="id" title="var">A</span> <span class="id" title="var">n</span> <span class="id" title="var">P</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">P</span> =? 0 <span class="id" title="keyword">then</span> 0 <span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">P</span>) <span class="id" title="var">mod</span> <span class="id" title="var">A</span> =? 0<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">P</span> / <span class="id" title="var">A</span> - (<span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">P</span>) / <span class="id" title="var">A</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">P</span> / <span class="id" title="var">A</span> - 1 - (<span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">P</span>) / <span class="id" title="var">A</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Proposition</span> <span class="id" title="var">pad_min</span> <span class="id" title="var">A</span> <span class="id" title="var">n</span> <span class="id" title="var">P</span>: <span class="id" title="var">aligned</span> <span class="id" title="var">P</span> <span class="id" title="var">A</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">i</span> := <span class="id" title="var">pad_minimizer</span> <span class="id" title="var">A</span> <span class="id" title="var">n</span> <span class="id" title="var">P</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">j</span>, <span class="id" title="var">pad</span> (<span class="id" title="var">A</span> * <span class="id" title="var">i</span> + <span class="id" title="var">n</span>) <span class="id" title="var">P</span> &lt;= <span class="id" title="var">pad</span> (<span class="id" title="var">A</span> * <span class="id" title="var">j</span> + <span class="id" title="var">n</span>) <span class="id" title="var">P</span>.<br/>
 
 <br/>
 <span class="id" title="keyword">Axiom</span> <span class="id" title="var">accessible</span> : <span class="id" title="var">nat</span> -&gt; <span class="id" title="keyword">Prop</span>.<br/>
@@ -80,5 +83,4 @@ And the only guarantee we get regarding the alignment is that its a power of 2.
 <br/>
 <span class="id" title="keyword">Theorem</span> <span class="id" title="var">optimal_allocator</span> (<span class="id" title="var">M</span>: <span class="id" title="var">mmap</span> 4096):<br/>
 &nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">a</span>, <span class="id" title="var">OptimalAllocation</span> <span class="id" title="var">n</span> (2^<span class="id" title="var">a</span>) 4096.<br/>
-
 </p>
