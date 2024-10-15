@@ -5,3 +5,7 @@
 .post td {
     padding: 3px 15px;
 }
+
+.post img {
+    max-width: 80%;
+}
