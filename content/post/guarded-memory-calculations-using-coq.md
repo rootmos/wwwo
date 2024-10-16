@@ -3,8 +3,32 @@ title: "Guarded memory calculations using Coq"
 additional_css: [ "coqdoc.css" ]
 ---
 
+The aim of this text is to entice you to consider Coq (or other proof assistants) when dealing with integer arithmetics.
+The text is not aimed to provide a proof of a sophisticated problem, but it is a proof of something a developer almost certainly would encounter in the real world.
+
+Guard pages are intended to help catch unintentional or malicious buffer overflows.
+
+This is accomplished by [mmap](https://man.archlinux.org/man/mmap.2)
+and [mprotect](https://man.archlinux.org/man/mprotect.2).
+
+The resulting code I came up with revolved the following definition,
+which represents the number of alignments (A) needed to compute the offset
+such that the allocation's data region is as close to the upper guard page.
+<p class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">pad_minimizer</span> <span class="id" title="var">A</span> <span class="id" title="var">n</span> <span class="id" title="var">P</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">P</span> =? 0 <span class="id" title="keyword">then</span> 0 <span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">P</span>) <span class="id" title="var">mod</span> <span class="id" title="var">A</span> =? 0<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">P</span> / <span class="id" title="var">A</span> - (<span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">P</span>) / <span class="id" title="var">A</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">P</span> / <span class="id" title="var">A</span> - 1 - (<span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">P</span>) / <span class="id" title="var">A</span>.<br/>
+</p>
+Imagine you stumble upon this experession, how sure are you of its correctness?
+
+# Sketch
+
 ## The problem
 Wanted to implement guarded memory allocations (a la [libsodium](https://doc.libsodium.org/memory_management#guarded-heap-allocations)) in rust.
+
+Two inaccessible memory pages (any access yields a page-fault) surrounding an accessible range snugged up against the upper guardpage.
 
 ![guarded memory allocations](guarded-memory-sketch.jpg)
 
