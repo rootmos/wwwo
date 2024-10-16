@@ -11,6 +11,9 @@ Guard pages are intended to help catch unintentional or malicious buffer overflo
 This is accomplished by [mmap](https://man.archlinux.org/man/mmap.2)
 and [mprotect](https://man.archlinux.org/man/mprotect.2).
 
+This memory allocation scheme might seem exceedingly wasteful.
+But I think (meaning I trust but haven't verified) the guard pages will not take up any physical memory, only virtual memory, since the kernel should treat them as copy-on-write and by design we will not write to them.
+
 The resulting code I came up with revolved the following definition,
 which represents the number of alignments (A) needed to compute the offset
 such that the allocation's data region is as close to the upper guard page.
