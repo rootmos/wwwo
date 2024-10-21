@@ -1,9 +1,11 @@
+import argparse
 import itertools
 import json
-import argparse
 import os
+import re
 
 from github import Github
+import requests
 
 from .common import fetch_secret, output
 
@@ -33,8 +35,58 @@ def from_github(u, N):
     return cs
 
 
-def from_sourcehut(user):
-    token = fetch_secret(os.environ["SOURCEHUT_TOKEN_ARN"])
+def from_sourcehut():
+    token = os.environ.get("SOURCEHUT_TOKEN")
+    if token is None:
+        token = fetch_secret(os.environ["SOURCEHUT_TOKEN_ARN"])
+
+    def graphql(query):
+        query = re.sub(r"\s+", " ", query)
+        h = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        }
+
+        body = { "query": query }
+        rsp = requests.post("https://git.sr.ht/query", headers=h, json=body)
+        rsp.raise_for_status()
+        return rsp.json()
+
+    def accessible_repositories():
+        cursor = "null"
+        while True:
+            rsp = graphql("""
+                {
+                    repositories(cursor: %s) {
+                        cursor
+                        results {
+                            name, description, visibility
+                            owner {
+                              canonicalName
+                            }
+                        }
+                    }
+                }""" % cursor
+            )
+            rs = rsp["data"]["repositories"]
+
+            for r in rs["results"]:
+                yield {
+                    "name": r["name"],
+                    "description": r["description"],
+                    "visibility": r["visibility"],
+                    "url": "https://git.sr.ht/" + r["owner"]["canonicalName"] + "/" + r["name"],
+                }
+
+            cursor = rs.get("cursor")
+            if not cursor:
+                break
+            else:
+                cursor = f"\"{cursor}\""
+
+    for repo in accessible_repositories():
+        print(repo)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch recent GitHub activity")
@@ -44,7 +96,7 @@ def parse_args():
     parser.add_argument("--commits", metavar='N', dest="commits", type=int, default=10)
 
     parser.add_argument("--github")
-    parser.add_argument("--sourcehut")
+    parser.add_argument("--sourcehut", action="store_true")
 
     return parser.parse_args()
 
@@ -59,7 +111,7 @@ def main():
         commits += from_github(user, args.commits)
 
     if args.sourcehut:
-        pass
+        from_sourcehut()
 
     with output(args.output) as f:
         f.write(json.dumps(commits))
