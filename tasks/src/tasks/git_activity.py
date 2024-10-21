@@ -7,7 +7,7 @@ from github import Github
 
 from .common import fetch_secret, output
 
-def commits(u, N):
+def from_github(u, N):
     cs = []
     for e in u.get_public_events():
         if len(cs) > N: return cs
@@ -32,21 +32,34 @@ def commits(u, N):
                     })
     return cs
 
+
+def from_sourcehut(user):
+    token = fetch_secret(os.environ["SOURCEHUT_TOKEN_ARN"])
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch recent GitHub activity")
 
     parser.add_argument("-o", "--output")
 
     parser.add_argument("--commits", metavar='N', dest="commits", type=int, default=10)
-    parser.add_argument("user")
+
+    parser.add_argument("--github")
+    parser.add_argument("--sourcehut")
 
     return parser.parse_args()
 
 def main():
     args = parse_args()
 
-    g = Github(fetch_secret(os.environ["GITHUB_TOKEN_ARN"]))
+    commits = []
 
-    u = g.get_user(args.user)
+    if args.github:
+        g = Github(fetch_secret(os.environ["GITHUB_TOKEN_ARN"]))
+        user = g.get_user(args.github)
+        commits += from_github(user, args.commits)
+
+    if args.sourcehut:
+        pass
+
     with output(args.output) as f:
-        f.write(json.dumps(commits(u, args.commits)))
+        f.write(json.dumps(commits))

@@ -19,7 +19,6 @@ where = ["src"]
 namespaces = false
 
 [project.scripts]
-wwwo-github = "tasks.github:main"
 wwwo-gallery = "tasks.gallery:main"
 wwwo-project = "tasks.project:main"
 wwwo-projects = "tasks.projects:main"
@@ -28,3 +27,4 @@ wwwo-twitch = "tasks.twitch:main"
 wwwo-upload = "tasks.upload:main"
 wwwo-purge = "tasks.purge:main"
 wwwo-resume = "tasks.resume:main"
+wwwo-git-activity = "tasks.git_activity:main"
