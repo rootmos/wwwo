@@ -1,0 +1,93 @@
+import os
+
+import requests
+
+from .common import fetch_secret
+
+def find_cursor(x):
+    def go(x):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                if k == "cursor":
+                    yield v
+                else:
+                    yield from go(v)
+        elif isinstance(x, list):
+            for v in x:
+                yield from go(v)
+
+    cs = list(go(x))
+    if len(cs) == 0:
+        return None
+    elif len(cs) == 1:
+        return cs[0]
+    else:
+        raise RuntimeError("multiple cursors found", x)
+
+class API:
+    def __init__(self):
+        token = os.environ.get("SOURCEHUT_TOKEN")
+        if token is None:
+            arn = os.environ["SOURCEHUT_TOKEN_ARN"]
+            token = fetch_secret(arn)
+
+        self.session = requests.Session()
+
+        self.session.headers.update({
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        })
+
+    def graphql(self, query):
+        # query = re.sub(r"\s+", " ", query)
+        rsp = self.session.post("https://git.sr.ht/query", json={ "query": query })
+        if rsp.status_code == 422:
+            j = rsp.json()
+            if "errors" in j:
+                raise RuntimeError("GraphQL errors", j["errors"])
+        rsp.raise_for_status()
+        return rsp.json()["data"]
+
+    def yield_from_cursor(self, query, f, metavar="$cursor"):
+        cursor = "null"
+        while cursor:
+            q = query.replace(metavar, cursor)
+            data = self.graphql(q)
+            yield from f(data)
+            cursor = find_cursor(data)
+            if cursor:
+                cursor = '"' + cursor + '"'
+
+    def repositories(self):
+        query = """{
+            repositories(cursor: $cursor) {
+                cursor
+                results {
+                    name, description, visibility
+                    owner {
+                        canonicalName
+                        ... on User {
+                            username
+                        }
+                    }
+                }
+            }
+        }"""
+
+        def f(data):
+            for raw in data["repositories"]["results"]:
+                yield Repository(self, raw)
+
+        yield from self.yield_from_cursor(query, f)
+
+class Repository:
+    def __init__(self, api, raw):
+        self.name = raw["name"]
+        self.description = raw["description"]
+        self.visibility = raw["visibility"]
+        self.owner = raw["owner"]["username"]
+        self.url = "https://git.sr.ht/" + raw["owner"]["canonicalName"] + "/" + raw["name"]
+
+    def __str__(self):
+        return f"{self.owner}/{self.name}"
