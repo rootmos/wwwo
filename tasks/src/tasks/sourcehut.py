@@ -1,4 +1,5 @@
 import os
+import datetime
 
 import requests
 
@@ -160,6 +161,8 @@ class Ref:
                         cursor
                         results {
                             id, message
+                            author { name, email, time }
+                            committer { name, email, time }
                         }
                     }
                 }
@@ -180,6 +183,8 @@ class Commit:
 
         self.id = raw["id"]
         self.message = raw["message"]
+        self.author = Signature(raw["author"])
+        self.committer = Signature(raw["committer"])
 
         lines = self.message.splitlines()
         if lines:
@@ -189,3 +194,9 @@ class Commit:
 
     def __str__(self):
         return self.id
+
+class Signature:
+    def __init__(self, raw):
+        self.name = raw["name"]
+        self.email = raw["email"]
+        self.time = datetime.datetime.fromisoformat(raw["time"])
