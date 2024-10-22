@@ -69,7 +69,7 @@ class API:
                     owner {
                         canonicalName
                         ... on User {
-                            username
+                            username, email
                         }
                     }
                 }
@@ -91,7 +91,7 @@ class API:
                     owner {
                         canonicalName
                         ... on User {
-                            username
+                            username, email
                         }
                     }
                 }
@@ -103,6 +103,34 @@ class API:
         if raw is not None:
             return Repository(self, raw)
 
+    def me(self):
+        query = """{
+            me {
+                username
+                canonicalName
+                email
+            }
+        }"""
+
+        data = self.graphql(query)
+        raw = data["me"]
+        if raw is not None:
+            return User(self, raw)
+
+    def user(self, username):
+        query = """{
+            user(username: "%s") {
+                username
+                canonicalName
+                email
+            }
+        }""" % username
+
+        data = self.graphql(query)
+        raw = data["user"]
+        if raw is not None:
+            return User(self, raw)
+
 class Repository:
     def __init__(self, api, raw):
         self.api = api
@@ -110,8 +138,9 @@ class Repository:
         self.name = raw["name"]
         self.description = raw["description"]
         self.visibility = raw["visibility"]
-        self.owner = raw["owner"]["username"]
-        self.url = "https://git.sr.ht/" + raw["owner"]["canonicalName"] + "/" + raw["name"]
+        self.owner = User(api, raw["owner"])
+
+        self.url = "https://git.sr.ht/" + self.owner.canonicalName + "/" + self.name
 
     def __str__(self):
         return f"{self.owner}/{self.name}"
@@ -128,7 +157,7 @@ class Repository:
                     }
                 }
             }
-        }""" % (self.owner, self.name)
+        }""" % (self.owner.username, self.name)
 
         def f(data):
             for raw in data["user"]["repository"]["references"]["results"]:
@@ -153,7 +182,7 @@ class Repository:
                     }
                 }
             }
-        }""" % (self.owner, self.name, ", ".join([f'"{i}"' for i in ids]))
+        }""" % (self.owner.username, self.name, ", ".join([f'"{i}"' for i in ids]))
 
         data = self.api.graphql(query)
         cs = []
@@ -189,7 +218,7 @@ class Ref:
                     }
                 }
             }
-        }""" % (self.repo.owner, self.repo.name, self.target)
+        }""" % (self.repo.owner.username, self.repo.name, self.target)
 
         def f(data):
             for raw in data["user"]["repository"]["log"]["results"]:
@@ -221,3 +250,12 @@ class Signature:
         self.name = raw["name"]
         self.email = raw["email"]
         self.time = datetime.datetime.fromisoformat(raw["time"])
+
+class User:
+    def __init__(self, api, raw):
+        self.username = raw["username"]
+        self.canonicalName = raw["canonicalName"]
+        self.email = raw["email"]
+
+    def __str__(self):
+        return self.username

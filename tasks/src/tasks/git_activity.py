@@ -36,12 +36,14 @@ def from_github(u, N):
 def from_sourcehut():
     api = sourcehut.API()
 
+    print(api.me().email)
+
     # for repo in api.repositories():
         # print(repo)
 
     repo = api.repository("rootmos", "scripts")
     for c in itertools.islice(repo.refs()["HEAD"].log(), 5):
-        print(f"{c.id[:7]} {c.committer.time} {c.title}")
+        print(f"{c.id[:7]} {c.committer.time} {c.committer.email} {c.title}")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch recent GitHub activity")
