@@ -139,6 +139,28 @@ class Repository:
             refs[ref.name] = ref
         return refs
 
+    def commit(self, *ids):
+        query = """{
+            user(username: "%s") {
+                repository(name: "%s") {
+                    objects(ids: [%s]) {
+                        id
+                        ... on Commit {
+                            message
+                            author { name, email, time }
+                            committer { name, email, time }
+                        }
+                    }
+                }
+            }
+        }""" % (self.owner, self.name, ", ".join([f'"{i}"' for i in ids]))
+
+        data = self.api.graphql(query)
+        cs = []
+        for raw in data["user"]["repository"]["objects"]:
+            cs.append(Commit(self, raw))
+        return cs[0] if len(ids) == 1 else cs
+
 class Ref:
     def __init__(self, repo, raw):
         self.api = repo.api
@@ -171,15 +193,14 @@ class Ref:
 
         def f(data):
             for raw in data["user"]["repository"]["log"]["results"]:
-                yield Commit(self, raw)
+                yield Commit(self.repo, raw)
 
         yield from self.api.yield_from_cursor(query, f)
 
 class Commit:
-    def __init__(self, ref, raw):
-        self.api = ref.api
-        self.repo = ref.repo
-        self.ref = ref
+    def __init__(self, repo, raw):
+        self.api = repo.api
+        self.repo = repo
 
         self.id = raw["id"]
         self.message = raw["message"]
