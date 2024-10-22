@@ -81,6 +81,27 @@ class API:
 
         yield from self.yield_from_cursor(query, f)
 
+    def repository(self, username, name):
+        query = """{
+            user(username: "%s") {
+                repository(name: "%s") {
+                    name, description, visibility
+
+                    owner {
+                        canonicalName
+                        ... on User {
+                            username
+                        }
+                    }
+                }
+            }
+        }""" % (username, name)
+
+        data = self.graphql(query)
+        raw = data["user"]["repository"]
+        if raw is not None:
+            return Repository(self, raw)
+
 class Repository:
     def __init__(self, api, raw):
         self.name = raw["name"]
