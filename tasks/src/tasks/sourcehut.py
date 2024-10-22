@@ -104,6 +104,8 @@ class API:
 
 class Repository:
     def __init__(self, api, raw):
+        self.api = api
+
         self.name = raw["name"]
         self.description = raw["description"]
         self.visibility = raw["visibility"]
@@ -112,3 +114,78 @@ class Repository:
 
     def __str__(self):
         return f"{self.owner}/{self.name}"
+
+    def refs(self):
+        query = """{
+            user(username: "%s") {
+                repository(name: "%s") {
+                    references(cursor: $cursor) {
+                        cursor
+                        results {
+                            name, target
+                        }
+                    }
+                }
+            }
+        }""" % (self.owner, self.name)
+
+        def f(data):
+            for raw in data["user"]["repository"]["references"]["results"]:
+                yield Ref(self, raw)
+
+        refs = {}
+        for ref in self.api.yield_from_cursor(query, f):
+            refs[ref.name] = ref
+        return refs
+
+class Ref:
+    def __init__(self, repo, raw):
+        self.api = repo.api
+        self.repo = repo
+
+        self.name = raw["name"]
+        self.target = raw["target"]
+
+    def __str__(self):
+        return f"{self.name} ({self.target})"
+
+    def __repr__(self):
+        return f"{self.name} ({self.target})"
+
+    def log(self):
+        query = """{
+            user(username: "%s") {
+                repository(name: "%s") {
+                    log(cursor: $cursor, from: "%s") {
+                        cursor
+                        results {
+                            id, message
+                        }
+                    }
+                }
+            }
+        }""" % (self.repo.owner, self.repo.name, self.target)
+
+        def f(data):
+            for raw in data["user"]["repository"]["log"]["results"]:
+                yield Commit(self, raw)
+
+        yield from self.api.yield_from_cursor(query, f)
+
+class Commit:
+    def __init__(self, ref, raw):
+        self.api = ref.api
+        self.repo = ref.repo
+        self.ref = ref
+
+        self.id = raw["id"]
+        self.message = raw["message"]
+
+        lines = self.message.splitlines()
+        if lines:
+            self.title = lines[0]
+        else:
+            self.title = None
+
+    def __str__(self):
+        return self.id

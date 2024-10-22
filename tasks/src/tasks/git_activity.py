@@ -38,8 +38,10 @@ def from_sourcehut():
 
     # for repo in api.repositories():
         # print(repo)
+
     repo = api.repository("rootmos", "scripts")
-    print(repo)
+    for c in itertools.islice(repo.refs()["HEAD"].log(), 5):
+        print(f"{c.id[:7]} {c.title}")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch recent GitHub activity")
