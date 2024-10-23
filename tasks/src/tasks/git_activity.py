@@ -4,35 +4,10 @@ import datetime
 import json
 import os
 
-from github import Github
+import github
 
 from .common import fetch_secret, output
 from . import sourcehut
-
-def from_github(u, N):
-    cs = []
-    for e in u.get_public_events():
-        if len(cs) > N: return cs
-
-        d = {
-            "event_id": e.id,
-            "date": e.created_at.isoformat(),
-            "repo":  e.repo.name,
-            "repo_url":  e.repo.html_url,
-        }
-
-        if e.type == "PushEvent":
-            p = e.payload
-            for c in e.payload["commits"]:
-                c = e.repo.get_commit(c["sha"])
-                if c.author == u:
-                    cs.append({ **d,
-                        "type": "commit",
-                        "sha": c.sha,
-                        "url": c.html_url,
-                        "message": c.commit.message,
-                    })
-    return cs
 
 def github_token_from_env():
     token = os.environ.get("GITHUB_TOKEN")
@@ -41,7 +16,7 @@ def github_token_from_env():
         token = fetch_secret(arn)
     return token
 
-def walk_github_repo(author_name, after):
+def walk_github_repo(repo, author_name, after):
     visited = set()
     found = set()
     unvisited = collections.deque()
@@ -69,14 +44,29 @@ def walk_github_repo(author_name, after):
 
     return found
 
+def render_github_commit(r, c):
+    return {
+        "hash": c.sha,
+        "title": c.commit.message.splitlines()[0],
+        "url": c.html_url,
+        "date": c.commit.author.date.isoformat(timespec="seconds"),
+        "repo": {
+            "name": r.name,
+            "url": r.html_url,
+            "public": r.visibility == "public",
+        }
+    }
+
 def fetch_from_github(author_name, username, after):
-    api = github.Github(login_or_token=token_from_env())
+    api = github.Github(login_or_token=github_token_from_env())
 
-    commits = set()
+    commits = collections.deque()
     for repo in api.get_user(username).get_repos():
-        commits |= walk_github_repo(repo)
+        print(f"processing GitHub repo: {repo.name}")
+        for commit in walk_github_repo(repo, author_name, after):
+            commits.append(render_github_commit(repo, commit))
 
-    return commits
+    return list(commits)
 
 def render_sourcehut_commit(c):
     return {
@@ -96,6 +86,7 @@ def fetch_from_sourcehut(author_name, after):
 
     commits = set()
     for repo in api.repositories():
+        print(f"processing sourcehut repo: {repo.name}")
         refs = repo.refs()
         for _, ref in refs.items():
             if ref.name == "HEAD" and ref.target in refs:
@@ -109,7 +100,7 @@ def fetch_from_sourcehut(author_name, after):
 
                 commits.add(c)
 
-    return commits
+    return [ render_sourcehut_commit(c) for c in cs ]
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch recent GitHub activity")
@@ -135,12 +126,10 @@ def main():
     commits = []
 
     if args.github_username:
-        cs = fetch_from_github(author_name=args.author_name, username=args.github_username, after=after)
-        commits += [ render_github_commit(c) for c in cs ]
+        commits += fetch_from_github(author_name=args.author_name, username=args.github_username, after=after)
 
     if args.sourcehut:
-        cs = fetch_from_sourcehut(author_name=args.author_name, after=after)
-        commits += [ render_sourcehut_commit(c) for c in cs ]
+        commits += fetch_from_sourcehut(author_name=args.author_name, after=after)
 
     with output(args.output) as f:
         f.write(json.dumps(commits))
