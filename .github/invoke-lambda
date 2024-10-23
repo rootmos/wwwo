@@ -16,16 +16,10 @@ REGION=$(cut -d':' -f 4 <<< "$LAMBDA_ARN")
 
 ARGS=("--function-name="$LAMBDA_ARN"")
 ARGS+=("--region=$REGION")
-ARGS+=("--invocation-type=RequestResponse")
-ARGS+=("--log-type=Tail")
+ARGS+=("--invocation-type=Event")
 
 if [ -n "${AWS_PROFILE-}" ]; then
     ARGS+=("--profile=$AWS_PROFILE")
-fi
-
-if [ -n "${LAMBDA_TIMEOUT-}" ]; then
-    ARGS+=("--cli-read-timeout=$LAMBDA_TIMEOUT")
-    ARGS+=("--cli-connect-timeout=$LAMBDA_TIMEOUT")
 fi
 
 TMP=$(mktemp -d)
@@ -69,16 +63,12 @@ EOF
 ARGS+=("--payload=file://$PAYLOAD")
 
 echo 1>&2 "invoking lambda: $LAMBDA_ARN ($(<"$TMP/trigger.id"))"
-if [ -n "${LAMBDA_TIMEOUT-}" ]; then
-    echo 1>&2 "  with timeout: ${LAMBDA_TIMEOUT}s"
-fi
-env AWS_MAX_ATTEMPTS=1 \
-    aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
+aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
 
 EXIT=0
 
 STATUS_CODE=$(jq -r .StatusCode "$TMP/result.json")
-if [ "$STATUS_CODE" != 200 ]; then
+if [ "$STATUS_CODE" != 202 ]; then
     echo 1>&2 "invocation status code: $STATUS_CODE != 200"
     jq -r . "$TMP/result.json" | sed 's/^/  /' 1>&2
     EXIT=1
@@ -90,8 +80,5 @@ if [ "$FUNCTION_ERROR" != "null" ]; then
     jq -r . "$TMP/result.json" | sed 's/^/  /' 1>&2
     EXIT=2
 fi
-
-echo 1>&2 "log:"
-jq -r .LogResult "$TMP/result.json" | base64 -d | sed 's/^/  /' 1>&2
 
 exit "$EXIT"
