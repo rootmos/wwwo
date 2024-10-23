@@ -25,6 +25,7 @@ fi
 
 if [ -n "${LAMBDA_TIMEOUT-}" ]; then
     ARGS+=("--cli-read-timeout=$LAMBDA_TIMEOUT")
+    ARGS+=("--cli-connect-timeout=$LAMBDA_TIMEOUT")
 fi
 
 TMP=$(mktemp -d)
@@ -68,7 +69,11 @@ EOF
 ARGS+=("--payload=file://$PAYLOAD")
 
 echo 1>&2 "invoking lambda: $LAMBDA_ARN ($(<"$TMP/trigger.id"))"
-aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
+if [ -n "${LAMBDA_TIMEOUT-}" ]; then
+    echo 1>&2 "  with timeout: ${LAMBDA_TIMEOUT}s"
+fi
+env AWS_MAX_ATTEMPTS=1 \
+    aws lambda invoke "${ARGS[@]}" "$TMP/out.json" > "$TMP/result.json"
 
 EXIT=0
 
