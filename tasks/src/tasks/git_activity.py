@@ -1,5 +1,5 @@
 import argparse
-import itertools
+import datetime
 import json
 import os
 
@@ -34,16 +34,23 @@ def from_github(u, N):
     return cs
 
 def from_sourcehut():
-    api = sourcehut.API()
+    api = sourcehut.API(token=sourcehut.token_from_env())
 
-    print(api.me().email)
+    after = datetime.datetime.now().astimezone() - datetime.timedelta(days=1)
 
-    # for repo in api.repositories():
-        # print(repo)
+    commits = set()
+    for repo in api.repositories():
+        print(f"handling repo: {repo}")
+        for _, ref in repo.refs().items():
+            print(f"handling ref: {ref.name}")
+            for c in ref.log():
+                if after and c.author.time < after:
+                    break
+            # TODO check c.author and continue on non-me:s
+                commits.add(c)
 
-    repo = api.repository("rootmos", "scripts")
-    for c in itertools.islice(repo.refs()["HEAD"].log(), 5):
-        print(f"{c.id[:7]} {c.committer.time} {c.committer.email} {c.title}")
+    for c in commits:
+        print(f"{c.id[:7]} {c.author.time} {c.title}")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch recent GitHub activity")

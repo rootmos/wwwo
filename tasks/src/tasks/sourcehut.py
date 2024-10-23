@@ -25,15 +25,18 @@ def find_cursor(x):
     else:
         raise RuntimeError("multiple cursors found", x)
 
+def token_from_env():
+    token = os.environ.get("SOURCEHUT_TOKEN")
+    if token is None:
+        arn = os.environ["SOURCEHUT_TOKEN_ARN"]
+        token = fetch_secret(arn)
+    return token
+
 class API:
-    def __init__(self):
-        token = os.environ.get("SOURCEHUT_TOKEN")
-        if token is None:
-            arn = os.environ["SOURCEHUT_TOKEN_ARN"]
-            token = fetch_secret(arn)
+    def __init__(self, token):
+        self.token = token
 
         self.session = requests.Session()
-
         self.session.headers.update({
             "Authorization": f"Bearer {token}",
             "Accept": "application/json",
@@ -42,6 +45,7 @@ class API:
 
     def graphql(self, query):
         # query = re.sub(r"\s+", " ", query)
+        # print("submitting query: " + query)
         rsp = self.session.post("https://git.sr.ht/query", json={ "query": query })
         if rsp.status_code == 422:
             j = rsp.json()
@@ -55,7 +59,8 @@ class API:
         while cursor:
             q = query.replace(metavar, cursor)
             data = self.graphql(q)
-            yield from f(data)
+            if data is not None:
+                yield from f(data)
             cursor = find_cursor(data)
             if cursor:
                 cursor = '"' + cursor + '"'
@@ -221,7 +226,10 @@ class Ref:
         }""" % (self.repo.owner.username, self.repo.name, self.target)
 
         def f(data):
-            for raw in data["user"]["repository"]["log"]["results"]:
+            repo = data["user"]["repository"]
+            if repo is None:
+                return
+            for raw in repo["log"]["results"]:
                 yield Commit(self.repo, raw)
 
         yield from self.api.yield_from_cursor(query, f)
