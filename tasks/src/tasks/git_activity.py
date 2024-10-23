@@ -33,9 +33,20 @@ def from_github(u, N):
                     })
     return cs
 
-def from_sourcehut(author_name, days):
-    api = sourcehut.API(token=sourcehut.token_from_env())
+def render_sourcehut_commit(c):
+    return {
+        "hash": c.id,
+        "title": c.title,
+        "url": c.url,
+        "date": c.author.time.isoformat(timespec="seconds"),
+        "repo": {
+            "name": c.repo.name,
+            "url": c.repo.url,
+        }
+    }
 
+def fetch_from_sourcehut(author_name, after):
+    api = sourcehut.API(token=sourcehut.token_from_env())
 
     commits = set()
     for repo in api.repositories():
@@ -73,7 +84,7 @@ def main():
     if args.days:
         after = datetime.datetime.now().astimezone() - datetime.timedelta(days=args.days)
 
-    commits = set()
+    commits = []
 
     if args.github_username:
         g = Github(fetch_secret(os.environ["GITHUB_TOKEN_ARN"]))
@@ -81,7 +92,8 @@ def main():
         commits += from_github(user, args.commits)
 
     if args.sourcehut_author_name:
-        commits |= from_sourcehut(author_name=args.sourcehut_author_name, after=after)
+        cs = fetch_from_sourcehut(author_name=args.sourcehut_author_name, after=after)
+        commits += [ render_sourcehut_commit(c) for c in cs ]
 
     with output(args.output) as f:
         f.write(json.dumps(commits))
