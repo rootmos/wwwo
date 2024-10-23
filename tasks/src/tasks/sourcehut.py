@@ -33,6 +33,8 @@ def token_from_env():
     return token
 
 class API:
+    BASE_URL = "https://git.sr.ht"
+
     def __init__(self, token):
         self.token = token
 
@@ -46,7 +48,7 @@ class API:
     def graphql(self, query):
         # query = re.sub(r"\s+", " ", query)
         # print("submitting query: " + query)
-        rsp = self.session.post("https://git.sr.ht/query", json={ "query": query })
+        rsp = self.session.post(f"{API.BASE_URL}/query", json={ "query": query })
         if rsp.status_code == 422:
             j = rsp.json()
             if "errors" in j:
@@ -145,7 +147,7 @@ class Repository:
         self.visibility = raw["visibility"]
         self.owner = User(api, raw["owner"])
 
-        self.url = "https://git.sr.ht/" + self.owner.canonicalName + "/" + self.name
+        self.url = f"{API.BASE_URL}/{self.owner.canonicalName}/{self.name}"
 
     def __str__(self):
         return f"{self.owner}/{self.name}"
@@ -243,6 +245,8 @@ class Commit:
         self.message = raw["message"]
         self.author = Signature(raw["author"])
         self.committer = Signature(raw["committer"])
+
+        self.url = f"{self.repo.url}/commit/{self.id}"
 
         lines = self.message.splitlines()
         if lines:
