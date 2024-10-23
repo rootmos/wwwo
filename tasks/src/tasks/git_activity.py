@@ -7,6 +7,7 @@ import os
 import github
 
 from .common import fetch_secret, output
+from .util import eprint
 from . import sourcehut
 
 def github_token_from_env():
@@ -62,7 +63,7 @@ def fetch_from_github(author_name, username, after):
 
     commits = collections.deque()
     for repo in api.get_user(username).get_repos():
-        print(f"processing GitHub repo: {repo.name}")
+        eprint(f"processing GitHub repo: {repo.name}")
         for commit in walk_github_repo(repo, author_name, after):
             commits.append(render_github_commit(repo, commit))
 
@@ -86,7 +87,7 @@ def fetch_from_sourcehut(author_name, after):
 
     commits = set()
     for repo in api.repositories():
-        print(f"processing sourcehut repo: {repo.name}")
+        eprint(f"processing sourcehut repo: {repo.name}")
         refs = repo.refs()
         for _, ref in refs.items():
             if ref.name == "HEAD" and ref.target in refs:
@@ -100,7 +101,7 @@ def fetch_from_sourcehut(author_name, after):
 
                 commits.add(c)
 
-    return [ render_sourcehut_commit(c) for c in cs ]
+    return [ render_sourcehut_commit(c) for c in commits ]
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch recent GitHub activity")
@@ -130,6 +131,8 @@ def main():
 
     if args.sourcehut:
         commits += fetch_from_sourcehut(author_name=args.author_name, after=after)
+
+    commits.sort(key=lambda c: c["date"])
 
     with output(args.output) as f:
         f.write(json.dumps(commits))
