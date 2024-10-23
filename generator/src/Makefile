@@ -12,7 +12,7 @@ COMMON += lenient_iso8601.ml utils.ml env.ml
 COMMON += html.ml path.ml page.ml post.ml
 ATDs = \
 	$(call atd, sounds) $(call atd, twitch) \
-	$(call atd, github) $(call atd, practice) \
+	$(call atd, git_activity) $(call atd, practice) \
 	$(call atd, gallery) $(call atd, project) \
 	$(call atd, resume)
 

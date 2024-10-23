@@ -19,6 +19,7 @@ let wrap s =
 let unwrap t = Printer.Calendar.sprint "%a, %d %b %Y" t
 
 let rfc822 t = Printer.Calendar.sprint "%a, %d %b %Y" t
+let rfc5322 t = Printer.Calendar.sprint "%a, %d %b %Y %H:%M:%S %z" t
 let compare t t' = Calendar.compare t t'
 
 module Date = struct
