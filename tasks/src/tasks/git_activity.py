@@ -41,7 +41,10 @@ def from_sourcehut():
     commits = set()
     for repo in api.repositories():
         print(f"handling repo: {repo}")
-        for _, ref in repo.refs().items():
+        refs = repo.refs()
+        for _, ref in refs.items():
+            if ref.name == "HEAD" and ref.target in refs:
+                continue
             print(f"handling ref: {ref.name}")
             for c in ref.log():
                 if after and c.author.time < after:
