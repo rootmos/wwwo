@@ -4,7 +4,7 @@ TASKS_EXE_PREFIX ?= wwwo-
 META =
 
 META += sounds.json sounds.sessions.json sounds.demo.json sounds.practice.json
-META += github-activity.rootmos.commits.json
+META += git-activity.json
 META += twitch.rootmos2.json
 META += resume.json
 
@@ -29,8 +29,11 @@ sounds.%.json:
 twitch.%.json:
 	$(TASKS_EXE_PREFIX)twitch "$*" --output="$@"
 
-github-activity.%.commits.json:
-	$(TASKS_EXE_PREFIX)github "$*" --output="$@"
+git-activity.json:
+	$(TASKS_EXE_PREFIX)git-activity \
+		--author-name="Gustav Behm" \
+		--github-username="rootmos" --sourcehut \
+		--output="$@"
 
 projects.json: $(PROJECTS_SPEC)
 	$(TASKS_EXE_PREFIX)projects "$<" --output="$@"

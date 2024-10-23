@@ -1,0 +1,17 @@
+type date = string wrap <ocaml module="Lenient_iso8601">
+
+type repo = {
+    name: string;
+    url: string;
+    public: bool;
+}
+
+type commit = {
+    hash: string;
+    title: string;
+    url: string;
+    date: date;
+    repo: repo;
+}
+
+type commits = commit list

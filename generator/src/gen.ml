@@ -139,23 +139,23 @@ let demo_page = let open Sounds_t in
   ] |> pagemaker config (Subtitle "demo") ~back:(Some "index.html")
     ~additional_css:[ "sounds.css" ]
 
-let activity = let open Github_t in
-  let cs = Path.meta "github-activity.rootmos.commits.json" |>
-    Utils.load_file |> Github_j.commits_of_string in
+let activity = let open Git_activity_t in
+  let cs = Path.meta "git-activity.json" |>
+    Utils.load_file |> Git_activity_j.commits_of_string in
   let s c0 c1 = Lenient_iso8601.compare c1.date c0.date in
-  cs |> List.sort s
+  cs |> List.sort s |> List.filter (fun c -> c.repo.public)
 
-let activity_page = let open Github_t in
+let activity_page = let open Git_activity_t in
   let r c = [
-    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
-    a c.repo_url @@ text c.repo;
-    a c.url @@ text c.message;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc5322 c.date;
+    a c.repo.url @@ text c.repo.name;
+    a c.url @@ text @@ html_escape_string c.title;
   ] in activity >>| r |> table |> pagemaker config (Subtitle "activity") ~back:(Some "index.html")
-and activity_snippet = let open Github_t in
+and activity_snippet = let open Git_activity_t in
   let r c = [
-    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc822 c.date;
-    a c.repo_url @@ text c.repo;
-    a c.url @@ text c.message;
+    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc5322 c.date;
+    a c.repo.url @@ text c.repo.name;
+    a c.url @@ text @@ html_escape_string c.title;
   ] in seq [
     h2 @@ text "Activity";
     activity |> take 10 >>| r |> table;
