@@ -33,52 +33,55 @@ def from_github(u, N):
                     })
     return cs
 
-def from_sourcehut():
+def from_sourcehut(author_name, days):
     api = sourcehut.API(token=sourcehut.token_from_env())
 
-    after = datetime.datetime.now().astimezone() - datetime.timedelta(days=1)
 
     commits = set()
     for repo in api.repositories():
-        print(f"handling repo: {repo}")
         refs = repo.refs()
         for _, ref in refs.items():
             if ref.name == "HEAD" and ref.target in refs:
                 continue
-            print(f"handling ref: {ref.name}")
             for c in ref.log():
                 if after and c.author.time < after:
                     break
-            # TODO check c.author and continue on non-me:s
+
+                if c.author.name != author_name:
+                    continue
+
                 commits.add(c)
 
-    for c in commits:
-        print(f"{c.id[:7]} {c.author.time} {c.title}")
+    return commits
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch recent GitHub activity")
 
     parser.add_argument("-o", "--output")
 
-    parser.add_argument("--commits", metavar='N', dest="commits", type=int, default=10)
+    parser.add_argument("--days", metavar='N', type=int, default=7)
 
-    parser.add_argument("--github")
-    parser.add_argument("--sourcehut", action="store_true")
+    parser.add_argument("--github-username")
+    parser.add_argument("--sourcehut-author-name")
 
     return parser.parse_args()
 
 def main():
     args = parse_args()
 
-    commits = []
+    after = None
+    if args.days:
+        after = datetime.datetime.now().astimezone() - datetime.timedelta(days=args.days)
 
-    if args.github:
+    commits = set()
+
+    if args.github_username:
         g = Github(fetch_secret(os.environ["GITHUB_TOKEN_ARN"]))
-        user = g.get_user(args.github)
+        user = g.get_user(args.github_username)
         commits += from_github(user, args.commits)
 
-    if args.sourcehut:
-        from_sourcehut()
+    if args.sourcehut_author_name:
+        commits |= from_sourcehut(author_name=args.sourcehut_author_name, after=after)
 
     with output(args.output) as f:
         f.write(json.dumps(commits))
