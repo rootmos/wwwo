@@ -1,5 +1,6 @@
-import collections
 import argparse
+import collections
+import concurrent.futures
 import datetime
 import json
 import os
@@ -126,11 +127,16 @@ def main():
 
     commits = []
 
-    if args.github_username:
-        commits += fetch_from_github(author_name=args.author_name, username=args.github_username, after=after)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        fs = set()
+        if args.github_username:
+            fs.add(executor.submit(fetch_from_github, author_name=args.author_name, username=args.github_username, after=after))
 
-    if args.sourcehut:
-        commits += fetch_from_sourcehut(author_name=args.author_name, after=after)
+        if args.sourcehut:
+            fs.add(executor.submit(fetch_from_sourcehut, author_name=args.author_name, after=after))
+
+        for f in concurrent.futures.as_completed(fs):
+            commits += f.result()
 
     commits.sort(key=lambda c: c["date"])
 
