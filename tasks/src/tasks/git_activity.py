@@ -68,9 +68,9 @@ def render_github_commit(r, c, tz=None):
         }
     }
 
-def fetch_from_github(author_name, username, after):
+def fetch_from_github(author_name, after):
     api = github.Github(login_or_token=github_token_from_env())
-    user = api.get_user(username)
+    user = api.get_user()
     tz = figure_out_user_timezone(user)
 
     commits = collections.deque()
@@ -124,7 +124,7 @@ def parse_args():
 
     parser.add_argument("--author-name", required=True)
 
-    parser.add_argument("--github-username")
+    parser.add_argument("--github", action="store_true")
     parser.add_argument("--sourcehut", action="store_true")
 
     return parser.parse_args()
@@ -140,8 +140,8 @@ def main():
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         fs = set()
-        if args.github_username:
-            fs.add(executor.submit(fetch_from_github, author_name=args.author_name, username=args.github_username, after=after))
+        if args.github:
+            fs.add(executor.submit(fetch_from_github, author_name=args.author_name, after=after))
 
         if args.sourcehut:
             fs.add(executor.submit(fetch_from_sourcehut, author_name=args.author_name, after=after))

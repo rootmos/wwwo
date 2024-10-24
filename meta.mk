@@ -32,7 +32,7 @@ twitch.%.json:
 git-activity.json:
 	$(TASKS_EXE_PREFIX)git-activity --days=30 \
 		--author-name="Gustav Behm" \
-		--github-username="rootmos" --sourcehut \
+		--github --sourcehut \
 		--output="$@"
 
 projects.json: $(PROJECTS_SPEC)
