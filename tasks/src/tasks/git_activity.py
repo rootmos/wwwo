@@ -6,6 +6,7 @@ import json
 import os
 
 import github
+import pytz
 
 from .common import fetch_secret, output
 from .util import eprint
@@ -46,12 +47,20 @@ def walk_github_repo(repo, author_name, after):
 
     return found
 
-def render_github_commit(r, c):
+def figure_out_user_timezone(user):
+    for tz in pytz.all_timezones:
+        if tz.endswith(user.location):
+            return pytz.timezone(tz)
+
+def render_github_commit(r, c, tz=None):
+    date = c.commit.author.date
+    if tz:
+        date = date.astimezone(tz)
     return {
         "hash": c.sha,
         "title": c.commit.message.splitlines()[0],
         "url": c.html_url,
-        "date": c.commit.author.date.isoformat(timespec="seconds"),
+        "date": date.isoformat(timespec="seconds"),
         "repo": {
             "name": r.name,
             "url": r.html_url,
@@ -61,12 +70,14 @@ def render_github_commit(r, c):
 
 def fetch_from_github(author_name, username, after):
     api = github.Github(login_or_token=github_token_from_env())
+    user = api.get_user(username)
+    tz = figure_out_user_timezone(user)
 
     commits = collections.deque()
-    for repo in api.get_user(username).get_repos():
+    for repo in user.get_repos():
         eprint(f"processing GitHub repo: {repo.name}")
         for commit in walk_github_repo(repo, author_name, after):
-            commits.append(render_github_commit(repo, commit))
+            commits.append(render_github_commit(repo, commit, tz=tz))
 
     return list(commits)
 
