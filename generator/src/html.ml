@@ -50,11 +50,11 @@ let ul ?(cls=None) is = match is with
 | _ -> tag ~cls "ul" (is >>| tag "li" |> seq)
 let ol is x = tag "ol" (is >>| tag "li" |> seq) x
 let audio ?(id="") src = text @@
-  sprintf "<audio%s controls class=\"sound\"><source src=\"%s\"/></audio>"
+  sprintf "<audio%s controls preload=\"metadata\" class=\"sound\"><source src=\"%s\"/></audio>"
   (if id <> "" then sprintf " id=\"%s\"" id else "")
   (url_escape_string src |> html_escape_string)
 let video ?(id="") ?(poster=None) src = text @@
-  sprintf "<video%s%s controls class=\"video\"><source src=\"%s\"/></video>"
+  sprintf "<video%s%s controls preload=\"metadata\" class=\"video\"><source src=\"%s\"/></video>"
   (if id <> "" then sprintf " id=\"%s\"" id else "")
   (match poster with Some p -> sprintf " poster=\"%s\"" p | None -> "")
   (url_escape_string src |> html_escape_string)
