@@ -256,12 +256,16 @@ let index posts_snippet =
     ];
     social;
   ];
+
+  div ~cls:(Some "content") @@ projects_snippet;
+  div ~cls:(Some "content") @@ Activity.snippet ();
+  div ~cls:(Some "content") @@ posts_snippet;
+
   div ~cls:(Some "content") @@ sounds_snippet;
   div ~cls:(Some "content twitch") @@ twitch_snippet;
-  div ~cls:(Some "content") @@ Activity.snippet ();
-  div ~cls:(Some "content") @@ projects_snippet;
-  div ~cls:(Some "content") @@ posts_snippet;
+
   div ~cls:(Some "content") @@ services_snippet;
+
   div ~cls:(Some "content") @@ md_snippet (Path.snippet "academic.md");
   div ~cls:(Some "content") @@ resume_snippet;
 ]
