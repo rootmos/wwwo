@@ -75,6 +75,9 @@ def fetch_from_github(author_name, after):
 
     commits = collections.deque()
     for repo in user.get_repos():
+        if repo.owner.login != user.login:
+            eprint(f"skipping GitHub repo: {repo.name}")
+            continue
         eprint(f"processing GitHub repo: {repo.name}")
         for commit in walk_github_repo(repo, author_name, after):
             commits.append(render_github_commit(repo, commit, tz=tz))
