@@ -30,7 +30,7 @@ twitch.%.json:
 	$(TASKS_EXE_PREFIX)twitch "$*" --output="$@"
 
 git-activity.json:
-	$(TASKS_EXE_PREFIX)git-activity \
+	$(TASKS_EXE_PREFIX)git-activity --days=30 \
 		--author-name="Gustav Behm" \
 		--github-username="rootmos" --sourcehut \
 		--output="$@"

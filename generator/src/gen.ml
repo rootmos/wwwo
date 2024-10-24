@@ -139,28 +139,6 @@ let demo_page = let open Sounds_t in
   ] |> pagemaker config (Subtitle "demo") ~back:(Some "index.html")
     ~additional_css:[ "sounds.css" ]
 
-let activity = let open Git_activity_t in
-  let cs = Path.meta "git-activity.json" |>
-    Utils.load_file |> Git_activity_j.commits_of_string in
-  let s c0 c1 = Lenient_iso8601.compare c1.date c0.date in
-  cs |> List.sort s |> List.filter (fun c -> c.repo.public)
-
-let activity_page = let open Git_activity_t in
-  let r c = [
-    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc5322 c.date;
-    a c.repo.url @@ text c.repo.name;
-    a c.url @@ text @@ html_escape_string c.title;
-  ] in activity >>| r |> table |> pagemaker config (Subtitle "activity") ~back:(Some "index.html")
-and activity_snippet = let open Git_activity_t in
-  let r c = [
-    div ~cls:(Some "date") @@ text @@ Lenient_iso8601.rfc5322 c.date;
-    a c.repo.url @@ text c.repo.name;
-    a c.url @@ text @@ html_escape_string c.title;
-  ] in seq [
-    h2 @@ text "Activity";
-    activity |> take 10 >>| r |> table;
-  ]
-
 let twitch_snippet = let open Twitch_t in
   let vods = Path.meta "twitch.rootmos2.json" |>
       Utils.load_file |> Twitch_j.videos_of_string in
@@ -280,7 +258,7 @@ let index posts_snippet =
   ];
   div ~cls:(Some "content") @@ sounds_snippet;
   div ~cls:(Some "content twitch") @@ twitch_snippet;
-  div ~cls:(Some "content") @@ activity_snippet;
+  div ~cls:(Some "content") @@ Activity.snippet ();
   div ~cls:(Some "content") @@ projects_snippet;
   div ~cls:(Some "content") @@ posts_snippet;
   div ~cls:(Some "content") @@ services_snippet;
@@ -430,7 +408,7 @@ let () =
   write_page "jam.html" sounds_jam_page;
   write_page "demo.html" demo_page;
   write_page "practice.html" practice_page;
-  write_page "activity.html" activity_page;
+  write_page "activity.html" (fun ~path -> Activity.page (pagemaker ~back:(Some "index.html") ~path config));
   write_page "bor19/index.html" bor19;
 
   let write_gallery key =

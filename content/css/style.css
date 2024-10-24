@@ -129,3 +129,24 @@ img.avatar {
 audio {
   vertical-align: middle;
 }
+
+.activity td {
+  vertical-align: top;
+}
+
+.activity .date {
+  text-align: right;
+}
+
+.activity .repository {
+  white-space: nowrap;
+  padding-left: 1em;
+}
+
+.activity .message {
+  padding-left: 1em;
+}
+
+.activity .more {
+  text-align: center;
+}
