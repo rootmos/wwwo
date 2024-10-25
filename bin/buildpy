@@ -17,7 +17,7 @@ TARBALL=
 while getopts "t:C:pdbT:-" OPT; do
     case $OPT in
         t) BUILDPY_TARGET=$OPTARG ;;
-        C) cd $OPTARG ;;
+        C) cd "$OPTARG" ;;
         p) ACTION=prepare ;;
         d) ACTION=deps ;;
         b) ACTION=bundle ;;

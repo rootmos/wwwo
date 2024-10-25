@@ -12,14 +12,14 @@ BUILDML_VERBOSE=${BUILDML_VERBOSE-}
 while getopts "t:C:R:sdcTemMIv-" OPT; do
     case $OPT in
         t) BUILDML_TARGET=$OPTARG; SUFFIX=.$BUILDML_TARGET ;;
-        C) cd $OPTARG ;;
+        C) cd "$OPTARG" ;;
         R) BUILDML_PROJECT_ROOT=$OPTARG ;;
         s) ACTION=switch ;;
         d) ACTION=deps ;;
         c) ACTION=compile; break ;;
         T) ACTION=mktop; break ;;
         e) ACTION=execute; break ;;
-        m) ACTION=make; break ;;
+        m) ACTION="make"; break ;;
         M) ACTION=makefile ;;
         I) ACTION=ignorefile ;;
         v) BUILDML_VERBOSE=1 ;;
@@ -114,12 +114,13 @@ if ! [ "$BUILDML_PROJECT_ROOT/.switch$SUFFIX" -nt "$SWITCH_SPEC" ]; then
     mapfile -t SPEC < "$SWITCH_SPEC"
     export OPAMSWITCH=${SPEC[0]}
     if ! opam env --set-switch &>/dev/null; then
-        echo 1>&2 "creating switch: ${SPEC[@]}"
+        echo 1>&2 "creating switch: ${SPEC[*]}"
         opam switch create --no-switch "${SPEC[@]}"
     fi
     echo "$OPAMSWITCH" > "$BUILDML_PROJECT_ROOT/.switch$SUFFIX"
 else
-    export OPAMSWITCH=$(<"$BUILDML_PROJECT_ROOT/.switch$SUFFIX")
+    OPAMSWITCH=$(<"$BUILDML_PROJECT_ROOT/.switch$SUFFIX")
+    export OPAMSWITCH
 fi
 
 eval "$(opam env --set-switch)"
