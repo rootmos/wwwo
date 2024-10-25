@@ -4,12 +4,12 @@ open Printf
 
 open Git_activity_t
 
-let render_date d = Lenient_iso8601.rfc5322_sec d
+let render_date d = Strict_iso8601.rfc5322_min d
 
 let all_activity =
   let cs = Path.meta "git-activity.json" |>
     Utils.load_file |> Git_activity_j.commits_of_string in
-  let s c0 c1 = Lenient_iso8601.compare c1.date c0.date in
+  let s c0 c1 = Strict_iso8601.compare c1.date c0.date in
   cs |> List.sort s
 
 let total = List.length all_activity

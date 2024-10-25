@@ -135,17 +135,31 @@ if [ ! -f "$DEPS_SPEC" ]; then
     DEPS_SPEC="$BUILDML_PROJECT_ROOT/deps"
 fi
 
-mapfile -t PKGs < "$DEPS_SPEC"
+deps_spec() {
+    sed 's/\(.*\)\s\+#.*/\1/' "$DEPS_SPEC" \
+        | sed '/^\s*$/d'
+}
+
+deps_for_opam() {
+    deps_spec | sed 's,/.*,,'
+}
+
+deps_for_ocamlfind() {
+    deps_spec \
+        | sed 's,^\([a-zA-Z0-9_-]\+\)[^/]*$,\1,' \
+        | sed 's,^\([a-zA-Z0-9_-]\+\)[^/]*/\([a-zA-Z0-9_-]\+\)$,\1.\2,'
+}
 
 OCAMLFIND_PKG=${OCAMLFIND_PKG-ocamlfind>=1.9.6}
 
 DEPS_FLAG=$BUILDML_PROJECT_ROOT/.deps$SUFFIX
 if ! [ "$DEPS_FLAG" -nt "$DEPS_SPEC" ]; then
+    mapfile -t OPAM_PKGs < <(deps_for_opam)
     echo 1>&2 "installing dependencies:"
-    for p in "$OCAMLFIND_PKG" "${PKGs[@]}"; do
+    for p in "$OCAMLFIND_PKG" "${OPAM_PKGs[@]}"; do
         echo 1>&2 "  $p"
     done
-    opam install --yes "$OCAMLFIND_PKG" "${PKGs[@]}"
+    opam install --yes "$OCAMLFIND_PKG" "${OPAM_PKGs[@]}"
     touch "$DEPS_FLAG"
 fi
 
@@ -159,9 +173,9 @@ ARGS=()
 
 OCAMLFIND_ARGS=("-linkpkg")
 
-for p in "${PKGs[@]}"; do
-    ARGS+=("-package" "$(sed 's/\([a-zA-Z0-9_-]\+\).*/\1/' <<< "$p")")
-done
+while read -r p; do
+    ARGS+=("-package" "$p")
+done < <(deps_for_ocamlfind)
 
 if [ "$ACTION" = "compile" ]; then
     CMD=ocamlc

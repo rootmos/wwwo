@@ -1,4 +1,4 @@
-type date = string wrap <ocaml module="Lenient_iso8601">
+type date = string wrap <ocaml module="Strict_iso8601">
 
 type repo = {
     name: string;

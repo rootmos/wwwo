@@ -7,8 +7,8 @@ build: gen.exe gen_post.exe
 .PHONY: all
 all: gen.exe top.exe
 
-COMMON = common.ml
-COMMON += lenient_iso8601.ml utils.ml env.ml
+COMMON = common.ml utils.ml env.ml
+COMMON += lenient_iso8601.ml strict_iso8601.ml
 COMMON += html.ml path.ml page.ml post.ml
 ATDs = \
 	$(call atd, sounds) $(call atd, twitch) \
