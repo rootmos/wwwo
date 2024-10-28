@@ -14,7 +14,7 @@ doc: html.ml
 
 COMMON = common.ml utils.ml env.ml
 COMMON += lenient_iso8601.ml strict_iso8601.ml
-COMMON += html.ml path.ml page.ml post.ml
+COMMON += html.mli html.ml path.ml page.ml post.ml
 ATDs = \
 	$(call atd, sounds) $(call atd, twitch) \
 	$(call atd, git_activity) $(call atd, practice) \
