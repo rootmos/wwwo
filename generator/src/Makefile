@@ -7,6 +7,11 @@ build: gen.exe gen_post.exe
 .PHONY: all
 all: gen.exe top.exe
 
+.PHONY: doc
+doc: html.ml
+	@mkdir -p $(OCAML_DOC_OUTPUT_DIR)
+	$(BUILDML_OCAMLDOC) -html -d $(OCAML_DOC_OUTPUT_DIR) $^
+
 COMMON = common.ml utils.ml env.ml
 COMMON += lenient_iso8601.ml strict_iso8601.ml
 COMMON += html.ml path.ml page.ml post.ml
