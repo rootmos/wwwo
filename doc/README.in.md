@@ -10,6 +10,8 @@ This is my semi-static pseudo-dynamic website generator for [my homepage](https:
 3. this image is executed periodically in an AWS Lambda function that publish the result to S3 and is
 4. hosted by an OpenBSD server created using my [own image builder](https://github.com/rootmos/openbsd).
 
+The o in wwwo is simultaneously a reference to OCaml but primarily the goal naming style of [miniKanren](http://minikanren.org/).
+
 ## The Html module
 A small [continuation-passing style](https://en.wikipedia.org/wiki/Continuation-passing_style) HTML generator.
 
