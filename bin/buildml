@@ -9,7 +9,7 @@ SUFFIX=
 ACTION=compile
 BUILDML_PROJECT_ROOT=${BUILDML_PROJECT_ROOT-}
 BUILDML_VERBOSE=${BUILDML_VERBOSE-}
-while getopts "t:C:R:sdcTemMIv-" OPT; do
+while getopts "t:C:R:sdcTDemMIv-" OPT; do
     case $OPT in
         t) BUILDML_TARGET=$OPTARG; SUFFIX=.$BUILDML_TARGET ;;
         C) cd "$OPTARG" ;;
@@ -18,6 +18,7 @@ while getopts "t:C:R:sdcTemMIv-" OPT; do
         d) ACTION=deps ;;
         c) ACTION=compile; break ;;
         T) ACTION=mktop; break ;;
+        D) ACTION=doc; break ;;
         e) ACTION=execute; break ;;
         m) ACTION="make"; break ;;
         M) ACTION=makefile ;;
@@ -60,6 +61,7 @@ BUILDML_OCAMLC = \$(BUILDML) -c -- \$(BUILDML_OCAMLC_OPTS)
 BUILDML_OCAMLC_OPTS ?= -output-complete-exe
 BUILDML_OCAMLMKTOP = \$(BUILDML) -T -- \$(BUILDML_OCAMLMKTOP_OPTS)
 BUILDML_OCAMLMKTOP_OPTS ?= -output-complete-exe
+BUILDML_OCAMLDOC = \$(BUILDML) -D --
 BUILDML_EXEC = \$(BUILDML) -e --
 export BUILDML_TARGET = $BUILDML_TARGET
 export BUILDML_PROJECT_ROOT = $(readlink -f "$BUILDML_PROJECT_ROOT")
@@ -90,7 +92,7 @@ EOF
 
     ${MAKE-make} -I"$TMP" "$@"
     exit 0
-elif [ "$ACTION" != "switch" ] && [ "$ACTION" != "deps" ] && [ "$ACTION" != "compile" ] && [ "$ACTION" != "mktop" ] && [ "$ACTION" != "execute" ]; then
+elif [ "$ACTION" != "switch" ] && [ "$ACTION" != "deps" ] && [ "$ACTION" != "compile" ] && [ "$ACTION" != "mktop" ] && [ "$ACTION" != "doc" ] && [ "$ACTION" != "execute" ]; then
     echo 1>&2 "unsupported action: $ACTION"
     exit 1
 fi
@@ -171,16 +173,20 @@ fi
 
 ARGS=()
 
-OCAMLFIND_ARGS=("-linkpkg")
+OCAMLFIND_ARGS=()
 
 while read -r p; do
     ARGS+=("-package" "$p")
 done < <(deps_for_ocamlfind)
 
 if [ "$ACTION" = "compile" ]; then
+    OCAMLFIND_ARGS+=("-linkpkg")
     CMD=ocamlc
 elif [ "$ACTION" = "mktop" ]; then
+    OCAMLFIND_ARGS+=("-linkpkg")
     CMD=ocamlmktop
+elif [ "$ACTION" = "doc" ]; then
+    CMD=ocamldoc
 else
     echo 1>&2 "don't know how to do $ACTION using ocmalfind"
     exit 1

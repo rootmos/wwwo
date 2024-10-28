@@ -1,6 +1,12 @@
+CURRENT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
 .PHONY: build
 build:
 	$(MAKE) -C src build
+
+.PHONY: doc
+doc: build
+	$(MAKE) -C src doc "OCAML_DOC_OUTPUT_DIR=$(CURRENT_DIR)/doc"
 
 DESTDIR ?= /usr
 PREFIX ?=
@@ -13,3 +19,4 @@ install: build
 .PHONY: clean
 clean:
 	$(MAKE) -C src clean
+	rm -rf doc

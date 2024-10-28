@@ -2,14 +2,19 @@
 include buildml.mk
 
 .PHONY: build
-build: gen.exe gen_post.exe
+build: gen.exe gen_post.exe hello.exe
 
 .PHONY: all
 all: gen.exe top.exe
 
+.PHONY: doc
+doc: html.ml
+	@mkdir -p $(OCAML_DOC_OUTPUT_DIR)
+	$(BUILDML_OCAMLDOC) -html -d $(OCAML_DOC_OUTPUT_DIR) $^
+
 COMMON = common.ml utils.ml env.ml
 COMMON += lenient_iso8601.ml strict_iso8601.ml
-COMMON += html.ml path.ml page.ml post.ml
+COMMON += html.mli html.ml path.ml page.ml post.ml
 ATDs = \
 	$(call atd, sounds) $(call atd, twitch) \
 	$(call atd, git_activity) $(call atd, practice) \
@@ -23,4 +28,7 @@ top.exe: $(COMMON)
 	$(BUILDML_OCAMLMKTOP) -o $@ $^
 
 gen_post.exe: $(COMMON) gen_post.ml
+	$(BUILDML_OCAMLC) -o $@ $^
+
+hello.exe: common.ml utils.ml html.mli html.ml hello.ml
 	$(BUILDML_OCAMLC) -o $@ $^
