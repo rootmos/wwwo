@@ -1,8 +1,9 @@
 # wwwo
 
 ## The Html module
+
 ### Example
-The following small example:
+The following [small example](generator/src/hello.ml):
 ```ocaml
 open Html
 
@@ -15,20 +16,24 @@ let page = () |> html @@ seq [
     ];
 ]
 
-let () = print_endline page
+let () = Utils.write_file "hello.html" page
 ```
 generates the following HTML (after pretty-printing using [tidy](http://www.html-tidy.org/)):
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Hello</title>
-</head>
-<body>
-  <h1>Hello</h1>
-</body>
+  <head>
+    <title>
+      Hello
+    </title>
+  </head>
+  <body>
+    <h1>
+      Hello
+    </h1>
+  </body>
 </html>
-````
+```
 
 ### Interface
 ```ocaml

@@ -2,7 +2,7 @@
 include buildml.mk
 
 .PHONY: build
-build: gen.exe gen_post.exe
+build: gen.exe gen_post.exe hello.exe
 
 .PHONY: all
 all: gen.exe top.exe
@@ -28,4 +28,7 @@ top.exe: $(COMMON)
 	$(BUILDML_OCAMLMKTOP) -o $@ $^
 
 gen_post.exe: $(COMMON) gen_post.ml
+	$(BUILDML_OCAMLC) -o $@ $^
+
+hello.exe: common.ml utils.ml html.mli html.ml hello.ml
 	$(BUILDML_OCAMLC) -o $@ $^
