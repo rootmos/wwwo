@@ -1,4 +1,6 @@
 # wwwo
+[![Build, upload and publish](https://github.com/rootmos/wwwo/actions/workflows/publish.yaml/badge.svg)](https://github.com/rootmos/wwwo/actions/workflows/publish.yaml)
+
 This is my semi-static pseudo-dynamic website generator for [my homepage](https://rootmos.io):
 1. The content is gathered by a set of [tasks](tasks) implemented in Python, for example:
    - scrapes a couple of S3 buckets
