@@ -1,3 +1,6 @@
+# include
+# 2024-10-29T07:32:57+01:00 SHA-256:5ba75751d3b08ec107418c906420f197de887430cbf7eaae0c300117b30b0608
+# https://git.sr.ht/~rootmos/scripts 287b20978cfca9e8ca89bbc94d9863f0366875c8
 #!/bin/bash
 
 set -o nounset -o pipefail -o errexit
