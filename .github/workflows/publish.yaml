@@ -1,7 +1,7 @@
 name: Build, upload and publish
 on:
   push:
-    branches: [ master, update-dependencies ]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
