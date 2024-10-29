@@ -70,23 +70,18 @@ RUN apk update && apk add bash python3 make rsync
 
 WORKDIR /workdir
 
-COPY bin/whereami bin/
-
-COPY bin/fontawesome bin/fetch bin/
-COPY .fetch.json .
-RUN bin/fontawesome
-
 COPY --from=lambda-builder /lambda.tar.gz /
-RUN tar xf /lambda.tar.gz -C /
+RUN tar xf /lambda.tar.gz -C / && rm /lambda.tar.gz
 
 COPY --from=tasks-builder /tasks.tar.gz /
-RUN tar xf /tasks.tar.gz -C /
+RUN tar xf /tasks.tar.gz -C / && rm /tasks.tar.gz
 
 COPY --from=generator-builder /usr/bin/wwwo-generator /usr/bin/wwwo-generator
 
-COPY generate meta.mk .
+COPY bin/whereami bin/fontawesome bin/fetch bin/
+COPY generate meta.mk .fetch.json .build.json .
 COPY content content
 
-COPY .build.json .build.json
+RUN bin/fontawesome # in order to cache the fa.zip bundle
 
 ENTRYPOINT [ "/usr/bin/wwwo-lambda", "-C", "/workdir" ]
