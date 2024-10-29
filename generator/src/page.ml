@@ -5,8 +5,7 @@ let livejs_src = "http://livejs.com/live.js"
 let chartjs_src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
 let momentjs_src = "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js"
 
-(* TODO reinit and update *)
-let tracking_id = "UA-124878438-2"
+let tracking_id = "G-S1L923YT6Z"
 
 let tracking_snippet id = seq [
   js_src (sprintf "https://www.googletagmanager.com/gtag/js?id=%s" id);
