@@ -26,9 +26,10 @@ while getopts "t:C:pdbT:-" OPT; do
         ?) exit 2 ;;
     esac
 done
+shift $((OPTIND-1))
 
 if [ "$ACTION" = "prepare" ]; then
-    exec pip install "pipenv >=2023.9.8"
+    exec pip install "pipenv >=2024.02.0"
 fi
 
 if [ -z "$BUILDPY_PROJECT_ROOT" ]; then
@@ -52,7 +53,7 @@ c = setuptools.config.pyprojecttoml.read_configuration("pyproject.toml")
 for d in c["tool"]["setuptools"]["package-dir"].values():
     print(d)
 EOF
-pipenv run python3 "$TMP/package-dirs.py" > "$TMP/package-dirs"
+python "$TMP/package-dirs.py" > "$TMP/package-dirs"
 mapfile -t PKG_DIRs < "$TMP/package-dirs"
 
 if [ "$ACTION" = "deps" ]; then
@@ -65,7 +66,7 @@ if [ "$ACTION" = "deps" ]; then
         fi
     done
 
-    pipenv install
+    pipenv install --deploy
 
     for d in "${DUMMY_PKG_DIRs[@]}"; do
         echo 1>&2 "removing dummy package dir: $d"
@@ -76,7 +77,7 @@ if [ "$ACTION" = "deps" ]; then
     exit 0
 fi
 
-pipenv install .
+pipenv install --deploy .
 
 cat <<EOF > "$TMP/scripts.py"
 import os
@@ -99,7 +100,7 @@ EOF
 
 VENV=$(pipenv --venv)
 
-pipenv run python3 "$TMP/scripts.py" "$VENV" > "$TMP/scripts"
+python "$TMP/scripts.py" "$VENV" > "$TMP/scripts"
 mapfile -t SCRIPTS < "$TMP/scripts"
 
 INCLUDE=("$VENV")

@@ -1,4 +1,4 @@
-FROM alpine:3.20 as generator-builder
+FROM alpine:3.20 AS generator-builder
 
 RUN apk update && apk add bash make gcc musl-dev opam
 
@@ -24,15 +24,16 @@ RUN buildml -C generator -m install
 
 
 
-FROM alpine:3.20 as tasks-builder
+FROM alpine:3.20 AS tasks-builder
 
-RUN apk update && apk add bash python3 py3-pip
+RUN apk update && apk add bash python3 py3-pip py3-setuptools
 
 WORKDIR /workdir
 
 COPY bin/buildpy /usr/bin/
 
-RUN buildpy -p
+# TODO no official pipenv package in Alpine 3.20?
+RUN env PIP_BREAK_SYSTEM_PACKAGES=yes buildpy -p
 
 COPY tasks/Pipfile tasks/Pipfile.lock tasks/pyproject.toml tasks/
 RUN buildpy -C tasks -d
@@ -42,17 +43,18 @@ RUN buildpy -C tasks -b -T /tasks.tar.gz
 
 
 
-FROM alpine:3.20 as lambda-builder
+FROM alpine:3.20 AS lambda-builder
 
 RUN apk update && apk add bash \
-    python3-dev py3-pip \
+    python3-dev py3-pip py3-setuptools \
     make gcc musl-dev g++ cmake autoconf automake libtool elfutils-dev
 
 WORKDIR /workdir
 
 COPY bin/buildpy /usr/bin/
 
-RUN buildpy -p
+# TODO no official pipenv package in Alpine 3.20?
+RUN env PIP_BREAK_SYSTEM_PACKAGES=yes buildpy -p
 
 COPY lambda/Pipfile lambda/Pipfile.lock lambda/pyproject.toml lambda/
 RUN buildpy -C lambda -d
