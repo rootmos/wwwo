@@ -27,6 +27,11 @@ go() {
     bin/buildml -C generator -m && ./generate -w workdir -e dev
 }
 
+fa() {
+    rm -rf workdir/fa
+    ./generate -w workdir -e dev
+}
+
 upload() {
     aws s3 cp --acl=public-read "workdir/webroot/dev/$POST.html" "s3://rootmos-www/$POST.html"
 }

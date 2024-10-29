@@ -3,20 +3,16 @@
 set -o nounset -o pipefail -o errexit
 
 SCRIPT_DIR=$(readlink -f $0 | xargs dirname)
-TARGET=${TARGET-$SCRIPT_DIR/../.fontawesome}
+ROOT=${ROOT-$(readlink -f "$SCRIPT_DIR/..")}
 
-. "$SCRIPT_DIR/fetch.sh"
+FETCH=$SCRIPT_DIR/fetch
+export FETCH_MANIFEST=$ROOT/.fetch.json
+export FETCH_ROOT=$ROOT
 
-mkdir -p "$TARGET"
-
-export FETCH_CACHE="$TARGET/.cache"
+"$FETCH" download fa.zip
 
 TMP=$(mktemp -d)
 trap 'rm -rf $TMP' EXIT
-
-fetch -s "https://use.fontawesome.com/releases/v5.9.0/fontawesome-free-5.9.0-web.zip" \
-    "800b9aea20e4ae9425b6b8f593d14fbf6a92856abbc22b90f32148097e167f45" \
-    "$TMP/fa.zip"
 
 PREFIX="fontawesome-free-5.9.0-web"
 
@@ -32,6 +28,6 @@ if [ -n "${1-}" ]; then
     for e in "${EXTRACT[@]}"; do
         ARGS+=("$PREFIX/$e")
     done
-    unzip "$TMP/fa.zip" "${ARGS[@]}" -d "$TMP/root"
-    rsync -av "$TMP/root/$PREFIX/" "$1"
+    unzip "$ROOT/fa.zip" "${ARGS[@]}" -d "$TMP"
+    rsync -av "$TMP/$PREFIX/" "$1"
 fi
