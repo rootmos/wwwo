@@ -66,14 +66,14 @@ RUN buildpy -C lambda -b -T /lambda.tar.gz
 
 FROM alpine:3.20
 
-RUN apk update && apk add bash \
-    python3 wget make rsync
+RUN apk update && apk add bash python3 make rsync
 
 WORKDIR /workdir
 
 COPY bin/whereami bin/
 
-COPY bin/fontawesome bin/fetch.sh bin/
+COPY bin/fontawesome bin/fetch bin/
+COPY .fetch.json .
 RUN bin/fontawesome
 
 COPY --from=lambda-builder /lambda.tar.gz /

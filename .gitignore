@@ -10,6 +10,6 @@ dist
 __pycache__
 .venv
 
-.fontawesome
+fa.zip
 .workdirs
 workdir
