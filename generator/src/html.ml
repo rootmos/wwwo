@@ -45,10 +45,19 @@ let p ?(cls=None) ?(id=None) ?(style=None) x = tag ~cls ~id ~style "p" x
 let h1 x = tag "h1" x
 let h2 x = tag "h2" x
 let title t = tag "title" (text t)
+
 let ul ?(cls=None) is = match is with
 | [] -> noop
 | _ -> tag ~cls "ul" (is >>| tag "li" |> seq)
-let ol is x = tag "ol" (is >>| tag "li" |> seq) x
+let ul' ?(cls=None) lis = match lis with
+| [] -> noop
+| _ -> tag ~cls "ul" (lis |> seq)
+let ol is = match is with
+| [] -> noop
+| _ -> tag "ol" (is >>| tag "li" |> seq )
+
+let li ?(cls=None) = tag "li" ~cls
+
 let audio ?(id="") src = text @@
   sprintf "<audio%s controls preload=\"metadata\" class=\"sound\"><source src=\"%s\"/></audio>"
   (if id <> "" then sprintf " id=\"%s\"" id else "")

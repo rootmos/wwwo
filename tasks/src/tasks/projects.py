@@ -63,6 +63,9 @@ def github(projects):
 
         P["stars"] = len(list(r.get_stargazers()))
 
+        if "favorite" not in P:
+            P["favorite"] = False
+
         ps[P["name"]] = P
 
     return ps
@@ -98,14 +101,26 @@ def sourcehut(projects):
 
         for r in rs["results"]:
             name = r["name"]
-            if name not in projects:
+
+            def m(p):
+                if isinstance(p, str):
+                    return p == name
+                elif isinstance(p, dict):
+                    return p["name"] == name
+            try:
+                p = next(filter(m, projects))
+            except StopIteration:
                 continue
+            if isinstance(p, str):
+                p = { "name": p }
+
             ps[name] = {
                 "name": name,
                 "description": r["description"],
                 "date_created": r["created"],
                 "last_activity": r["updated"],
                 "url": "https://git.sr.ht/" + r["owner"]["canonicalName"] + "/" + name,
+                "favorite": p.get("favorite", False),
             }
 
         cursor = rs.get("cursor")

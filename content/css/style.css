@@ -30,6 +30,10 @@ li {
   padding: 2px 15px;
 }
 
+li.favorite::marker {
+  color: #be2cd3;
+}
+
 ul > li {
   padding: 0.2em 0;
 }

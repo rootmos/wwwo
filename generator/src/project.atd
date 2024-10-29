@@ -21,6 +21,7 @@ type project = {
     ?stars: int option;
     ~subprojects <ocaml default="[]">: subproject list;
     ~branches <ocaml default="[]">: branch list;
+    favorite: bool;
 }
 
 type projects = project list

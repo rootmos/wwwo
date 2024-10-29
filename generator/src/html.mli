@@ -25,7 +25,9 @@ val h1 : 'a t -> 'a t
 val h2 : 'a t -> 'a t
 
 val ul : ?cls:string option -> 'a t list -> 'a t
+val ul' : ?cls:string option -> 'a t list -> 'a t
 val ol : 'a t list -> 'a -> string
+val li : ?cls:string option -> 'a t -> 'a t
 
 val table : ?widths:int list option -> 'a t list list -> 'a t
 

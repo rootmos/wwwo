@@ -160,18 +160,20 @@ let projects_snippet =
       Utils.load_file |> Project_j.projects_of_string in
     let s p0 p1 = Lenient_iso8601.compare p1.last_activity p0.last_activity in
     ps |> List.sort s in
-  let r p = seq [
-    a p.url @@ text p.name;
-    (match p.stars with None -> noop | Some 0 -> noop | Some s -> text (sprintf " ★%d" s));
-    (match p.description with Some d -> text (" » " ^ d) | None -> noop);
-    p.subprojects >>| (fun (s: subproject) -> seq [
-      a s.url @@ text s.name;
-      (match s.description with Some d -> text (" » " ^ d) | None -> noop);
-    ]) |> ul;
-  ]
+  let r p =
+    let cls = (if p.favorite then (Some "favorite") else None) in
+    li ~cls @@ seq [
+      a p.url @@ text p.name;
+      (match p.stars with None -> noop | Some 0 -> noop | Some s -> text (sprintf " ★%d" s));
+      (match p.description with Some d -> text (" » " ^ d) | None -> noop);
+      p.subprojects >>| (fun (s: subproject) -> seq [
+        a s.url @@ text s.name;
+        (match s.description with Some d -> text (" » " ^ d) | None -> noop);
+      ]) |> ul;
+    ]
   in seq [
     h2 @@ text "Projects";
-    projects >>| r |> ul ~cls:(Some "content");
+    projects >>| r |> ul' ~cls:(Some "content");
   ]
 
 let services_snippet = seq [

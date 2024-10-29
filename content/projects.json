@@ -50,7 +50,10 @@
             ]
         },
         "lambdasylum",
-        "silly-k",
+        {
+            "name": "silly-k",
+            "favorite": true
+        },
         "silly-ml",
         "silly-joy",
         "silly-actor",
@@ -70,8 +73,14 @@
         "audio-journal",
         "stream",
         "twitch-cli",
-        "h",
-        "openbsd",
+        {
+            "name": "h",
+            "favorite": true
+        },
+        {
+            "name": "openbsd",
+            "favorite": true
+        },
         "libr",
         "texhelp"
     ],
