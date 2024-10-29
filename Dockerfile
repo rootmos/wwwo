@@ -1,4 +1,4 @@
-FROM alpine:3.18.4 as generator-builder
+FROM alpine:3.20 as generator-builder
 
 RUN apk update && apk add bash make gcc musl-dev opam
 
@@ -24,7 +24,7 @@ RUN buildml -C generator -m install
 
 
 
-FROM alpine:3.18.4 as tasks-builder
+FROM alpine:3.20 as tasks-builder
 
 RUN apk update && apk add bash python3 py3-pip
 
@@ -42,7 +42,7 @@ RUN buildpy -C tasks -b -T /tasks.tar.gz
 
 
 
-FROM alpine:3.18.4 as lambda-builder
+FROM alpine:3.20 as lambda-builder
 
 RUN apk update && apk add bash \
     python3-dev py3-pip \
@@ -62,7 +62,7 @@ RUN buildpy -C lambda -b -T /lambda.tar.gz
 
 
 
-FROM alpine:3.18.4
+FROM alpine:3.20
 
 RUN apk update && apk add bash \
     python3 wget make rsync
