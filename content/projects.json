@@ -82,7 +82,11 @@
             "favorite": true
         },
         "libr",
-        "texhelp"
+        "texhelp",
+        {
+            "name": "continuously",
+            "favorite": true
+        }
     ],
     "sourcehut": [
         "AoC",
