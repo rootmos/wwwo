@@ -6,6 +6,8 @@ import datetime
 
 from .common import fetch_secret, output
 
+from . import sourcehut
+
 import requests
 from github import Github
 
@@ -19,7 +21,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def github(projects):
+def from_github(projects):
     g = Github(fetch_secret(os.environ["GITHUB_TOKEN_ARN"]))
     user = g.get_user().login
 
@@ -70,8 +72,8 @@ def github(projects):
 
     return ps
 
-def sourcehut(projects):
-    token = fetch_secret(os.environ["SOURCEHUT_TOKEN_ARN"])
+def from_sourcehut(projects):
+    token = sourcehut.token_from_env()
 
     h = {
         "Authorization": f"Bearer {token}",
@@ -96,6 +98,7 @@ def sourcehut(projects):
 }}"""
         body = { "query": query }
         rsp = requests.post("https://git.sr.ht/query", headers=h, data=json.dumps(body))
+        rsp.raise_for_status()
         j = json.loads(rsp.content)
         rs = j["data"]["repositories"]
 
