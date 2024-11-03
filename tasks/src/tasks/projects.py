@@ -140,8 +140,8 @@ def main():
     with open(args.projects_spec, "r") as f:
         raw = json.loads(f.read())
 
-    ps = github(raw.get("github", {}))
-    ps |= sourcehut(raw.get("sourcehut", {}))
+    ps = from_github(raw.get("github", {}))
+    ps |= from_sourcehut(raw.get("sourcehut", {}))
 
     with output(args.output) as f:
         json.dump(list(ps.values()), f)
