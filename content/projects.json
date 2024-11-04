@@ -97,6 +97,7 @@
         "turn",
         "fetch",
         "go-pkg-proxy",
-        "scripts"
+        "scripts",
+        "dot-nvim"
     ]
 }
