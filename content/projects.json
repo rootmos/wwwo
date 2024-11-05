@@ -98,6 +98,7 @@
         "fetch",
         "go-pkg-proxy",
         "scripts",
-        "dot-nvim"
+        "dot-nvim",
+        "media"
     ]
 }
