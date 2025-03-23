@@ -92,7 +92,7 @@ def entrypoint(event, ctx):
             log_stream_url = f"https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logEventViewer:group={ctx.log_group_name};stream={ctx.log_stream_name}"
 
             payload = {
-                "execption": repr(e),
+                "exception": repr(e),
                 "event": event,
                 "invocation": {
                     "function_arn": ctx.invoked_function_arn,

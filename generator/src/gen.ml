@@ -172,8 +172,13 @@ let projects_snippet =
       ]) |> ul;
     ]
   in seq [
-    h2 @@ text "Projects";
-    projects >>| r |> ul' ~cls:(Some "content");
+    h2 @@ text "Favorite projects";
+    List.filter (fun p -> p.favorite) projects >>| r |> ul' ~cls:(Some "content");
+    h2 @@ seq [
+      text "Projects";
+      span ~cls:"subtitle" @@ text "sorted by recent activity";
+    ];
+    List.filter (fun p -> not p.favorite) projects >>| r |> ul' ~cls:(Some "content");
   ]
 
 let services_snippet = seq [

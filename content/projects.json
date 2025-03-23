@@ -60,6 +60,7 @@
         "silly-church",
         "tabs-vs-spaces",
         "dvorak",
+        "xhook",
         "git-audit",
         "displayswitcheroo",
         "libpquv",
@@ -99,6 +100,7 @@
         "go-pkg-proxy",
         "scripts",
         "dot-nvim",
-        "media"
+        "media",
+        "templates"
     ]
 }
