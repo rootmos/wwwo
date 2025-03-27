@@ -193,7 +193,7 @@ let resume_snippet =
   seq [
     h2 @@ text "Resume";
     p @@ seq [
-      a (Page.static "resume-gustav-behm.pdf" (* TODO should be part of the resume.json *)) @@ text "PDF";
+      a "/resume.pdf" @@ text "PDF";
       text @@ sprintf" (updated %s)" r.updated;
     ]
   ]
