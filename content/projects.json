@@ -62,7 +62,10 @@
         "dvorak",
         "xhook",
         "git-audit",
-        "displayswitcheroo",
+        {
+            "name": "displayswitcheroo",
+            "favorite": true
+        },
         "libpquv",
         "ppx_useless",
         "fb",
@@ -87,7 +90,12 @@
         {
             "name": "continuously",
             "favorite": true
-        }
+        },
+        {
+            "name": "lua-bigint",
+            "favorite": true
+        },
+        "release.py"
     ],
     "sourcehut": [
         "AoC",
