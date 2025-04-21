@@ -27,6 +27,7 @@ ARGS+=("--tag=$DOCKER_IMAGE")
 ARGS+=(".")
 
 if [ -n "${GITHUB_ACTION-}" ]; then
+    # https://docs.docker.com/build/cache/backends/gha/
     # https://github.com/moby/buildkit#github-actions-cache-experimental
     docker buildx build \
         --output=type=docker \
