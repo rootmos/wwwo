@@ -218,47 +218,23 @@ let index posts_snippet =
   let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
   pagemaker config Default ~back:None ~additional_css:[ "twitch.css" ] @@ seq [
   div ~cls:(Some "intro") @@ seq [
-    script @@ String.concat "" [
-      "let avatar_revealed = 0;";
-      "function avatar_show_hint() {";
-      "  if(!avatar_revealed) {";
-      "    document.getElementById('avatar-hint').style['display'] = 'block';";
-      "  }";
-      "}";
-      "setTimeout(avatar_show_hint, 5000);";
-      "let avatar_clicks = 0;";
-      "function avatar_onclick() {";
-      "  document.getElementById('avatar-hint').style['display'] = 'none';";
-      "  const e1 = document.getElementById('avatar-explanation-1');";
-      "  const e2 = document.getElementById('avatar-explanation-2');";
-      "  if(avatar_clicks%4 == 0) {";
-      "    e1.style['display'] = 'block';";
-      "  } else if(avatar_clicks%4 == 1) {";
-      "    e2.style['display'] = 'block';";
-      "  } else if(avatar_clicks%4 == 2) {";
-      "    e2.style['display'] = 'none';";
-      "  } else {";
-      "    e1.style['display'] = 'none';";
-      "  }";
-      "  avatar_clicks += 1;";
-      "  avatar_revealed = 1;";
-      "}";
-    ];
+    script @@ Utils.load_file @@ Path.js "avatar.js";
+    script @@ Utils.load_file @@ Path.js "slogan.js";
     img ~cls:(Some "avatar") ~alt:(Some acronym) ~onclick:(Some "avatar_onclick()")
       (Path.image "rootmos.jpg");
     div ~cls:(Some "slogan") @@ seq [
-      text "Some math, music, mostly programming and everything in between";
+      div ~id:(Some "slogan-text") @@ text "Some math, music, mostly programming and everything in between";
       div ~id:(Some "avatar-hint") ~style:(Some "display: none") @@ text "click me ⇒ ";
       div ~id:(Some "avatar-explanation-1") ~style:(Some "display: none") @@ seq [
-        text acronym;
-        text " ";
-        a "https://knowyourmeme.com/memes/astronaut-sloth" @@ text "[?]";
-      ];
-      div ~id:(Some "avatar-explanation-2") ~style:(Some "display: none") @@ seq [
-        text "conflation of ";
+        text "rootmos := conflation of ";
         a "https://en.wikipedia.org/wiki/Superuser" @@ text "root";
         text " and ";
         a "https://sv.wikipedia.org/wiki/Rotmos" @@ text "rotmos";
+      ];
+      div ~id:(Some "avatar-explanation-2") ~style:(Some "display: none") @@ seq [
+        text "What's with the";
+        text " ";
+        a "https://knowyourmeme.com/memes/astronaut-sloth" @@ text "sloth?";
       ];
     ];
     social;
