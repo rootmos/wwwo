@@ -84,8 +84,9 @@ let span ?(cls="") = fun k x ->
   if cls <> "" then sprintf "<span class=\"%s\">%s</span>" cls (k x)
   else sprintf "<span>%s</span>" (k x)
 
-let a href = fun k x -> sprintf "<a href=\"%s\">%s</a>"
-    (url_escape_string href |> html_escape_string) (k x)
+let a ?(alt=None) href = fun k x ->
+  let alt = match alt with Some alt -> sprintf " title=\"%s\"" alt | None -> "" in
+  sprintf "<a href=\"%s\"%s>%s</a>" (url_escape_string href |> html_escape_string) alt (k x)
 
 let button s = fun k x ->
   sprintf "<a href=\"#\" onclick=\"%s\">%s</a>" s (k x)

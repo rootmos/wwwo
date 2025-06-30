@@ -222,18 +222,30 @@ let index posts_snippet =
       img ~cls:(Some "avatar") ~alt:(Some acronym)
         (Path.image "rootmos.jpg");
       div ~cls:(Some "description") @@ seq @@ List.rev [
-        div ~cls:(Some "slogan") @@ text "some math, music, mostly programming and everything in between";
+        div ~cls:(Some "slogan") @@ seq [
+          text "Some ";
+          a "#math" @@ text "math";
+          text ", ";
+          a "#music" @@ text "music";
+          text ", mostly ";
+          a "#programming" @@ text "programming";
+          text " and everything in between";
+        ];
 
         div ~cls:(Some "separator") @@ noop;
 
         div ~cls:(Some "text") @@ text "I'm a problem-solving automaton";
         div ~cls:(Some "text") @@ seq [
           text "I ";
-          a "https://dl.acm.org/doi/10.1145/358198.358210" @@ text "trust";
+          a ~alt:(Some "Reflections on trusting trust, Ken Thompson") "https://dl.acm.org/doi/10.1145/358198.358210" @@ text "trust";
           text ",&nbspbut ";
           a "https://en.wikipedia.org/wiki/Trust,_but_verify" @@ text "verify";
         ];
-        div ~cls:(Some "text") @@ text "I like silly things and abstract non-sense";
+        div ~cls:(Some "text") @@ seq [
+          text "I like ";
+          a "https://github.com/rootmos/silly-k" @@ text "silly";
+          text " things and abstract non-sense";
+        ];
         div ~cls:(Some "text") @@ text "but I'm dead serious about code and ruthlessly (self-)critical";
 
         div ~cls:(Some "separator") @@ noop;
@@ -257,16 +269,16 @@ let index posts_snippet =
     ];
   ];
 
-  div ~cls:(Some "content") @@ projects_snippet;
+  div ~id:(Some "programming") ~cls:(Some "content") @@ projects_snippet;
   div ~cls:(Some "content") @@ Activity.snippet ();
   div ~cls:(Some "content") @@ posts_snippet;
 
-  div ~cls:(Some "content") @@ sounds_snippet;
+  div ~id:(Some "music") ~cls:(Some "content") @@ sounds_snippet;
   div ~cls:(Some "content twitch") @@ twitch_snippet;
 
   div ~cls:(Some "content") @@ services_snippet;
 
-  div ~cls:(Some "content") @@ md_snippet (Path.snippet "academic.md");
+  div ~id:(Some "math") ~cls:(Some "content") @@ md_snippet (Path.snippet "academic.md");
   div ~cls:(Some "content") @@ resume_snippet;
 ]
 

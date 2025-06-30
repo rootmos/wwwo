@@ -40,7 +40,7 @@ val audio : ?id:string -> Camomile.UTF8.t -> 'a t
 val video : ?id:string -> ?poster:string option -> Camomile.UTF8.t -> 'a t
 val canvas : string -> int -> int -> 'a t
 
-val a : Camomile.UTF8.t -> ('a -> string) -> 'a -> string
+val a : ?alt:(string option) -> Camomile.UTF8.t -> ('a -> string) -> 'a -> string
 val button : string -> ('a -> string) -> 'a -> string
 
 val img :
