@@ -3,7 +3,7 @@
 
     let slogans = [
         "I trust,&nbspbut verify",
-        "I like silly things",
+        "I like silly things and abstract non-sense",
         "I like silly things<br/>but I'm dead serious about code",
         "I like silly things<br/>but I'm dead serious about code<br/>and ruthlessly (self-)critical",
     ];
@@ -34,7 +34,7 @@
 
     window.addEventListener(
         "load",
-        (event) => {
+        ev => {
             sloganElement = document.querySelector("#slogan-text");
             slogans.push(sloganElement.innerHTML);
             console.log(slogans);

@@ -218,26 +218,43 @@ let index posts_snippet =
   let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
   pagemaker config Default ~back:None ~additional_css:[ "twitch.css" ] @@ seq [
   div ~cls:(Some "intro") @@ seq [
-    script @@ Utils.load_file @@ Path.js "avatar.js";
-    script @@ Utils.load_file @@ Path.js "slogan.js";
-    img ~cls:(Some "avatar") ~alt:(Some acronym) ~onclick:(Some "avatar_onclick()")
-      (Path.image "rootmos.jpg");
-    div ~cls:(Some "slogan") @@ seq [
-      div ~id:(Some "slogan-text") @@ text "Some math, music, mostly programming and everything in between";
-      div ~id:(Some "avatar-hint") ~style:(Some "display: none") @@ text "click me ⇒ ";
-      div ~id:(Some "avatar-explanation-1") ~style:(Some "display: none") @@ seq [
-        text "rootmos := conflation of ";
-        a "https://en.wikipedia.org/wiki/Superuser" @@ text "root";
-        text " and ";
-        a "https://sv.wikipedia.org/wiki/Rotmos" @@ text "rotmos";
-      ];
-      div ~id:(Some "avatar-explanation-2") ~style:(Some "display: none") @@ seq [
-        text "What's with the";
-        text " ";
-        a "https://knowyourmeme.com/memes/astronaut-sloth" @@ text "sloth?";
+    div ~cls:(Some "row") @@ seq [
+      img ~cls:(Some "avatar") ~alt:(Some acronym)
+        (Path.image "rootmos.jpg");
+      div ~cls:(Some "description") @@ seq @@ List.rev [
+        div ~cls:(Some "slogan") @@ text "some math, music, mostly programming and everything in between";
+
+        div ~cls:(Some "separator") @@ noop;
+
+        div ~cls:(Some "text") @@ text "I'm a problem-solving automaton";
+        div ~cls:(Some "text") @@ seq [
+          text "I ";
+          a "https://dl.acm.org/doi/10.1145/358198.358210" @@ text "trust";
+          text ",&nbspbut ";
+          a "https://en.wikipedia.org/wiki/Trust,_but_verify" @@ text "verify";
+        ];
+        div ~cls:(Some "text") @@ text "I like silly things and abstract non-sense";
+        div ~cls:(Some "text") @@ text "but I'm dead serious about code and ruthlessly (self-)critical";
+
+        div ~cls:(Some "separator") @@ noop;
+
+        div ~cls:(Some "explanation") @@ seq [
+          text "rootmos := conflation of ";
+          a "https://en.wikipedia.org/wiki/Superuser" @@ text "root";
+          text " and ";
+          a "https://sv.wikipedia.org/wiki/Rotmos" @@ text "rotmos";
+        ];
+        div ~cls:(Some "explanatio") @@ seq [
+          text "and what's with the";
+          text " ";
+          a "https://knowyourmeme.com/memes/astronaut-sloth" @@ text "sloth";
+          text "?";
+        ];
       ];
     ];
-    social;
+    div ~cls:(Some "row") @@ seq [
+      social;
+    ];
   ];
 
   div ~cls:(Some "content") @@ projects_snippet;
