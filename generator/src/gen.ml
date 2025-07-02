@@ -254,7 +254,9 @@ let index posts_snippet =
         div ~cls:(Some "text") @@ seq [
           text "I like ";
           a "https://github.com/rootmos/silly-k" @@ text "silly";
-          text " things and abstract non-sense";
+          text " things and ";
+          a "https://en.wikipedia.org/w/index.php?title=Surreal_Numbers_(book)" @@ text "surreal";
+          text " non-sense";
         ];
         div ~cls:(Some "text") @@ text "but I'm dead serious about code and ruthlessly (self-)critical";
 
