@@ -234,19 +234,42 @@ let index posts_snippet =
 
         div ~cls:(Some "separator") @@ noop;
 
-        div ~cls:(Some "text") @@ text "I'm a problem-solving automaton";
+        div ~cls:(Some "text") @@ text "a problem-solving automaton";
         div ~cls:(Some "text") @@ seq [
-          text "I ";
-          a ~alt:(Some "Reflections on trusting trust, Ken Thompson") "https://dl.acm.org/doi/10.1145/358198.358210" @@ text "trust";
+          (*text "I ";*)
+          text "that ";
+          a ~alt:(Some "Reflections on trusting trust, Ken Thompson") "https://dl.acm.org/doi/10.1145/358198.358210" @@ text "trusts";
           text ",&nbspbut ";
-          a "https://en.wikipedia.org/wiki/Trust,_but_verify" @@ text "verify";
+          a "https://en.wikipedia.org/wiki/Trust,_but_verify" @@ text "verifies";
         ];
+
+        div ~cls:(Some "separator") @@ noop;
+
         div ~cls:(Some "text") @@ seq [
           text "I like ";
           a "https://github.com/rootmos/silly-k" @@ text "silly";
           text " things and abstract non-sense";
         ];
         div ~cls:(Some "text") @@ text "but I'm dead serious about code and ruthlessly (self-)critical";
+
+        div ~cls:(Some "separator") @@ noop;
+
+        div ~cls:(Some "text") @@ text "oh, and yes I'm \"that guy\"";
+        div ~cls:(Some "text") @@ seq [
+          a "https://archlinux.org/" @@ text "Arch Linux";
+          text ", ";
+          a "https://xmonad.org/" @@ text "XMonad";
+          text ", ";
+          a "https://en.wikipedia.org/wiki/Kinesis_(keyboard)#Contoured_/_Advantage" @@ text "Kinesis";
+          text ", ";
+          a "https://github.com/rootmos/dvorak" @@ text "custom";
+          text " ";
+          a "https://en.wikipedia.org/wiki/Dvorak_keyboard_layout" @@ text "Dvorak";
+          text " and ";
+          a "https://git.sr.ht/~rootmos/dot-nvim" @@ text ".";
+          text "&thinsp;";
+          a "https://neovim.io/" @@ text "nvim";
+        ];
 
         div ~cls:(Some "separator") @@ noop;
 
