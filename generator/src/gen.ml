@@ -264,6 +264,8 @@ let index posts_snippet =
         div ~cls:(Some "text") @@ seq [
           a "https://archlinux.org/" @@ text "Arch Linux";
           text ", ";
+          a "https://github.com/rootmos/desktop" @@ text ".";
+          text "&thinsp;";
           a "https://xmonad.org/" @@ text "XMonad";
           text ", ";
           a "https://en.wikipedia.org/wiki/Kinesis_(keyboard)#Contoured_/_Advantage" @@ text "Kinesis";
