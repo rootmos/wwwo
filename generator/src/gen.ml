@@ -234,6 +234,12 @@ let index posts_snippet =
 
         div ~cls:(Some "separator") @@ noop;
 
+        div ~cls:(Some "explanation") @@ seq [
+          text "rootmos := conflation of ";
+          a "https://en.wikipedia.org/wiki/Superuser" @@ text "root";
+          text " and ";
+          a "https://sv.wikipedia.org/wiki/Rotmos" @@ text "rotmos";
+        ];
         div ~cls:(Some "text") @@ text "a problem-solving automaton";
         div ~cls:(Some "text") @@ seq [
           (*text "I ";*)
@@ -273,12 +279,6 @@ let index posts_snippet =
 
         div ~cls:(Some "separator") @@ noop;
 
-        div ~cls:(Some "explanation") @@ seq [
-          text "rootmos := conflation of ";
-          a "https://en.wikipedia.org/wiki/Superuser" @@ text "root";
-          text " and ";
-          a "https://sv.wikipedia.org/wiki/Rotmos" @@ text "rotmos";
-        ];
         div ~cls:(Some "explanatio") @@ seq [
           text "and what's with the";
           text " ";
