@@ -42,28 +42,30 @@ open struct
     a "https://en.wikipedia.org/wiki/Trust,_but_verify" @@ text verify;
   ]
 
+  let separator = div ~cls:(Some "separator") @@ noop
+
   let description = function
-    0 -> [ slogan ]
+  | 0 -> [
+    slogan;
+    separator;
+    rootmos_definition;
+  ]
   | 1 -> [
     slogan;
-    div ~cls:(Some "separator") @@ noop;
-
+    separator;
     rootmos_definition;
     trust "I" "trust" "verify";
-    div ~cls:(Some "separator") @@ noop;
-
+    separator;
     sloth_explanation "but";
   ]
   | 2 -> [
     slogan;
-
-    div ~cls:(Some "separator") @@ noop;
+    separator;
 
     rootmos_definition;
     div ~cls:(Some "text") @@ text "a problem-solving automaton";
     trust "that" "trusts" "verifies";
-
-    div ~cls:(Some "separator") @@ noop;
+    separator;
 
     div ~cls:(Some "text") @@ seq [
       text "I like ";
@@ -73,8 +75,7 @@ open struct
       text " non-sense";
     ];
     div ~cls:(Some "text") @@ text "but I'm dead serious about code and ruthlessly (self-)critical";
-
-    div ~cls:(Some "separator") @@ noop;
+    separator;
 
     div ~cls:(Some "text") @@ seq [
       text "oh, and yes I'm ";
@@ -98,26 +99,23 @@ open struct
       text "&thinsp;";
       a "https://neovim.io/" @@ text "nvim";
     ];
-
-    div ~cls:(Some "separator") @@ noop;
+    separator;
 
     sloth_explanation "and";
   ]
   | _ -> failwith "undefined variant"
 
-  let picture variant = seq [
-    begin match variant with
-      0 -> img ~cls:(Some "portrait") ~alt:(Some "Gustav Behm") (Path.image "portrait.jpg")
-    | _ ->
-        let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
-        img ~cls:(Some "avatar") ~alt:(Some acronym) (Path.image "rootmos.jpg")
-    end;
-
-    div ~cls:(Some "description") @@ seq @@ List.rev @@ description variant;
-  ]
+  let picture = function
+    0 -> img ~cls:(Some "portrait") ~alt:(Some "Gustav Behm") (Path.image "portrait.jpg")
+  | _ ->
+    let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
+    img ~cls:(Some "avatar") ~alt:(Some acronym) (Path.image "rootmos.jpg")
 end
 
 let make variant = close @@ div ~cls:(Some "intro") @@ seq [
-  div ~cls:(Some "row") @@ picture variant;
+  div ~cls:(Some "row") @@ seq [
+    picture variant;
+    div ~cls:(Some "description") @@ seq @@ List.rev @@ description variant;
+  ];
   div ~cls:(Some "row") @@ seq [ social ];
 ]
