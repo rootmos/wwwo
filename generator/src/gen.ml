@@ -214,83 +214,90 @@ let md_snippet s =
     | _ -> None in
   text @@ Omd.to_html md
 
-let index posts_snippet =
-  let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
+let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness"
+
+let avatar variant = seq [
+  img ~cls:(Some "avatar") ~alt:(Some acronym)
+      (Path.image "rootmos.jpg");
+  div ~cls:(Some "description") @@ seq @@ List.rev [
+    div ~cls:(Some "slogan") @@ seq [
+      text "Some ";
+      a "#math" @@ text "math";
+      text ", ";
+      a "#music" @@ text "music";
+      text ", mostly ";
+      a "#programming" @@ text "programming";
+      text " and everything in between";
+    ];
+
+    div ~cls:(Some "separator") @@ noop;
+
+    div ~cls:(Some "explanation") @@ seq [
+      text "rootmos := conflation of ";
+      a "https://en.wikipedia.org/wiki/Superuser" @@ text "root";
+      text " and ";
+      a "https://sv.wikipedia.org/wiki/Rotmos" @@ text "rotmos";
+    ];
+    div ~cls:(Some "text") @@ text "a problem-solving automaton";
+    div ~cls:(Some "text") @@ seq [
+      (*text "I ";*)
+      text "that ";
+      a ~alt:(Some "Reflections on trusting trust, Ken Thompson") "https://dl.acm.org/doi/10.1145/358198.358210" @@ text "trusts";
+      text ",&nbspbut ";
+      a "https://en.wikipedia.org/wiki/Trust,_but_verify" @@ text "verifies";
+    ];
+
+    div ~cls:(Some "separator") @@ noop;
+
+    div ~cls:(Some "text") @@ seq [
+      text "I like ";
+      a "https://github.com/rootmos/silly-k" @@ text "silly";
+      text " things and ";
+      a "https://en.wikipedia.org/w/index.php?title=Surreal_Numbers_(book)" @@ text "surreal";
+      text " non-sense";
+    ];
+    div ~cls:(Some "text") @@ text "but I'm dead serious about code and ruthlessly (self-)critical";
+
+    div ~cls:(Some "separator") @@ noop;
+
+    div ~cls:(Some "text") @@ seq [
+      text "oh, and yes I'm ";
+      a "https://unixgreybeard.com/" @@ text "that guy";
+      text ":";
+    ];
+    div ~cls:(Some "text") @@ seq [
+      a "https://archlinux.org/" @@ text "Arch Linux";
+      text ", ";
+      a "https://github.com/rootmos/desktop" @@ text ".";
+      text "&thinsp;";
+      a "https://xmonad.org/" @@ text "XMonad";
+      text ", ";
+      a "https://en.wikipedia.org/wiki/Kinesis_(keyboard)#Contoured_/_Advantage" @@ text "Kinesis";
+      text ", ";
+      a "https://github.com/rootmos/dvorak" @@ text "custom";
+      text " ";
+      a "https://en.wikipedia.org/wiki/Dvorak_keyboard_layout" @@ text "Dvorak";
+      text " and ";
+      a "https://git.sr.ht/~rootmos/dot-nvim" @@ text ".";
+      text "&thinsp;";
+      a "https://neovim.io/" @@ text "nvim";
+    ];
+
+    div ~cls:(Some "separator") @@ noop;
+
+    div ~cls:(Some "explanatio") @@ seq [
+      text "and what's with the";
+      text " ";
+      a "https://knowyourmeme.com/memes/astronaut-sloth" @@ text "sloth";
+      text "?";
+    ];
+  ];
+]
+
+let index variant posts_snippet =
   pagemaker config Default ~back:None ~additional_css:[ "twitch.css" ] @@ seq [
   div ~cls:(Some "intro") @@ seq [
-    div ~cls:(Some "row") @@ seq [
-      img ~cls:(Some "avatar") ~alt:(Some acronym)
-        (Path.image "rootmos.jpg");
-      div ~cls:(Some "description") @@ seq @@ List.rev [
-        div ~cls:(Some "slogan") @@ seq [
-          text "Some ";
-          a "#math" @@ text "math";
-          text ", ";
-          a "#music" @@ text "music";
-          text ", mostly ";
-          a "#programming" @@ text "programming";
-          text " and everything in between";
-        ];
-
-        div ~cls:(Some "separator") @@ noop;
-
-        div ~cls:(Some "explanation") @@ seq [
-          text "rootmos := conflation of ";
-          a "https://en.wikipedia.org/wiki/Superuser" @@ text "root";
-          text " and ";
-          a "https://sv.wikipedia.org/wiki/Rotmos" @@ text "rotmos";
-        ];
-        div ~cls:(Some "text") @@ text "a problem-solving automaton";
-        div ~cls:(Some "text") @@ seq [
-          (*text "I ";*)
-          text "that ";
-          a ~alt:(Some "Reflections on trusting trust, Ken Thompson") "https://dl.acm.org/doi/10.1145/358198.358210" @@ text "trusts";
-          text ",&nbspbut ";
-          a "https://en.wikipedia.org/wiki/Trust,_but_verify" @@ text "verifies";
-        ];
-
-        div ~cls:(Some "separator") @@ noop;
-
-        div ~cls:(Some "text") @@ seq [
-          text "I like ";
-          a "https://github.com/rootmos/silly-k" @@ text "silly";
-          text " things and ";
-          a "https://en.wikipedia.org/w/index.php?title=Surreal_Numbers_(book)" @@ text "surreal";
-          text " non-sense";
-        ];
-        div ~cls:(Some "text") @@ text "but I'm dead serious about code and ruthlessly (self-)critical";
-
-        div ~cls:(Some "separator") @@ noop;
-
-        div ~cls:(Some "text") @@ text "oh, and yes I'm \"that guy\"";
-        div ~cls:(Some "text") @@ seq [
-          a "https://archlinux.org/" @@ text "Arch Linux";
-          text ", ";
-          a "https://github.com/rootmos/desktop" @@ text ".";
-          text "&thinsp;";
-          a "https://xmonad.org/" @@ text "XMonad";
-          text ", ";
-          a "https://en.wikipedia.org/wiki/Kinesis_(keyboard)#Contoured_/_Advantage" @@ text "Kinesis";
-          text ", ";
-          a "https://github.com/rootmos/dvorak" @@ text "custom";
-          text " ";
-          a "https://en.wikipedia.org/wiki/Dvorak_keyboard_layout" @@ text "Dvorak";
-          text " and ";
-          a "https://git.sr.ht/~rootmos/dot-nvim" @@ text ".";
-          text "&thinsp;";
-          a "https://neovim.io/" @@ text "nvim";
-        ];
-
-        div ~cls:(Some "separator") @@ noop;
-
-        div ~cls:(Some "explanatio") @@ seq [
-          text "and what's with the";
-          text " ";
-          a "https://knowyourmeme.com/memes/astronaut-sloth" @@ text "sloth";
-          text "?";
-        ];
-      ];
-    ];
+    div ~cls:(Some "row") @@ avatar variant;
     div ~cls:(Some "row") @@ seq [
       social;
     ];
@@ -446,7 +453,7 @@ let () =
     ) |> ul
   ] in
 
-  write_page "index.html" (index posts_snippet);
+  List.iter (fun i -> write_page (sprintf "index.%d.html" i) (index i posts_snippet)) (List.init 3 (fun i -> i));
   write_page "sounds.html" sounds_page;
   write_page "jam.html" sounds_jam_page;
   write_page "demo.html" demo_page;
