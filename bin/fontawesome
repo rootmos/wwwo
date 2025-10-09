@@ -22,6 +22,7 @@ EXTRACT+=("svgs/brands/keybase.svg")
 EXTRACT+=("svgs/brands/twitch.svg")
 EXTRACT+=("svgs/brands/soundcloud.svg")
 EXTRACT+=("svgs/brands/github.svg")
+EXTRACT+=("svgs/brands/linkedin.svg")
 
 if [ -n "${1-}" ]; then
     ARGS=()

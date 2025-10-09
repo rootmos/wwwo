@@ -1,12 +1,15 @@
 open Html
 
 open struct
-  let social = seq @@ List.rev [
-    a "https://github.com/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/github.svg";
-    a "https://git.sr.ht/~rootmos" @@ svg ~cls:"social" (Path.image "sourcehut.svg");
-    a "https://keybase.io/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/keybase.svg";
-    a "https://twitch.tv/rootmos2" @@ svg ~cls:"social" "fa/svgs/brands/twitch.svg";
-    a "https://soundcloud.com/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/soundcloud.svg";
+  let linkedin = a "https://www.linkedin.com/in/rootmos/" @@ svg ~cls:"social" "fa/svgs/brands/linkedin.svg"
+  let social variant = seq @@ List.rev @@ List.flatten @@ [
+    (match variant with 0 -> [ linkedin ] | _ -> []);
+    [ a "https://github.com/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/github.svg";
+      a "https://git.sr.ht/~rootmos" @@ svg ~cls:"social" (Path.image "sourcehut.svg");
+      a "https://keybase.io/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/keybase.svg";
+      a "https://twitch.tv/rootmos2" @@ svg ~cls:"social" "fa/svgs/brands/twitch.svg";
+      a "https://soundcloud.com/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/soundcloud.svg";
+    ]
   ]
 
   let slogan = div ~cls:(Some "slogan") @@ seq [
@@ -117,5 +120,5 @@ let make variant = close @@ div ~cls:(Some "intro") @@ seq [
     picture variant;
     div ~cls:(Some "description") @@ seq @@ List.rev @@ description variant;
   ];
-  div ~cls:(Some "row") @@ seq [ social ];
+  div ~cls:(Some "row") @@ seq [ social variant ];
 ]
