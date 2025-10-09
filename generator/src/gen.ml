@@ -198,14 +198,6 @@ let resume_snippet =
     ]
   ]
 
-let social = seq @@ List.rev [
-  a "https://github.com/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/github.svg";
-  a "https://git.sr.ht/~rootmos" @@ svg ~cls:"social" (Path.image "sourcehut.svg");
-  a "https://keybase.io/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/keybase.svg";
-  a "https://twitch.tv/rootmos2" @@ svg ~cls:"social" "fa/svgs/brands/twitch.svg";
-  a "https://soundcloud.com/rootmos" @@ svg ~cls:"social" "fa/svgs/brands/soundcloud.svg";
-]
-
 let md_snippet s =
   let raw = Utils.load_file s in
   let md = raw |> Omd.of_string |> Omd_representation.visit @@ function
@@ -214,68 +206,22 @@ let md_snippet s =
     | _ -> None in
   text @@ Omd.to_html md
 
-let index posts_snippet =
-  let acronym = "Rolling Oblong Ortofon Troubadouring Mystique Over Salaciousness" in
+let index variant posts_snippet =
   pagemaker config Default ~back:None ~additional_css:[ "twitch.css" ] @@ seq [
-  div ~cls:(Some "intro") @@ seq [
-    script @@ String.concat "" [
-      "let avatar_revealed = 0;";
-      "function avatar_show_hint() {";
-      "  if(!avatar_revealed) {";
-      "    document.getElementById('avatar-hint').style['display'] = 'block';";
-      "  }";
-      "}";
-      "setTimeout(avatar_show_hint, 5000);";
-      "let avatar_clicks = 0;";
-      "function avatar_onclick() {";
-      "  document.getElementById('avatar-hint').style['display'] = 'none';";
-      "  const e1 = document.getElementById('avatar-explanation-1');";
-      "  const e2 = document.getElementById('avatar-explanation-2');";
-      "  if(avatar_clicks%4 == 0) {";
-      "    e1.style['display'] = 'block';";
-      "  } else if(avatar_clicks%4 == 1) {";
-      "    e2.style['display'] = 'block';";
-      "  } else if(avatar_clicks%4 == 2) {";
-      "    e2.style['display'] = 'none';";
-      "  } else {";
-      "    e1.style['display'] = 'none';";
-      "  }";
-      "  avatar_clicks += 1;";
-      "  avatar_revealed = 1;";
-      "}";
-    ];
-    img ~cls:(Some "avatar") ~alt:(Some acronym) ~onclick:(Some "avatar_onclick()")
-      (Path.image "rootmos.jpg");
-    div ~cls:(Some "slogan") @@ seq [
-      text "Some math, music, mostly programming and everything in between";
-      div ~id:(Some "avatar-hint") ~style:(Some "display: none") @@ text "click me ⇒ ";
-      div ~id:(Some "avatar-explanation-1") ~style:(Some "display: none") @@ seq [
-        text acronym;
-        text " ";
-        a "https://knowyourmeme.com/memes/astronaut-sloth" @@ text "[?]";
-      ];
-      div ~id:(Some "avatar-explanation-2") ~style:(Some "display: none") @@ seq [
-        text "conflation of ";
-        a "https://en.wikipedia.org/wiki/Superuser" @@ text "root";
-        text " and ";
-        a "https://sv.wikipedia.org/wiki/Rotmos" @@ text "rotmos";
-      ];
-    ];
-    social;
-  ];
+    Intro.make variant;
 
-  div ~cls:(Some "content") @@ projects_snippet;
-  div ~cls:(Some "content") @@ Activity.snippet ();
-  div ~cls:(Some "content") @@ posts_snippet;
+    div ~id:(Some "programming") ~cls:(Some "content") @@ projects_snippet;
+    div ~cls:(Some "content") @@ Activity.snippet ();
+    div ~cls:(Some "content") @@ posts_snippet;
 
-  div ~cls:(Some "content") @@ sounds_snippet;
-  div ~cls:(Some "content twitch") @@ twitch_snippet;
+    div ~id:(Some "music") ~cls:(Some "content") @@ sounds_snippet;
+    div ~cls:(Some "content twitch") @@ twitch_snippet;
 
-  div ~cls:(Some "content") @@ services_snippet;
+    div ~cls:(Some "content") @@ services_snippet;
 
-  div ~cls:(Some "content") @@ md_snippet (Path.snippet "academic.md");
-  div ~cls:(Some "content") @@ resume_snippet;
-]
+    div ~id:(Some "math") ~cls:(Some "content") @@ md_snippet (Path.snippet "academic.md");
+    div ~cls:(Some "content") @@ resume_snippet;
+  ]
 
 let bor19 = seq [
   p ~cls:(Some "c") @@ img ~cls:(Some "cover") ~alt:(Some "cover")
@@ -414,7 +360,7 @@ let () =
     ) |> ul
   ] in
 
-  write_page "index.html" (index posts_snippet);
+  List.iter (fun i -> write_page (sprintf "index.%d.html" i) (index i posts_snippet)) (List.init 3 (fun i -> i));
   write_page "sounds.html" sounds_page;
   write_page "jam.html" sounds_jam_page;
   write_page "demo.html" demo_page;

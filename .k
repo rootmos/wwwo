@@ -33,5 +33,6 @@ fa() {
 }
 
 upload() {
-    aws s3 cp --acl=public-read "workdir/webroot/dev/$POST.html" "s3://rootmos-www/$POST.html"
+    #aws s3 cp --acl=public-read "workdir/webroot/dev/$POST.html" "s3://rootmos-www/$POST.html"
+    aws s3 cp --acl=public-read "workdir/webroot/dev/index.html" "s3://rootmos-www/sandbox.html"
 }

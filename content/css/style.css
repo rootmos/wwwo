@@ -88,20 +88,6 @@ svg.button {
   overflow: visible;
 }
 
-.slogan {
-  font-size: 15px;
-  font-style: italic;
-  margin: 150px 40px 0 0;
-  color: #777;
-  text-align: right;
-  width: 660px;
-  line-height: 1.5;
-}
-
-img.avatar {
-  height: 14em;
-}
-
 .intro {
   text-align: center;
   background-color: #fff;
@@ -109,6 +95,41 @@ img.avatar {
   display: flex;
   flex-direction: row-reverse;
   flex-wrap: wrap;
+}
+
+.intro > .row {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.intro .description {
+  font-size: 15px;
+  font-style: italic;
+  margin: 0 40px 0 0;
+  color: #777;
+  text-align: right;
+  width: 660px;
+  line-height: 1.5;
+
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.intro .slogan {
+  font-size: 17px;
+  color: #555;
+}
+
+.intro .description > .separator {
+  padding: 0.4em 0;
+}
+
+.intro .avatar {
+  height: 17em;
+}
+
+.intro .portrait {
+  height: 19em;
 }
 
 .subtitle {

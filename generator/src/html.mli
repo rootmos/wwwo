@@ -6,6 +6,7 @@ val head : 'a t -> 'a t
 
 val noop : 'a t
 val seq : ('a -> string) list -> 'a t
+val close : ('a -> 'a) t -> 'b t
 
 val title : string -> 'a t
 val favicon : ?embedd:bool -> string -> 'a -> string
@@ -40,7 +41,7 @@ val audio : ?id:string -> Camomile.UTF8.t -> 'a t
 val video : ?id:string -> ?poster:string option -> Camomile.UTF8.t -> 'a t
 val canvas : string -> int -> int -> 'a t
 
-val a : Camomile.UTF8.t -> ('a -> string) -> 'a -> string
+val a : ?alt:(string option) -> Camomile.UTF8.t -> ('a -> string) -> 'a -> string
 val button : string -> ('a -> string) -> 'a -> string
 
 val img :
