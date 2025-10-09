@@ -38,8 +38,10 @@ let seq xs: 'a t = fun a ->
 let text t: 'a t = fun _ -> t
 let noop: 'a t = fun x -> text "" x
 
+let close f = fun _ -> f (fun x -> x)
+
 let html x = seq [text "<!DOCTYPE html>"; tag "html" x]
-let body x =  tag "body" x
+let body x = tag "body" x
 let head x = tag "head" x
 let p ?(cls=None) ?(id=None) ?(style=None) x = tag ~cls ~id ~style "p" x
 let h1 x = tag "h1" x

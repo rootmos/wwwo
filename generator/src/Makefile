@@ -21,7 +21,7 @@ ATDs = \
 	$(call atd, gallery) $(call atd, project) \
 	$(call atd, resume)
 
-gen.exe: $(COMMON) $(ATDs) activity.ml gen.ml
+gen.exe: $(COMMON) $(ATDs) activity.ml intro.ml gen.ml
 	$(BUILDML_OCAMLC) -o $@ $^
 
 top.exe: $(COMMON)
@@ -32,3 +32,6 @@ gen_post.exe: $(COMMON) gen_post.ml
 
 hello.exe: common.ml utils.ml html.mli html.ml hello.ml
 	$(BUILDML_OCAMLC) -o $@ $^
+
+#%.mli: %.ml
+	#$(BUILDML_OCAMLC) -i $^ > $@

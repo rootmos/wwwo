@@ -6,6 +6,7 @@ val head : 'a t -> 'a t
 
 val noop : 'a t
 val seq : ('a -> string) list -> 'a t
+val close : ('a -> 'a) t -> 'b t
 
 val title : string -> 'a t
 val favicon : ?embedd:bool -> string -> 'a -> string
