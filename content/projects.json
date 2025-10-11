@@ -110,6 +110,7 @@
         "dot-nvim",
         "media",
         "templates",
-        "transfer-file"
+        "transfer-file",
+        "geo-hack"
     ]
 }

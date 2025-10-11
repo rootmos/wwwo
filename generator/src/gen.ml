@@ -185,6 +185,7 @@ let services_snippet = seq [
   h2 @@ text "Services";
   ul @@ [
     a "https://ip.rootmos.io" (text "ip.rootmos.io");
+    a "https://rootmos.io/geo-hack" (text "rootmos.io/geo-hack");
   ]
 ]
 
