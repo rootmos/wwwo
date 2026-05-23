@@ -6,6 +6,12 @@ embed_images: false
 
 <table>
 <tr>
+    <td>2026-05-23</td>
+    <td><a href="https://avarvet.se/news/7999987/Information-om-A-varvet-2026">Å-varvet</a></td>
+    <td><a href="https://rootmos.io/geo-hack/?url=%C3%A5-varvet.json">10km</a></td>
+    <td><a href="https://www.racetimer.se/sv/runner/show/9745985?class=row-link&layout=racetimer&race_id=6862">52:58</a></td>
+</tr>
+<tr>
     <td>2026-05-09</td>
     <td><a href="https://www.coopkungsholmenrunt.se/info/inbjudan2026">Kungsholmen Runt</a></td>
     <td><a href="https://rootmos.io/geo-hack/?url=KR23d.gpx">10km</a></td>
