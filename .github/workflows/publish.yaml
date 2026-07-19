@@ -2,6 +2,8 @@ name: Build, upload and publish
 on:
   push:
     branches: [ master ]
+  schedule:
+    - cron: "46 3 21 * *"
   workflow_dispatch:
 
 jobs:
