@@ -297,7 +297,7 @@ def parse_args():
     add_formats(current_cmd)
     ss = current_cmd.add_argument_group("Situations")
     for s in situations:
-        ss.add_argument(f"--{s.key}", metavar="BOOL", action=argparse.BooleanOptionalAction, default=True)
+        ss.add_argument(f"--{s.key}", action=argparse.BooleanOptionalAction, default=True)
         s.add_arguments(current_cmd)
 
     format_cmd = subparsers.add_parser("format")

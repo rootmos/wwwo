@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+SCRIPT_DIR=$(readlink -f "$0" | xargs dirname)
+PROJECT_ROOT=$(readlink -f "$SCRIPT_DIR/..")
+TASKS_DIR=$(readlink -f "$PROJECT_ROOT/tasks")
+
+TARGET=$(readlink -f "$1")
+
+(cd "$TASKS_DIR" && pipenv run -- wwwo-gallery upload --edit --prefix="clips" "$TARGET")
+
+(cd "$PROJECT_ROOT" && .github/invoke-lambda)

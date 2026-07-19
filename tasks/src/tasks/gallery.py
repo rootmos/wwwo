@@ -17,13 +17,14 @@ import botocore
 
 s3 = boto3.resource("s3")
 s3c = boto3.client("s3")
-default_region = "eu-central-1"
+DEFAULT_BUCKET = "rootmos-static"
+DEFAULT_REGION = "eu-central-1"
 
 def s3url(bucket, region, path):
     return f"https://{bucket}.s3.{region}.amazonaws.com/{path}"
 
 def url(o):
-    return s3url(bucket=o.bucket_name, region=default_region, path=urlencode(o.key))
+    return s3url(bucket=o.bucket_name, region=DEFAULT_REGION, path=urlencode(o.key))
 
 def s3exists(obj):
     try:
@@ -35,8 +36,8 @@ def s3exists(obj):
     return False
 
 class Thumbnail:
-    bucket = s3.Bucket("rootmos-static")
-    bucket_region = default_region
+    bucket = s3.Bucket(DEFAULT_BUCKET)
+    bucket_region = DEFAULT_REGION
 
     def __init__(self, id):
         self.id = id
@@ -84,8 +85,8 @@ class Thumbnail:
         return self
 
 class Meta:
-    bucket = s3.Bucket("rootmos-static")
-    bucket_region = default_region
+    bucket = s3.Bucket(DEFAULT_BUCKET)
+    bucket_region = DEFAULT_REGION
 
     TEMPLATE = { "title": None, "description": None }
 
@@ -174,7 +175,7 @@ def parse_args():
     upload_cmd.add_argument("-e", "--edit", action="store_true")
     upload_cmd.add_argument("-f", "--force", action="store_true")
     upload_cmd.add_argument("-p", "--prefix", metavar="PREFIX")
-    upload_cmd.add_argument("bucket", metavar="BUCKET")
+    upload_cmd.add_argument("-b", "--bucket", metavar="BUCKET", default=DEFAULT_BUCKET)
     upload_cmd.add_argument("file", metavar="FILE")
 
     return parser.parse_args()
