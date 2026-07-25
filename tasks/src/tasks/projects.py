@@ -63,7 +63,7 @@ def from_github(projects):
 
         P["date_created"] = r.created_at.isoformat()
 
-        P["stars"] = len(list(r.get_stargazers()))
+        P["stars"] = r.stargazers_count
 
         if "favorite" not in P:
             P["favorite"] = False
